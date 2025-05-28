@@ -30,7 +30,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const sortedCategories = Object.keys(groupedContexts).sort();
 
   return (
-    <div className="bg-dark-800 rounded-lg p-4 h-full flex flex-col border border-dark-700">
+    <div className="bg-dark rounded-lg p-4 h-full flex flex-col border border-border">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-xl text-dark-50">Contexts Library</h2>
         <button

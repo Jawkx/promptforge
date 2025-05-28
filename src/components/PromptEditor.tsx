@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
 import PromptInput from './PromptInput';
 import ContextsLibrary from './ContextsLibrary';
 import AddContextModal from './AddContextModal';
 import EditContextModal from './EditContextModal';
 import { useContexts } from '../hooks/useContexts';
-import { useDarkMode } from '../hooks/useDarkMode';
 import { Context } from '../types';
 
 interface PromptEditorProps {
