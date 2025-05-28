@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Copy } from 'lucide-react';
 import { Context } from '../types';
 import { Textarea } from './ui/textarea';
+import { Button } from './ui/button';
 
 export interface PromptInputProps {
   value: string;
@@ -33,31 +34,29 @@ const PromptInput: React.FC<PromptInputProps> = ({
   };
 
   return (
-    <div
-      onDragOver={handleDragOver}
-      onDrop={onDrop}
-    >
-      <Textarea
-        value={value}
-        onChange={handleChange}
-        onPaste={handlePaste}
-        placeholder="Carve your context here ..."
-        className='resize-none'
-      />
+    <>
+      <div
+        onDragOver={handleDragOver}
+        onDrop={onDrop}
+        className='w-full h-auto relative'
+      >
+        <Textarea
+          value={value}
+          onChange={handleChange}
+          onPaste={handlePaste}
+          placeholder="Carve your context here ..."
+          className='flex-1 resize-y max-h-[48rem] min-h-32 z-10'
+        />
 
-      <div className="absolute bottom-4 right-4">
-        <button
+        <Button
           onClick={onCopy}
-          className="flex items-center gap-1 px-3 py-1.5 bg-dark-700 hover:bg-dark-600 transition-colors text-dark-50 rounded-lg text-sm shadow-lg"
+          className='absolute bottom-4 right-4 z-10'
         >
           <Copy size={16} />
-          <span>Copy</span>
-        </button>
-      </div>
+          Copy
+        </Button>
 
-      {selectedContexts.length > 0 && (
-        <div className="border-t border-dark-700 p-3 bg-dark-900">
-          <h3 className="text-xs font-medium text-dark-400 mb-2">Selected Contexts</h3>
+        <div className='absolute w-full border-t border-border min-h-28 p-4 bottom-3 z-0'>
           <div className="flex flex-wrap gap-2">
             {selectedContexts.map(context => (
               <div
@@ -75,9 +74,13 @@ const PromptInput: React.FC<PromptInputProps> = ({
             ))}
           </div>
         </div>
-      )}
-    </div>
+
+      </div>
+
+    </>
   );
 };
 
 export default PromptInput;
+
+

@@ -72,19 +72,17 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopy }) => {
   };
 
   return (
-    <div className="w-full h-full max-w-7xl mx-auto p-4">
+    <div className="w-full h-full mx-auto max-w-7xl px-5">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-150px)]">
         <div className="lg:col-span-2 h-full">
-          <div className={`h-full transition-all duration-200 ${draggingContext ? 'ring-2 ring-blue-400 ring-opacity-50 rounded-lg' : ''}`}>
-            <PromptInput
-              value={prompt}
-              onChange={setPrompt}
-              onDrop={handleDrop}
-              selectedContexts={selectedContexts}
-              onRemoveContext={removeContext}
-              onCopy={handleCopy}
-            />
-          </div>
+          <PromptInput
+            value={prompt}
+            onChange={setPrompt}
+            onDrop={handleDrop}
+            selectedContexts={selectedContexts}
+            onRemoveContext={removeContext}
+            onCopy={handleCopy}
+          />
         </div>
 
         <div className="h-full">

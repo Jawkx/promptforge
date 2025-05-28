@@ -30,9 +30,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className='flex flex-row justify-between py-5 px-5'>
-        <h1 className='text-2xl text-primary font-semibold'>Context Carve</h1>
-        <Button variant="ghost" onClick={handleToggleTheme} > {theme === "light" ? <LucideSun className='text-foreground' strokeWidth={2} /> : <LucideMoon className='text-foreground' />}</Button>
+      <div className='py-5 px-5'>
+        <div className='flex flex-row justify-between mx-auto max-w-7xl'>
+          <h1 className='text-2xl text-primary font-semibold'>Context Carve</h1>
+          <Button variant="ghost" onClick={handleToggleTheme} > {theme === "light" ? <LucideSun className='text-foreground' strokeWidth={2} /> : <LucideMoon className='text-foreground' />}</Button>
+        </div>
       </div>
       <PromptEditor onCopy={handleCopy} />
     </div>

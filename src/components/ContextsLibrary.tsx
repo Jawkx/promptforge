@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import { Context } from '../types';
 import ContextItem from './ContextItem';
+import { Button } from './ui/button';
 
 interface ContextsLibraryProps {
   contexts: Context[];
@@ -30,22 +31,22 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const sortedCategories = Object.keys(groupedContexts).sort();
 
   return (
-    <div className="bg-dark rounded-lg p-4 h-full flex flex-col border border-border">
+    <div className="rounded-lg p-4 h-full flex flex-col border-2 border-border">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-xl text-dark-50">Contexts Library</h2>
-        <button
+        <h2 className="text-foreground text-xl text-base">Contexts</h2>
+        <Button
+          variant="secondary"
           onClick={onAddContext}
-          className="w-8 h-8 rounded-lg bg-dark-700 flex items-center justify-center text-dark-50 hover:bg-dark-600 transition-colors border border-dark-600"
           aria-label="Add new context"
         >
-          <Plus size={20} />
-        </button>
+          <Plus size={20} className='text-base' />
+        </Button>
       </div>
 
       <div className="overflow-y-auto flex-grow">
         {sortedCategories.map(category => (
           <div key={category} className="mb-4">
-            <h3 className="text-sm font-medium text-dark-400 mb-2">{category}</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">{category}</h3>
             {groupedContexts[category].map(context => (
               <ContextItem
                 key={context.id}

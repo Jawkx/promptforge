@@ -83,6 +83,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
                 onChange={e => setContent(e.target.value)}
                 placeholder="Context content"
                 required
+                className='resize-none h-32'
               />
             </div>
 
