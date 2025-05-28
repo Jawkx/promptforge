@@ -143,7 +143,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
             onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
           />
         </ResizablePanel>
-        <ResizableHandle withHandle className='mx-2 bg-transparent' />
+        <ResizableHandle withHandle className='mx-2 bg-transparent border-transparent' />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}

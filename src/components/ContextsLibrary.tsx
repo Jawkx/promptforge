@@ -62,13 +62,16 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       onPaste={handlePaste}
       tabIndex={0} // Make it focusable
     >
-      <CardHeader className="p-4 border-b">
+      <CardHeader className="p-4 ">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Context Library</CardTitle>
-          <Button variant="outline" size="icon" onClick={onAddContextButtonClick}>
+          <Button variant="default" size="icon" onClick={onAddContextButtonClick}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
+
+        <span className='h-1' />
+
         <div className="relative mt-2">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

@@ -68,8 +68,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add New Context</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className='text-primary'>Add New Context</DialogTitle>
+          <DialogDescription className='text-foreground'>
             Create a new context snippet to use in your prompts.
           </DialogDescription>
         </DialogHeader>

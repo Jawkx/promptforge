@@ -3,7 +3,7 @@ import { Context } from '../types';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { X, Copy as CopyIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,9 +42,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
-      <CardHeader className="p-4 border-b">
-        <CardTitle className="text-lg">Prompt Forge</CardTitle>
-      </CardHeader>
       <CardContent className="p-4 flex-grow flex flex-col gap-4 overflow-hidden">
         <Textarea
           placeholder="This is a text input. Type your main prompt or instructions here..."
