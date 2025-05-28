@@ -2,36 +2,6 @@ import { useState } from 'react';
 import { Context } from '../types';
 
 const initialContexts: Context[] = [
-  {
-    id: '1',
-    title: 'System prompt 1',
-    content: "You're a golang engineer ...",
-    category: 'Programming'
-  },
-  {
-    id: '2',
-    title: 'React native engineer',
-    content: "You're a React native engineer ...",
-    category: 'Programming'
-  },
-  {
-    id: '3',
-    title: 'Swift engineer',
-    content: "You're a swift engineer ...",
-    category: 'Programming'
-  },
-  {
-    id: '4',
-    title: 'Marketing specialist',
-    content: "You're a marketing specialist with expertise in digital campaigns...",
-    category: 'Marketing'
-  },
-  {
-    id: '5',
-    title: 'Content writer',
-    content: "You're a content writer specialized in blog posts...",
-    category: 'Writing'
-  }
 ];
 
 export const useContexts = () => {
@@ -48,10 +18,10 @@ export const useContexts = () => {
   };
 
   const updateContext = (updatedContext: Context) => {
-    setContexts(contexts.map(context => 
+    setContexts(contexts.map(context =>
       context.id === updatedContext.id ? updatedContext : context
     ));
-    
+
     setSelectedContexts(selectedContexts.map(context =>
       context.id === updatedContext.id ? updatedContext : context
     ));
@@ -70,16 +40,16 @@ export const useContexts = () => {
     const contextsText = selectedContexts
       .map(context => `# ${context.title}\n${context.content}`)
       .join('\n\n');
-    
-    const fullText = prompt 
-      ? `${prompt}\n\n${contextsText}` 
+
+    const fullText = prompt
+      ? `${prompt}\n\n${contextsText}`
       : contextsText;
-    
+
     navigator.clipboard.writeText(fullText)
       .catch(err => {
         console.error('Failed to copy text: ', err);
       });
-    
+
     return fullText;
   };
 
