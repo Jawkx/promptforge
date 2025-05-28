@@ -70,7 +70,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Edit Context</DialogTitle>
+          <DialogTitle className='text-foreground'>Edit Context</DialogTitle>
           <DialogDescription>
             Modify the title or content of your context snippet.
           </DialogDescription>
@@ -102,7 +102,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="secondary">
                 Cancel
               </Button>
             </DialogClose>

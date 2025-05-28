@@ -128,7 +128,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
 
 
   return (
-    <div className="h-[calc(100vh-100px)] p-4 max-w-7xl mx-auto">
+    <div className="h-[calc(100vh-100px)] p-4 pt-0 max-w-7xl mx-auto">
       <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
         <ResizablePanel defaultSize={60} minSize={30}>
           <PromptInput
@@ -143,7 +143,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
             onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
           />
         </ResizablePanel>
-        <ResizableHandle withHandle className='mx-2 bg-transparent border-transparent' />
+        <ResizableHandle withHandle className='mx-2 bg-transparent' />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}

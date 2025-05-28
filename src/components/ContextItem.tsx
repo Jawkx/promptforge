@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Context } from '../types';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Trash2, Edit3, GripVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ContextItemProps {
   context: Context;
@@ -28,10 +27,8 @@ const ContextItem: React.FC<ContextItemProps> = ({ context, onDragStart, onEdit,
     <Card
       draggable
       onDragStart={(e) => onDragStart(e, context)}
-      className={cn(
-        "mb-2 cursor-grab active:cursor-grabbing transition-shadow duration-150",
-        isFocused ? "shadow-md border-primary" : "shadow-sm"
-      )}
+      className="mb-2 cursor-grab active:cursor-grabbing transition-shadow duration-150"
+
     >
       <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0">
         <CardTitle className="text-sm font-medium flex items-center">
