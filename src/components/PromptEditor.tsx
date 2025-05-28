@@ -1,0 +1,138 @@
+import React, { useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { PromptEditorProps } from '../types';
+import PromptInput from './PromptInput';
+import ContextsLibrary from './ContextsLibrary';
+import AddContextModal from './AddContextModal';
+import EditContextModal from './EditContextModal';
+import { useContexts } from '../hooks/useContexts';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { Context } from '../types';
+
+interface PromptEditorProps {
+  onCopy: () => void;
+}
+
+
+const PromptEditor: React.FC<PromptEditorProps> = ({ onCopy }) => {
+  const {
+    contexts,
+    prompt,
+    setPrompt,
+    selectedContexts,
+    addContext,
+    updateContext,
+    deleteContext,
+    removeContext,
+    copyPromptWithContexts,
+    addContextToPrompt
+  } = useContexts();
+
+  const [isDark, setIsDark] = useDarkMode();
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingContext, setEditingContext] = useState<Context | null>(null);
+  const [draggingContext, setDraggingContext] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    try {
+      const contextData = e.dataTransfer.getData('context');
+      if (contextData) {
+        const context = JSON.parse(contextData);
+        addContextToPrompt(context);
+      }
+    } catch (error) {
+      console.error('Error parsing dropped context:', error);
+    }
+    setDraggingContext(false);
+  };
+
+  const handleDragStart = () => {
+    setDraggingContext(true);
+  };
+
+  const handleCopy = () => {
+    const text = copyPromptWithContexts();
+    onCopy();
+    return text;
+  };
+
+  const handleAddContext = () => {
+    setAddModalOpen(true);
+  };
+
+  const handleEditContext = (context: Context) => {
+    setEditingContext(context);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveContext = (newContext: Omit<Context, 'id'>) => {
+    addContext(newContext);
+  };
+
+  const handleSaveEdit = (updatedContext: Context) => {
+    updateContext(updatedContext);
+  };
+
+  const toggleDarkMode = () => {
+    setIsDark(!isDark);
+  };
+
+  return (
+    <div className="w-full h-full max-w-7xl mx-auto p-4">
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={toggleDarkMode}
+          className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-dark-50"
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-150px)]">
+        <div className="lg:col-span-2 h-full">
+          <div className={`h-full transition-all duration-200 ${draggingContext ? 'ring-2 ring-blue-400 ring-opacity-50 rounded-lg' : ''}`}>
+            <PromptInput
+              value={prompt}
+              onChange={setPrompt}
+              onDrop={handleDrop}
+              selectedContexts={selectedContexts}
+              onRemoveContext={removeContext}
+              onCopy={handleCopy}
+            />
+          </div>
+        </div>
+
+        <div className="h-full">
+          <ContextsLibrary
+            contexts={contexts}
+            onDragStart={handleDragStart}
+            onAddContext={handleAddContext}
+            onEditContext={handleEditContext}
+            onDeleteContext={deleteContext}
+          />
+        </div>
+      </div>
+
+      <AddContextModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSave={handleSaveContext}
+      />
+
+      <EditContextModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingContext(null);
+        }}
+        onSave={handleSaveEdit}
+        context={editingContext}
+      />
+    </div>
+  );
+};
+
+export default PromptEditor;
