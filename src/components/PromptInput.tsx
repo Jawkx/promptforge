@@ -52,17 +52,19 @@ const PromptInput: React.FC<PromptInputProps> = ({
         />
         <div
           id="selected-contexts-area"
-          className="border rounded-md p-2 min-h-[80px] bg-muted/30"
+          className="border border-dashed border-border rounded-md p-3 min-h-[80px] bg-muted/30"
         >
           <h3 className="text-sm font-medium mb-2 text-muted-foreground">Selected Contexts (Drag & Drop here or in Text Area)</h3>
           {selectedContexts.length > 0 ? (
-            <ScrollArea className="h-[120px] pr-3">
-              <div className="space-y-2">
+            <ScrollArea className="pr-3 max-h-[160px]">
+              <div className="flex flex-wrap gap-2">
                 {selectedContexts.map(context => (
-                  <div key={context.id} className="flex items-center justify-between p-2 bg-background border rounded-md text-sm">
-                    <span>{context.title} <span className="text-xs text-muted-foreground">({context.content.split('\n').length} lines)</span></span>
-                    <Button variant="ghost" size="icon" onClick={() => onRemoveContext(context.id)} className="h-6 w-6">
-                      <X className="h-4 w-4" />
+                  // Pill styled div
+                  <div key={context.id} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-background border border-border rounded-md text-sm shadow-sm">
+                    <span className="font-medium text-foreground">{context.title}</span>
+                    {/* Removed line count for pill style */}
+                    <Button variant="ghost" size="icon" onClick={() => onRemoveContext(context.id)} className="h-5 w-5 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground" aria-label={`Remove ${context.title}`}>
+                      <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 ))}

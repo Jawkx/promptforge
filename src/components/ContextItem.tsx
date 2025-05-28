@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Trash2, Edit3, GripVertical } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 interface ContextItemProps {
   context: Context;
@@ -53,12 +54,19 @@ const ContextItem: React.FC<ContextItemProps> = ({ context, onDragStart, onEdit,
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
-        <pre className="text-xs text-muted-foreground whitespace-pre-wrap break-all overflow-hidden">
-          {getFirstNLines(context.content, 5)}
-          {context.content.split('\n').length > 5 ? "\n..." : ""}
-        </pre>
-      </CardContent>
+      <Accordion type="single" collapsible className="w-full px-3 pb-3 pt-0">
+        <AccordionItem value="preview" className="border-b-0">
+          <AccordionTrigger className="py-1 text-xs text-muted-foreground hover:no-underline focus-visible:ring-0 focus-visible:ring-offset-0 [&>svg]:size-3.5">
+            <span className='font-normal'>Toggle Preview</span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-1 pb-0 text-xs text-muted-foreground">
+            <pre className="whitespace-pre-wrap break-all overflow-hidden">
+              {getFirstNLines(context.content, 5)}
+              {context.content.split('\n').length > 5 ? "\n..." : ""}
+            </pre>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </Card>
   );
 };
