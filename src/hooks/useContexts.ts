@@ -1,10 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react'; // Added useEffect
 import { Context } from '../types';
 import { useToast } from './use-toast';
 
+const LOCAL_STORAGE_KEYS = {
+  CONTEXTS: 'promptForge_contexts',
+  PROMPT: 'promptForge_prompt',
+  SELECTED_CONTEXTS: 'promptForge_selectedContexts',
+};
+
 const initialContexts: Context[] = [];
 
-const untitledCounter = 0;
+// const untitledCounter = 0; // This variable is not used and can be removed
 
 const getNextUntitledTitle = (existingContexts: Context[]): string => {
   let title: string;
@@ -18,10 +24,72 @@ const getNextUntitledTitle = (existingContexts: Context[]): string => {
 
 
 export const useContexts = () => {
-  const [contexts, setContexts] = useState<Context[]>(initialContexts);
-  const [prompt, setPrompt] = useState<string>('');
-  const [selectedContexts, setSelectedContexts] = useState<Context[]>([]);
+  const [contexts, setContexts] = useState<Context[]>(() => {
+    try {
+      const storedContexts = localStorage.getItem(LOCAL_STORAGE_KEYS.CONTEXTS);
+      return storedContexts ? JSON.parse(storedContexts) : initialContexts;
+    } catch (error) {
+      console.error("Error loading contexts from local storage:", error);
+      return initialContexts;
+    }
+  });
+
+  const [prompt, setPrompt] = useState<string>(() => {
+    try {
+      const storedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.PROMPT);
+      return storedPrompt !== null ? storedPrompt : ''; // Ensure null is handled, default to empty string
+    } catch (error) {
+      console.error("Error loading prompt from local storage:", error);
+      return '';
+    }
+  });
+
+  const [selectedContexts, setSelectedContexts] = useState<Context[]>(() => {
+    try {
+      const storedSelectedContexts = localStorage.getItem(LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS);
+      return storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
+    } catch (error) {
+      console.error("Error loading selected contexts from local storage:", error);
+      return [];
+    }
+  });
+
   const { toast } = useToast();
+
+  // Effect to save contexts to local storage
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.CONTEXTS, JSON.stringify(contexts));
+    } catch (error) {
+      console.error("Error saving contexts to local storage:", error);
+      toast({
+        title: "Storage Error",
+        description: "Could not save your context library. Changes might not persist.",
+        variant: "destructive",
+      });
+    }
+  }, [contexts, toast]);
+
+  // Effect to save prompt to local storage
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.PROMPT, prompt);
+    } catch (error) {
+      console.error("Error saving prompt to local storage:", error);
+      // Potentially toast here if prompt saving is critical and frequent
+    }
+  }, [prompt]);
+
+  // Effect to save selectedContexts to local storage
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS, JSON.stringify(selectedContexts));
+    } catch (error) {
+      console.error("Error saving selected contexts to local storage:", error);
+      // Potentially toast here
+    }
+  }, [selectedContexts]);
+
 
   const addContext = useCallback((context: Omit<Context, 'id'>) => {
     let titleToUse = context.title;
@@ -29,16 +97,13 @@ export const useContexts = () => {
       titleToUse = getNextUntitledTitle(contexts);
     }
 
-    // Check for duplicate titles
     if (contexts.some(c => c.title === titleToUse)) {
       toast({
         title: "Duplicate Title",
         description: `A context with the title "${titleToUse}" already exists. Please choose a unique title.`,
         variant: "destructive",
       });
-      // Potentially append a number or throw error, for now, let's just notify
-      // For this implementation, we'll allow the modal to handle re-submission with a new title
-      return false; // Indicate failure
+      return false;
     }
 
     const newContext: Context = {
@@ -51,7 +116,7 @@ export const useContexts = () => {
       title: "Context Added",
       description: `Context "${newContext.title}" has been added.`,
     });
-    return true; // Indicate success
+    return true;
   }, [contexts, toast]);
 
   const addContextFromPaste = useCallback((content: string) => {
@@ -71,14 +136,13 @@ export const useContexts = () => {
 
 
   const updateContext = useCallback((updatedContext: Context) => {
-    // Check for duplicate titles, excluding the context being edited
     if (contexts.some(c => c.id !== updatedContext.id && c.title === updatedContext.title)) {
       toast({
         title: "Duplicate Title",
         description: `A context with the title "${updatedContext.title}" already exists. Please choose a unique title.`,
         variant: "destructive",
       });
-      return false; // Indicate failure
+      return false;
     }
 
     setContexts(prevContexts =>
@@ -95,7 +159,7 @@ export const useContexts = () => {
       title: "Context Updated",
       description: `Context "${updatedContext.title}" has been updated.`,
     });
-    return true; // Indicate success
+    return true;
   }, [contexts, toast]);
 
 
@@ -114,14 +178,14 @@ export const useContexts = () => {
 
   const removeContextFromPrompt = useCallback((id: string) => {
     setSelectedContexts(prevSelectedContexts => prevSelectedContexts.filter(context => context.id !== id));
-    const removedContext = selectedContexts.find(c => c.id === id);
+    const removedContext = selectedContexts.find(c => c.id === id); // Find from old state for toast
     if (removedContext) {
       toast({
         title: "Context Removed",
         description: `Context "${removedContext.title}" removed from prompt.`,
       });
     }
-  }, [selectedContexts, toast]);
+  }, [selectedContexts, toast]); // selectedContexts needed here for the find operation
 
   const copyPromptWithContexts = useCallback(() => {
     const contextsText = selectedContexts
@@ -181,6 +245,7 @@ export const useContexts = () => {
     prompt,
     setPrompt,
     selectedContexts,
+    // Removed setSelectedContexts from direct export as it's managed internally and through add/remove functions
     addContext,
     addContextFromPaste,
     updateContext,
@@ -188,6 +253,6 @@ export const useContexts = () => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
-    getNextUntitledTitle,
+    getNextUntitledTitle, // This might not be needed by consumers if modals handle titles internally
   };
 };

@@ -47,7 +47,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
           placeholder="This is a text input. Type your main prompt or instructions here..."
           value={value}
           onChange={handleTextAreaChange}
-          className="flex-grow resize-none text-base min-h-[150px]"
+          className="flex-grow resize-none text-base min-h-[150px] border-transparent"
           onFocus={onFocus} // Ensure Textarea also sets focus
         />
         <div

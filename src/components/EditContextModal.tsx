@@ -78,7 +78,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
+              <Label htmlFor="title" className="text-right text-foreground">
                 Title
               </Label>
               <Input
@@ -89,7 +89,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="content" className="text-right">
+              <Label htmlFor="content" className="text-right text-foreground">
                 Content
               </Label>
               <Textarea
