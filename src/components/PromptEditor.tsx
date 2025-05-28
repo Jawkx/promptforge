@@ -1,12 +1,16 @@
-import React, { useState, useCallback, useRef } from 'react';
+// src/components/PromptEditor.tsx
+import React, { useState, useCallback } from 'react';
 import { useContexts } from '../hooks/useContexts';
 import { Context } from '../types';
 import PromptInput from './PromptInput';
 import ContextsLibrary from './ContextsLibrary';
 import AddContextModal from './AddContextModal';
 import EditContextModal from './EditContextModal';
+import MarkdownPreview from './MarkdownPreview'; // Import the new component
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from "@/components/ui/switch"; // Import Switch
+import { Label } from "@/components/ui/label";   // Import Label
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,11 +20,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-
+} from "@/components/ui/alert-dialog";
 
 interface PromptEditorProps {
-  onCopySuccess: () => void; // Changed from onCopy to onCopySuccess to avoid naming conflicts
+  onCopySuccess: () => void;
 }
 
 const PROMPT_FORGE_AREA = "promptForge";
@@ -39,7 +42,6 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
-    getNextUntitledTitle,
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -47,6 +49,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   const [editingContext, setEditingContext] = useState<Context | null>(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(null);
+  const [isPreviewMode, setIsPreviewMode] = useState(false); // State for preview mode
 
   const { toast } = useToast();
 
@@ -68,14 +71,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   }, [addContextToPrompt, toast]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault(); // Necessary to allow dropping
+    e.preventDefault();
   }, []);
 
   const handleDragStart = useCallback((e: React.DragEvent, context: Context) => {
     e.dataTransfer.setData('application/json', JSON.stringify(context));
     e.dataTransfer.effectAllowed = "move";
   }, []);
-
 
   const handleCopy = () => {
     const copiedText = copyPromptWithContexts();
@@ -106,7 +108,6 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     setContextToDeleteId(null);
   };
 
-
   const handleSaveNewContext = (newContextData: Omit<Context, 'id'>) => {
     const success = addContext(newContextData);
     if (success) {
@@ -126,22 +127,38 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     addContextFromPaste(pastedText);
   };
 
-
   return (
     <div className="h-[calc(100vh-100px)] p-4 pt-0 max-w-7xl mx-auto">
       <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
-        <ResizablePanel defaultSize={60} minSize={30}>
-          <PromptInput
-            value={prompt}
-            onChange={setPrompt}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            selectedContexts={selectedContexts}
-            onRemoveContext={removeContextFromPrompt}
-            onCopy={handleCopy}
-            isFocused={focusedArea === PROMPT_FORGE_AREA}
-            onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
-          />
+        <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col">
+          <div className="flex-grow p-4 pt-2 overflow-hidden relative"> {/* Added padding to match original PromptInput container */}
+            {isPreviewMode ? (
+              <MarkdownPreview
+                content={prompt}
+                isFocused={focusedArea === PROMPT_FORGE_AREA}
+                onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
+              />
+            ) : (
+              <PromptInput
+                value={prompt}
+                onChange={setPrompt}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                selectedContexts={selectedContexts}
+                onRemoveContext={removeContextFromPrompt}
+                onCopy={handleCopy}
+                isFocused={focusedArea === PROMPT_FORGE_AREA}
+                onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
+              />
+            )}
+
+            <Switch
+              id="preview-mode-toggle"
+              className='absolute top-5 right-7'
+              checked={isPreviewMode}
+              onCheckedChange={setIsPreviewMode}
+            />
+          </div>
         </ResizablePanel>
         <ResizableHandle withHandle className='mx-2 bg-transparent' />
         <ResizablePanel defaultSize={40} minSize={25}>
