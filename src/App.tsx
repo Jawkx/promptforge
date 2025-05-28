@@ -2,20 +2,17 @@ import { LucideMoon, LucideSun } from 'lucide-react';
 import PromptEditor from './components/PromptEditor';
 import { Button } from './components/ui/button';
 import { useTheme } from './hooks/useTheme';
+import { Toaster } from './components/ui/toaster';
+import { useToast } from './hooks/use-toast';
 
 function App() {
-  const handleCopy = () => {
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg animate-fadeInOut';
-    notification.textContent = 'Copied to clipboard!';
-    document.body.appendChild(notification);
+  // Remove the old handleCopy and use the one from PromptEditor + useToast
+  const { toast } = useToast(); // Get toast function
 
-    setTimeout(() => {
-      notification.classList.add('opacity-0');
-      setTimeout(() => {
-        document.body.removeChild(notification);
-      }, 300);
-    }, 2000);
+  const handleCopySuccess = () => {
+    // The toast notification is now handled within copyPromptWithContexts hook
+    // but if you need an additional app-level notification, you can add it here.
+    // For now, we assume the hook's toast is sufficient.
   };
 
   const { setTheme, theme } = useTheme()
@@ -31,12 +28,15 @@ function App() {
   return (
     <div className="min-h-screen bg-background">
       <div className='py-5 px-5'>
-        <div className='flex flex-row justify-between mx-auto max-w-7xl'>
-          <h1 className='text-2xl text-primary font-semibold'>Context Carve</h1>
-          <Button variant="ghost" onClick={handleToggleTheme} > {theme === "light" ? <LucideSun className='text-foreground' strokeWidth={2} /> : <LucideMoon className='text-foreground' />}</Button>
+        <div className='flex flex-row justify-between mx-auto max-w-7xl items-center'>
+          <h1 className='text-2xl text-primary font-semibold'>Prompt Forge</h1>
+          <Button variant="ghost" size="icon" onClick={handleToggleTheme} >
+            {theme === "light" || (theme === "system" && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? <LucideSun className='text-foreground h-5 w-5' strokeWidth={2} /> : <LucideMoon className='text-foreground h-5 w-5' />}
+          </Button>
         </div>
       </div>
-      <PromptEditor onCopy={handleCopy} />
+      <PromptEditor onCopySuccess={handleCopySuccess} />
+      <Toaster />
     </div>
   );
 }

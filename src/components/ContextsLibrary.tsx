@@ -1,65 +1,107 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
 import { Context } from '../types';
 import ContextItem from './ContextItem';
-import { Button } from './ui/button';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, Search } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContextsLibraryProps {
   contexts: Context[];
-  onDragStart: (context: Context) => void;
-  onAddContext: () => void;
+  onDragStart: (e: React.DragEvent, context: Context) => void;
+  onAddContextButtonClick: () => void; // Renamed to avoid conflict
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+  onPasteToAdd: (pastedText: string) => void;
+  isFocused: boolean;
+  onFocus: () => void;
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   contexts,
   onDragStart,
-  onAddContext,
+  onAddContextButtonClick,
   onEditContext,
-  onDeleteContext
+  onDeleteContext,
+  onPasteToAdd,
+  isFocused,
+  onFocus,
 }) => {
-  const groupedContexts = contexts.reduce((acc, context) => {
-    const category = context.category || 'Uncategorized';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(context);
-    return acc;
-  }, {} as Record<string, Context[]>);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
 
-  const sortedCategories = Object.keys(groupedContexts).sort();
+  const filteredContexts = contexts.filter(context =>
+    context.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    context.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handlePaste = useCallback(async (event: React.ClipboardEvent) => {
+    if (isFocused) {
+      event.preventDefault();
+      const pastedText = event.clipboardData.getData('text');
+      if (pastedText.trim()) {
+        onPasteToAdd(pastedText);
+      } else {
+        toast({
+          title: "Paste Error",
+          description: "Pasted content is empty.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [isFocused, onPasteToAdd, toast]);
+
 
   return (
-    <div className="rounded-lg p-4 h-full flex flex-col border-2 border-border">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-foreground text-xl text-base">Contexts</h2>
-        <Button
-          variant="secondary"
-          onClick={onAddContext}
-          aria-label="Add new context"
-        >
-          <Plus size={20} className='text-base' />
-        </Button>
-      </div>
-
-      <div className="overflow-y-auto flex-grow">
-        {sortedCategories.map(category => (
-          <div key={category} className="mb-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">{category}</h3>
-            {groupedContexts[category].map(context => (
+    <Card
+      className={cn("h-full flex flex-col border-2", isFocused ? "border-primary" : "border-border")}
+      onClick={onFocus}
+      onPaste={handlePaste}
+      tabIndex={0} // Make it focusable
+    >
+      <CardHeader className="p-4 border-b">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">Context Library</CardTitle>
+          <Button variant="outline" size="icon" onClick={onAddContextButtonClick}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="relative mt-2">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search contexts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 flex-grow overflow-hidden">
+        <ScrollArea className="h-full p-4">
+          {filteredContexts.length > 0 ? (
+            filteredContexts.map(context => (
               <ContextItem
                 key={context.id}
                 context={context}
                 onDragStart={onDragStart}
                 onEdit={onEditContext}
                 onDelete={onDeleteContext}
+                isFocused={isFocused}
               />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+            ))
+          ) : (
+            <div className="text-center text-muted-foreground py-10">
+              No contexts found.
+              {contexts.length > 0 && searchTerm && <p>Try a different search term.</p>}
+              {contexts.length === 0 && !searchTerm && <p>Click the '+' button to add a new context.</p>}
+            </div>
+          )}
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };
 

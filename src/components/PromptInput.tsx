@@ -1,86 +1,86 @@
 import React from 'react';
-import { X, Copy } from 'lucide-react';
 import { Context } from '../types';
-import { Textarea } from './ui/textarea';
-import { Button } from './ui/button';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { X, Copy as CopyIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface PromptInputProps {
   value: string;
   onChange: (value: string) => void;
   onDrop: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
   selectedContexts: Context[];
   onRemoveContext: (id: string) => void;
   onCopy: () => void;
+  isFocused: boolean;
+  onFocus: () => void;
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
   value,
   onChange,
   onDrop,
+  onDragOver,
   selectedContexts,
   onRemoveContext,
-  onCopy
+  onCopy,
+  isFocused,
+  onFocus
 }) => {
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
   };
 
-  const handlePaste = async (e: React.ClipboardEvent) => {
-    // Handle paste normally
-  };
-
   return (
-    <>
-      <div
-        onDragOver={handleDragOver}
-        onDrop={onDrop}
-        className='w-full h-auto relative'
-      >
+    <Card
+      className={cn("h-full flex flex-col border-2", isFocused ? "border-primary" : "border-border")}
+      onClick={onFocus}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
+      <CardHeader className="p-4 border-b">
+        <CardTitle className="text-lg">Prompt Forge</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 flex-grow flex flex-col gap-4 overflow-hidden">
         <Textarea
+          placeholder="This is a text input. Type your main prompt or instructions here..."
           value={value}
-          onChange={handleChange}
-          onPaste={handlePaste}
-          placeholder="Carve your context here ..."
-          className='flex-1 resize-y max-h-[48rem] min-h-32 z-10'
+          onChange={handleTextAreaChange}
+          className="flex-grow resize-none text-base min-h-[150px]"
+          onFocus={onFocus} // Ensure Textarea also sets focus
         />
-
-        <Button
-          onClick={onCopy}
-          className='absolute bottom-4 right-4 z-10'
+        <div
+          id="selected-contexts-area"
+          className="border rounded-md p-2 min-h-[80px] bg-muted/30"
         >
-          <Copy size={16} />
-          Copy
-        </Button>
-
-        <div className='absolute w-full border-t border-border min-h-28 p-4 bottom-3 z-0'>
-          <div className="flex flex-wrap gap-2">
-            {selectedContexts.map(context => (
-              <div
-                key={context.id}
-                className="flex items-center bg-dark-700 text-dark-50 text-xs px-2 py-1 rounded"
-              >
-                <span className="truncate max-w-[150px]">{context.title}</span>
-                <button
-                  onClick={() => onRemoveContext(context.id)}
-                  className="ml-1 text-dark-400 hover:text-dark-50"
-                >
-                  <X size={12} />
-                </button>
+          <h3 className="text-sm font-medium mb-2 text-muted-foreground">Selected Contexts (Drag & Drop here or in Text Area)</h3>
+          {selectedContexts.length > 0 ? (
+            <ScrollArea className="h-[120px] pr-3">
+              <div className="space-y-2">
+                {selectedContexts.map(context => (
+                  <div key={context.id} className="flex items-center justify-between p-2 bg-background border rounded-md text-sm">
+                    <span>{context.title} <span className="text-xs text-muted-foreground">({context.content.split('\n').length} lines)</span></span>
+                    <Button variant="ghost" size="icon" onClick={() => onRemoveContext(context.id)} className="h-6 w-6">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </ScrollArea>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-4">No contexts selected. Drag from library.</p>
+          )}
         </div>
-
-      </div>
-
-    </>
+        <Button onClick={onCopy} className="w-full mt-auto">
+          <CopyIcon className="mr-2 h-4 w-4" /> Copy All
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
 export default PromptInput;
-
-

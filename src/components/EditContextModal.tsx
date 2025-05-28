@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import { Context } from '../types';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from '@/hooks/use-toast';
 
 interface EditContextModalProps {
   isOpen: boolean;
@@ -12,109 +25,92 @@ interface EditContextModalProps {
 const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, onSave, context }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (context) {
+    if (context && isOpen) {
       setTitle(context.title);
       setContent(context.content);
-      setCategory(context.category || '');
     }
-  }, [context]);
+  }, [context, isOpen]);
 
   if (!isOpen || !context) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && content.trim()) {
-      onSave({
-        id: context.id,
-        title: title.trim(),
-        content: content.trim(),
-        category: category.trim() || 'Uncategorized'
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
+
+    if (!trimmedTitle) {
+      toast({
+        title: "Title Required",
+        description: "Title cannot be empty.",
+        variant: "destructive",
       });
-      onClose();
+      return;
     }
+    if (!trimmedContent) {
+      toast({
+        title: "Content Required",
+        description: "Content cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    onSave({
+      id: context.id,
+      title: trimmedTitle,
+      content: trimmedContent,
+      category: context.category || 'Uncategorized'
+    });
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div 
-        className="bg-dark-800 rounded-lg w-full max-w-md p-6 shadow-xl animate-fadeIn"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-dark-50">Edit Context</h2>
-          <button 
-            onClick={onClose}
-            className="text-dark-400 hover:text-dark-50 transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[525px]">
+        <DialogHeader>
+          <DialogTitle>Edit Context</DialogTitle>
+          <DialogDescription>
+            Modify the title or content of your context snippet.
+          </DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-dark-200 mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-dark-50"
-              placeholder="Context title"
-              required
-            />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="content" className="text-right">
+                Content
+              </Label>
+              <Textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="col-span-3 min-h-[200px]"
+              />
+            </div>
           </div>
-
-          <div className="mb-4">
-            <label htmlFor="category" className="block text-sm font-medium text-dark-200 mb-1">
-              Category
-            </label>
-            <input
-              type="text"
-              id="category"
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-dark-50"
-              placeholder="e.g., Programming, Writing (optional)"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="content" className="block text-sm font-medium text-dark-200 mb-1">
-              Content
-            </label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-dark-50 min-h-[100px]"
-              placeholder="Context content"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-dark-600 rounded-md text-dark-200 hover:bg-dark-700 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit">Save Changes</Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

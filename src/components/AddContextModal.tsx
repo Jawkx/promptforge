@@ -1,111 +1,116 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Context } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Button } from './ui/button';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from '@/hooks/use-toast';
 
 interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (context: Omit<Context, 'id'>) => void;
+  contextsCount: number; // To generate unique default titles
 }
 
-const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSave }) => {
+const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSave, contextsCount }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const { toast } = useToast();
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('');
+      setContent('');
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && content.trim()) {
-      onSave({
-        title: title.trim(),
-        content: content.trim(),
-        category: category.trim() || 'Uncategorized'
+    let finalTitle = title.trim();
+    if (!finalTitle && !content.trim()) {
+      toast({
+        title: "Empty Context",
+        description: "Both title and content are empty. Please add some content.",
+        variant: "destructive",
       });
-      setTitle('');
-      setContent('');
-      setCategory('');
-      onClose();
+      return;
     }
+    if (!finalTitle) {
+      finalTitle = `Untitled (${contextsCount + 1})`;
+    }
+    if (!content.trim()) {
+      toast({
+        title: "Empty Content",
+        description: "Content cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    onSave({
+      title: finalTitle,
+      content: content.trim(),
+      category: 'Uncategorized' // Default category or implement category input
+    });
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card
-        onClick={e => e.stopPropagation()}
-        className='w-1/2'
-      >
-        <CardHeader className='flex flex-row'>
-          <CardTitle className="text-xl font-semibold text-dark-50">Add New Context</CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4 space-y-1.5">
-              <Label htmlFor="title">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[525px]">
+        <DialogHeader>
+          <DialogTitle>Add New Context</DialogTitle>
+          <DialogDescription>
+            Create a new context snippet to use in your prompts.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
                 Title
               </Label>
               <Input
-                type="text"
                 id="title"
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Context title"
-                required
+                onChange={(e) => setTitle(e.target.value)}
+                className="col-span-3"
+                placeholder="Default title will be 'Untitled (N)' if left blank"
               />
             </div>
-
-            <div className="mb-4 space-y-1.5">
-              <Label htmlFor="category" >
-                Category
-              </Label>
-              <Input
-                type="text"
-                id="category"
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                placeholder="e.g., Programming, Writing (optional)"
-              />
-            </div>
-
-            <div className="mb-6 space-y-1.5">
-              <Label htmlFor="content" >
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="content" className="text-right">
                 Content
               </Label>
               <Textarea
                 id="content"
                 value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="Context content"
-                required
-                className='resize-none h-32'
+                onChange={(e) => setContent(e.target.value)}
+                className="col-span-3 min-h-[200px]"
+                placeholder="Paste your context content here."
               />
             </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={onClose}
-              >
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                variant="default"
-              >
-                Save Context
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            </DialogClose>
+            <Button type="submit">Add Context</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
