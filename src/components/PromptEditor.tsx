@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { PromptEditorProps } from '../types';
 import PromptInput from './PromptInput';
 import ContextsLibrary from './ContextsLibrary';
 import AddContextModal from './AddContextModal';
@@ -28,7 +27,6 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopy }) => {
     addContextToPrompt
   } = useContexts();
 
-  const [isDark, setIsDark] = useDarkMode();
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingContext, setEditingContext] = useState<Context | null>(null);
@@ -75,22 +73,8 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopy }) => {
     updateContext(updatedContext);
   };
 
-  const toggleDarkMode = () => {
-    setIsDark(!isDark);
-  };
-
   return (
     <div className="w-full h-full max-w-7xl mx-auto p-4">
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={toggleDarkMode}
-          className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-dark-50"
-          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-150px)]">
         <div className="lg:col-span-2 h-full">
           <div className={`h-full transition-all duration-200 ${draggingContext ? 'ring-2 ring-blue-400 ring-opacity-50 rounded-lg' : ''}`}>

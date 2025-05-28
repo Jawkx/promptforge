@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Context } from '../types';
+import { Card } from './ui/card';
 
 interface AddContextModalProps {
   isOpen: boolean;
@@ -32,8 +33,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div
-        className="bg-dark-800 rounded-lg w-full max-w-md p-6 shadow-xl animate-fadeIn"
+      <Card
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
@@ -106,7 +106,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
             </button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };

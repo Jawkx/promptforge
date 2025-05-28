@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Copy } from 'lucide-react';
 import { Context } from '../types';
+import { Textarea } from './ui/textarea';
 
 export interface PromptInputProps {
   value: string;
@@ -33,16 +34,16 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   return (
     <div
-      className="h-full flex flex-col border border-dark-700 rounded-lg overflow-hidden bg-dark-800 relative"
+      className="h-full flex flex-col border border-dark-700 rounded-lg overflow-hidden relative"
       onDragOver={handleDragOver}
       onDrop={onDrop}
     >
-      <textarea
+      <Textarea
         value={value}
         onChange={handleChange}
         onPaste={handlePaste}
+        className='flex-1'
         placeholder="Carve your context here ..."
-        className="flex-grow p-4 outline-none resize-none text-dark-50 bg-dark-800 placeholder-dark-400"
       />
 
       <div className="absolute bottom-4 right-4">
