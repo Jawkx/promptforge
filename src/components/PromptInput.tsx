@@ -34,7 +34,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   return (
     <div
-      className="h-full flex flex-col border border-dark-700 rounded-lg overflow-hidden relative"
       onDragOver={handleDragOver}
       onDrop={onDrop}
     >
@@ -42,8 +41,8 @@ const PromptInput: React.FC<PromptInputProps> = ({
         value={value}
         onChange={handleChange}
         onPaste={handlePaste}
-        className='flex-1'
         placeholder="Carve your context here ..."
+        className='resize-none'
       />
 
       <div className="absolute bottom-4 right-4">
