@@ -1,11 +1,11 @@
-import React from 'react';
-import { Context } from '../types';
+import React from "react";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Copy as CopyIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { X, Copy as CopyIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface PromptInputProps {
   value: string;
@@ -28,16 +28,18 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onRemoveContext,
   onCopy,
   isFocused,
-  onFocus
+  onFocus,
 }) => {
-
   const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
   };
 
   return (
     <Card
-      className={cn("h-full flex flex-col border-2", isFocused ? "border-primary" : "border-border")}
+      className={cn(
+        "h-full flex flex-col border-2",
+        isFocused ? "border-primary" : "border-border",
+      )}
       onClick={onFocus}
       onDragOver={onDragOver}
       onDrop={onDrop}
@@ -54,16 +56,29 @@ const PromptInput: React.FC<PromptInputProps> = ({
           id="selected-contexts-area"
           className="border border-dashed border-border rounded-md p-3 min-h-[80px] bg-muted/30"
         >
-          <h3 className="text-sm font-medium mb-2 text-muted-foreground">Selected Contexts (Drag & Drop here or in Text Area)</h3>
+          <h3 className="text-sm font-medium mb-2 text-muted-foreground">
+            Selected Contexts (Drag & Drop here or in Text Area)
+          </h3>
           {selectedContexts.length > 0 ? (
             <ScrollArea className="pr-3 max-h-[160px]">
               <div className="flex flex-wrap gap-2">
-                {selectedContexts.map(context => (
+                {selectedContexts.map((context) => (
                   // Pill styled div
-                  <div key={context.id} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-background border border-border rounded-md text-sm shadow-sm">
-                    <span className="font-medium text-foreground">{context.title}</span>
+                  <div
+                    key={context.id}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-background border border-border rounded-md text-sm shadow-sm"
+                  >
+                    <span className="font-medium text-foreground">
+                      {context.title}
+                    </span>
                     {/* Removed line count for pill style */}
-                    <Button variant="ghost" size="icon" onClick={() => onRemoveContext(context.id)} className="h-5 w-5 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground" aria-label={`Remove ${context.title}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onRemoveContext(context.id)}
+                      className="h-5 w-5 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      aria-label={`Remove ${context.title}`}
+                    >
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -71,7 +86,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
               </div>
             </ScrollArea>
           ) : (
-            <p className="text-xs text-muted-foreground text-center py-4">No contexts selected. Drag from library.</p>
+            <p className="text-xs text-muted-foreground text-center py-4">
+              No contexts selected. Drag from library.
+            </p>
           )}
         </div>
         <Button onClick={onCopy} className="w-full mt-auto">

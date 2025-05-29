@@ -29,5 +29,5 @@ export interface PromptEditorProps {
 export interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (context: Omit<Context, 'id'>) => void;
+  onSave: (context: Omit<Context, "id">) => void;
 }

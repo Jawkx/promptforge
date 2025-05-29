@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Context } from '../types';
+import React, { useState, useEffect } from "react";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 
 interface EditContextModalProps {
   isOpen: boolean;
@@ -22,9 +22,14 @@ interface EditContextModalProps {
   context: Context | null;
 }
 
-const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, onSave, context }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+const EditContextModal: React.FC<EditContextModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  context,
+}) => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,7 +66,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
       id: context.id,
       title: trimmedTitle,
       content: trimmedContent,
-      category: context.category || 'Uncategorized'
+      category: context.category || "Uncategorized",
     });
     onClose();
   };
@@ -70,7 +75,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({ isOpen, onClose, on
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle className='text-foreground'>Edit Context</DialogTitle>
+          <DialogTitle className="text-foreground">Edit Context</DialogTitle>
           <DialogDescription>
             Modify the title or content of your context snippet.
           </DialogDescription>

@@ -1,16 +1,20 @@
 // src/components/PromptEditor.tsx
-import React, { useState, useCallback } from 'react';
-import { useContexts } from '../hooks/useContexts';
-import { Context } from '../types';
-import PromptInput from './PromptInput';
-import ContextsLibrary from './ContextsLibrary';
-import AddContextModal from './AddContextModal';
-import EditContextModal from './EditContextModal';
-import MarkdownPreview from './MarkdownPreview'; // Import the new component
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useCallback } from "react";
+import { useContexts } from "../hooks/useContexts";
+import { Context } from "../types";
+import PromptInput from "./PromptInput";
+import ContextsLibrary from "./ContextsLibrary";
+import AddContextModal from "./AddContextModal";
+import EditContextModal from "./EditContextModal";
+import MarkdownPreview from "./MarkdownPreview"; // Import the new component
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch"; // Import Switch
-import { Label } from "@/components/ui/label";   // Import Label
+import { Label } from "@/components/ui/label"; // Import Label
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,36 +52,48 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingContext, setEditingContext] = useState<Context | null>(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(null);
+  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
+    null,
+  );
   const [isPreviewMode, setIsPreviewMode] = useState(false); // State for preview mode
 
   const { toast } = useToast();
 
   const [focusedArea, setFocusedArea] = useState<string>(PROMPT_FORGE_AREA);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      const contextData = e.dataTransfer.getData('application/json');
-      if (contextData) {
-        const context = JSON.parse(contextData) as Context;
-        addContextToPrompt(context);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const contextData = e.dataTransfer.getData("application/json");
+        if (contextData) {
+          const context = JSON.parse(contextData) as Context;
+          addContextToPrompt(context);
+        }
+      } catch (error) {
+        console.error("Error parsing dropped context:", error);
+        toast({
+          title: "Drop Error",
+          description: "Failed to add context from drop.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      console.error('Error parsing dropped context:', error);
-      toast({ title: "Drop Error", description: "Failed to add context from drop.", variant: "destructive" });
-    }
-  }, [addContextToPrompt, toast]);
+    },
+    [addContextToPrompt, toast],
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
   }, []);
 
-  const handleDragStart = useCallback((e: React.DragEvent, context: Context) => {
-    e.dataTransfer.setData('application/json', JSON.stringify(context));
-    e.dataTransfer.effectAllowed = "move";
-  }, []);
+  const handleDragStart = useCallback(
+    (e: React.DragEvent, context: Context) => {
+      e.dataTransfer.setData("application/json", JSON.stringify(context));
+      e.dataTransfer.effectAllowed = "move";
+    },
+    [],
+  );
 
   const handleCopy = () => {
     const copiedText = copyPromptWithContexts();
@@ -108,7 +124,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     setContextToDeleteId(null);
   };
 
-  const handleSaveNewContext = (newContextData: Omit<Context, 'id'>) => {
+  const handleSaveNewContext = (newContextData: Omit<Context, "id">) => {
     const success = addContext(newContextData);
     if (success) {
       setAddModalOpen(false);
@@ -154,13 +170,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
 
             <Switch
               id="preview-mode-toggle"
-              className='absolute top-7 right-8'
+              className="absolute top-7 right-8"
               checked={isPreviewMode}
               onCheckedChange={setIsPreviewMode}
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle className='mx-2 bg-transparent' withHandle />
+        <ResizableHandle className="mx-2 bg-transparent" withHandle />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}
@@ -192,18 +208,30 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
           context={editingContext}
         />
       )}
-      <AlertDialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
+      <AlertDialog
+        open={deleteConfirmationOpen}
+        onOpenChange={setDeleteConfirmationOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className='text-primary'>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle className="text-primary">
+              Are you sure?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the context
-              "{contexts.find(c => c.id === contextToDeleteId)?.title || 'this context'}" from the library.
+              This action cannot be undone. This will permanently delete the
+              context "
+              {contexts.find((c) => c.id === contextToDeleteId)?.title ||
+                "this context"}
+              " from the library.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteContext}>Delete</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteContext}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

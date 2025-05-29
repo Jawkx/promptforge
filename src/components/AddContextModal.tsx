@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Context } from '../types';
+import React, { useState, useEffect } from "react";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,24 +13,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 
 interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (context: Omit<Context, 'id'>) => void;
+  onSave: (context: Omit<Context, "id">) => void;
   contextsCount: number; // To generate unique default titles
 }
 
-const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSave, contextsCount }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+const AddContextModal: React.FC<AddContextModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  contextsCount,
+}) => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
-      setTitle('');
-      setContent('');
+      setTitle("");
+      setContent("");
     }
   }, [isOpen]);
 
@@ -40,7 +45,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
     if (!finalTitle && !content.trim()) {
       toast({
         title: "Empty Context",
-        description: "Both title and content are empty. Please add some content.",
+        description:
+          "Both title and content are empty. Please add some content.",
         variant: "destructive",
       });
       return;
@@ -59,7 +65,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
     onSave({
       title: finalTitle,
       content: content.trim(),
-      category: 'Uncategorized' // Default category or implement category input
+      category: "Uncategorized", // Default category or implement category input
     });
     onClose();
   };
@@ -68,8 +74,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({ isOpen, onClose, onSa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle className='text-primary'>Add New Context</DialogTitle>
-          <DialogDescription className='text-foreground'>
+          <DialogTitle className="text-primary">Add New Context</DialogTitle>
+          <DialogDescription className="text-foreground">
             Create a new context snippet to use in your prompts.
           </DialogDescription>
         </DialogHeader>
