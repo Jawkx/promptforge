@@ -44,7 +44,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
         onFocus={onFocus} // Ensure Textarea also sets focus
       />
 
-      <div className="h-2" />
+      <div className="h-8" />
 
       <div
         onDragOver={onDragOver}
@@ -53,13 +53,11 @@ const PromptInput: React.FC<PromptInputProps> = ({
         <ContextSelection selectedContexts={selectedContexts} onRemoveContext={onRemoveContext} />
       </div>
 
-      <div className="h-2" />
+      <div className="h-5" />
 
-      <div className="flex justify-end w-full px-2">
-        <Button onClick={onCopy} className="mt-auto" size="lg">
-          <CopyIcon className="mr-2 h-4 w-4" /> Copy All
-        </Button>
-      </div>
+      <Button onClick={onCopy} className="mt-auto w-full" size="lg">
+        <CopyIcon className="mr-2 h-4 w-4" /> Copy All
+      </Button>
     </div>
   );
 };
@@ -70,8 +68,8 @@ interface ContextSelectionProps {
 }
 
 const ContextSelection: React.FC<ContextSelectionProps> = ({ selectedContexts, onRemoveContext }) => {
-  return <div className="border-2 rounded-md bg-muted p-4 min-h-64">
-    <h1 className="font-medium">Selected Context</h1>
+  return <div className="border-2 rounded-md p-4 min-h-64">
+    <h1 className="font-semibold text-muted-foreground">Selected Context</h1>
     {
       selectedContexts.length > 0 ? (
         <ScrollArea className="pr-3 max-h-[160px]">

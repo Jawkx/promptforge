@@ -1,11 +1,10 @@
 import { useTheme } from "@/hooks/useTheme";
-import { Button } from "./ui/button"; // Assuming this is your button component
+import { Button } from "./ui/button"; // Ensure this path is correct
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const ThemeToggler = () => {
   const { setTheme, theme } = useTheme();
-  // Fallback to 'light' if theme is initially undefined or 'system' for SSR or non-browser environments
   const [currentIcon, setCurrentIcon] = useState(
     typeof window !== "undefined" &&
       theme === "system" &&
@@ -17,7 +16,6 @@ export const ThemeToggler = () => {
   );
 
   useEffect(() => {
-    // Update icon based on theme changes, including system preference
     const newIcon =
       typeof window !== "undefined" &&
         theme === "system" &&
@@ -33,33 +31,44 @@ export const ThemeToggler = () => {
     const newTheme =
       currentIcon === "sun"
         ? "dark"
-        : currentIcon === "moon" && theme === "dark" // if current is moon and actual theme is dark
+        : currentIcon === "moon" && theme === "dark"
           ? "light"
-          : theme === "system" && // if current is moon due to system dark
+          : theme === "system" &&
             typeof window !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "light" // switch to light
-            : "dark"; // default to dark if current is sun due to system light
-
+            ? "light"
+            : "dark";
     setTheme(newTheme);
   };
 
   return (
-    <Button variant="ghost" size="icon" onClick={handleToggleTheme} aria-label="Toggle theme" className="text-3xl">
-      <div className="relative h-5 w-5">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={handleToggleTheme}
+      aria-label="Toggle theme"
+    // The className="flex items-center justify-center" here is redundant
+    // as buttonVariants already provides these for the button itself.
+    // It doesn't harm, but isn't the fix.
+    >
+      <div className="relative w-6 h-6">
+        {" "}
+        {/* This div is centered by the Button */}
         <LucideSun
-          className={`absolute top-0 left-0 text-foreground h-5 w-5 transform transition-all duration-500 ease-in-out ${currentIcon === "sun"
-            ? "rotate-0 scale-100 opacity-100"
-            : "rotate-90 scale-0 opacity-0"
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground transform transition-all duration-500 ease-in-out ${ // Applied centering
+            currentIcon === "sun"
+              ? "rotate-0 scale-100 opacity-100"
+              : "rotate-90 scale-0 opacity-0"
             }`}
-          strokeWidth={2}
+        // The [&_svg]:size-4 from Button variant will still apply, making the icon size-4 (1rem)
         />
         <LucideMoon
-          className={`absolute top-0 left-0 text-foreground h-5 w-5 transform transition-all duration-500 ease-in-out ${currentIcon === "moon"
-            ? "rotate-0 scale-100 opacity-100"
-            : "-rotate-90 scale-0 opacity-0"
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground transform transition-all duration-500 ease-in-out ${ // Applied centering
+            currentIcon === "moon"
+              ? "rotate-0 scale-100 opacity-100"
+              : "-rotate-90 scale-0 opacity-0"
             }`}
-          strokeWidth={2}
+        // The [&_svg]:size-4 from Button variant will still apply
         />
       </div>
     </Button>

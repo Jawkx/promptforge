@@ -13,8 +13,6 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch"; // Import Switch
-import { Label } from "@/components/ui/label"; // Import Label
 import {
   AlertDialog,
   AlertDialogAction,
@@ -172,7 +170,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
             )}
           </div>
         </ResizablePanel>
-        <ResizableHandle className="bg-transparent" withHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}

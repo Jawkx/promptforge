@@ -60,7 +60,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   return (
     <div
-      className="h-full flex flex-col bg-muted py-5 px-4"
+      className="h-full flex flex-col py-5 px-4"
       onClick={onFocus}
       onPaste={handlePaste}
       tabIndex={0} // Make it focusable
@@ -84,7 +84,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
       <div className="h-4" />
 
-      <ScrollArea className="h-full">
+      <ScrollArea >
         {filteredContexts.length > 0 ? (
           filteredContexts.map((context) => (
             <ContextItem
@@ -108,6 +108,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           </div>
         )}
       </ScrollArea>
+
+      <div className="h-4" />
 
       <Button
         variant="default"
