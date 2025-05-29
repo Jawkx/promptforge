@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
 
@@ -86,7 +85,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
       <div className="h-4" />
 
-      <ScrollArea className="flex-1" >
+      <ScrollArea className="h-[50%] max-h-[500px] rounded-xl p-4 border border-secondary" >
         {filteredContexts.length > 0 ? (
           filteredContexts.map((context) => (
             <ContextItem
@@ -99,7 +98,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             />
           ))
         ) : (
-          <div className="text-center text-muted-foreground py-10">
+          <div className="text-center text-muted-foreground bg-background py-10">
             No contexts found.
             {contexts.length > 0 && searchTerm && (
               <p>Try a different search term.</p>

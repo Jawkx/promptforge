@@ -1,7 +1,6 @@
 import React from "react";
 import { Context } from "../types";
 import { Button } from "@/components/ui/button";
-import { CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,10 +38,10 @@ const ContextItem: React.FC<ContextItemProps> = ({
     <div
       draggable
       onDragStart={(e) => onDragStart(e, context)}
-      className="mb-1 cursor-grab active:cursor-grabbing transition-shadow duration-150 border border-secondary rounded-md hover:shadow"
+      className="cursor-grab active:cursor-grabbing transition-shadow duration-150 bg-background"
     >
-      <Accordion type="single" collapsible className="w-full px-3 py-4">
-        <AccordionItem value="preview" className="border-b-0">
+      <Accordion type="single" collapsible className="w-full cursor-auto">
+        <AccordionItem value="preview" className="py-2 border-muted border-b-2">
           <AccordionTrigger className="py-0.5 text-xs text-muted-foreground hover:no-underline focus-visible:ring-0 focus-visible:ring-offset-0 [&>svg]:size-3.5">
 
             <div className="flex flex-row items-center flex-1">
@@ -51,7 +50,7 @@ const ContextItem: React.FC<ContextItemProps> = ({
             </div>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild className="mr-2">
                 <Button variant="ghost" size="icon" className="h-4 w-4">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -70,8 +69,6 @@ const ContextItem: React.FC<ContextItemProps> = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <div className="w-2" />
           </AccordionTrigger>
 
           <AccordionContent className="pt-1 pb-0 text-xs text-muted-foreground">
