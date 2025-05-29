@@ -131,7 +131,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     <div className="h-[calc(100vh-100px)] p-4 pt-0 max-w-7xl mx-auto">
       <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
         <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col">
-          <div className="flex-grow p-4 pt-2 overflow-hidden relative"> {/* Added padding to match original PromptInput container */}
+          <div className="flex-grow pl-4 pt-2 overflow-hidden relative">
             {isPreviewMode ? (
               <MarkdownPreview
                 content={prompt}
@@ -154,13 +154,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
 
             <Switch
               id="preview-mode-toggle"
-              className='absolute top-5 right-7'
+              className='absolute top-7 right-8'
               checked={isPreviewMode}
               onCheckedChange={setIsPreviewMode}
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle withHandle className='mx-2 bg-transparent' />
+        <ResizableHandle className='mx-2 bg-transparent' withHandle />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}
@@ -195,7 +195,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
       <AlertDialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle className='text-primary'>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the context
               "{contexts.find(c => c.id === contextToDeleteId)?.title || 'this context'}" from the library.
