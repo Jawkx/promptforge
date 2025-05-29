@@ -39,9 +39,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
       <Textarea
         placeholder="This is a text input. Type your main prompt or instructions here..."
         value={value}
+        className="ring-inset h-full resize-none"
         onChange={handleTextAreaChange}
-        className="h-auto flex-1 focus-visible:ring-0"
-        onFocus={onFocus} // Ensure Textarea also sets focus
+        onFocus={onFocus}
       />
 
       <div className="h-8" />
