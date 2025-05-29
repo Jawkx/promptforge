@@ -6,7 +6,7 @@ import PromptInput from "./PromptInput";
 import ContextsLibrary from "./ContextsLibrary";
 import AddContextModal from "./AddContextModal";
 import EditContextModal from "./EditContextModal";
-import MarkdownPreview from "./MarkdownPreview"; // Import the new component
+// MarkdownPreview is no longer needed
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface PromptEditorProps {
-  onCopySuccess: () => void;
+  onCopySuccess?: () => void;
 }
 
 const PROMPT_FORGE_AREA = "promptForge";
@@ -50,16 +50,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingContext, setEditingContext] = useState<Context | null>(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
-    null,
-  );
-  const [isPreviewMode, setIsPreviewMode] = useState(false); // State for preview mode
+  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(null);
+  // isPreviewMode state is removed
 
   const { toast } = useToast();
-
   const [focusedArea, setFocusedArea] = useState<string>(PROMPT_FORGE_AREA);
 
-  const handleDrop = useCallback(
+  const handleDropOnPromptInput = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -85,7 +82,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     e.preventDefault();
   }, []);
 
-  const handleDragStart = useCallback(
+  const handleDragStartRow = useCallback(
     (e: React.DragEvent, context: Context) => {
       e.dataTransfer.setData("application/json", JSON.stringify(context));
       e.dataTransfer.effectAllowed = "move";
@@ -95,7 +92,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
 
   const handleCopy = () => {
     const copiedText = copyPromptWithContexts();
-    if (copiedText) {
+    if (copiedText && onCopySuccess) {
       onCopySuccess();
     }
   };
@@ -141,46 +138,64 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     addContextFromPaste(pastedText);
   };
 
+  const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
+    let countAdded = 0;
+    contextsToAdd.forEach(context => {
+      // addContextToPrompt already checks for duplicates
+      const alreadySelected = selectedContexts.some(sc => sc.id === context.id);
+      if (!alreadySelected) {
+        addContextToPrompt(context); // This will show individual toasts
+        countAdded++;
+      }
+    });
+    if (countAdded > 0 && contextsToAdd.length > 1) { // If more than one attempted, and at least one new was added
+      toast({
+        title: "Contexts Processed",
+        description: `${countAdded} new context(s) added to prompt. Others might have been duplicates.`,
+      });
+    } else if (countAdded === 0 && contextsToAdd.length > 0) {
+      toast({
+        title: "No New Contexts Added",
+        description: `All selected contexts were already in the prompt.`,
+        variant: "default",
+      });
+    }
+    // Individual toasts from addContextToPrompt will cover single additions or initial duplicates
+  };
+
   return (
     <div className="h-full w-full max-w-screen-2xl">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col p-4">
           <h1 className="font-semibold text-2xl">Context Mixer</h1>
-
           <div className="h-3" />
           <div className="flex-grow overflow-hidden relative">
-            {isPreviewMode ? (
-              <MarkdownPreview
-                content={prompt}
-                isFocused={focusedArea === PROMPT_FORGE_AREA}
-                onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
-              />
-            ) : (
-              <PromptInput
-                value={prompt}
-                onChange={setPrompt}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                selectedContexts={selectedContexts}
-                onRemoveContext={removeContextFromPrompt}
-                onCopy={handleCopy}
-                isFocused={focusedArea === PROMPT_FORGE_AREA}
-                onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
-              />
-            )}
+            {/* MarkdownPreview and isPreviewMode toggle removed */}
+            <PromptInput
+              value={prompt}
+              onChange={setPrompt}
+              onDrop={handleDropOnPromptInput}
+              onDragOver={handleDragOver}
+              selectedContexts={selectedContexts}
+              onRemoveContext={removeContextFromPrompt}
+              onCopy={handleCopy}
+              isFocused={focusedArea === PROMPT_FORGE_AREA}
+              onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
+            />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={40} minSize={25}>
+        <ResizablePanel defaultSize={40} minSize={25} className="flex flex-col">
           <ContextsLibrary
             contexts={contexts}
-            onDragStart={handleDragStart}
             onAddContextButtonClick={handleAddContextButtonClick}
             onEditContext={handleEditContext}
             onDeleteContext={handleDeleteContextRequest}
             onPasteToAdd={handlePasteToLibrary}
             isFocused={focusedArea === CONTEXT_LIBRARY_AREA}
             onFocus={() => setFocusedArea(CONTEXT_LIBRARY_AREA)}
+            onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
+            onDragStartRow={handleDragStartRow}
           />
         </ResizablePanel>
       </ResizablePanelGroup>

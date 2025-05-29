@@ -1,46 +1,49 @@
 import React, { useState, useCallback } from "react";
 import { Context } from "../types";
-import ContextItem from "./ContextItem";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
+import { ContextsDataTable } from "./ContextsDataTable";
+import { getContextsTableColumns } from "./ContextsDataTableColumns";
 
 interface ContextsLibraryProps {
   contexts: Context[];
-  onDragStart: (e: React.DragEvent, context: Context) => void;
-  onAddContextButtonClick: () => void; // Renamed to avoid conflict
+  onAddContextButtonClick: () => void;
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   onPasteToAdd: (pastedText: string) => void;
-  isFocused: boolean;
-  onFocus: () => void;
+  isFocused: boolean; // To determine if the library area itself is focused for paste
+  onFocus: () => void; // To set the library area as focused
+  onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
+  onDragStartRow: (event: React.DragEvent, context: Context) => void;
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   contexts,
-  onDragStart,
   onAddContextButtonClick,
   onEditContext,
   onDeleteContext,
   onPasteToAdd,
   isFocused,
   onFocus,
+  onAddSelectedToPrompt,
+  onDragStartRow,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  const filteredContexts = contexts.filter(
-    (context) =>
-      context.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      context.content.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // Memoize columns to prevent re-creation on every render
+  const columns = React.useMemo(() => getContextsTableColumns(), []);
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {
-      if (isFocused) {
+      // Check if the paste event originated from within an input field in the DataTable
+      // or if the library area itself is "active" for pasting.
+      const targetElement = event.target as HTMLElement;
+      const isPastingIntoInput = targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA';
+
+      if (isFocused && !isPastingIntoInput) { // Only paste if library is focused and not into an input
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
@@ -59,64 +62,35 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   return (
     <div
-      className="h-full flex flex-col py-5 px-4"
-      onClick={onFocus}
+      className="h-full flex flex-col py-5 px-4 gap-4 focus:outline-none"
+      onClick={onFocus} // Set library as focused when clicking in its general area
       onPaste={handlePaste}
-      tabIndex={0} // Make it focusable
+      tabIndex={-1} // Make it focusable for paste events, -1 so it's not in tab order
     >
       <div className="flex flex-row items-center justify-between">
         <h1 className="font-medium text-lg">Context Library</h1>
-        <div >
-          <ThemeToggler />
-        </div>
+        <ThemeToggler />
       </div>
 
-      <span className="h-1" />
-
-      <div className="relative mt-2">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search contexts..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8"
+      <div className="flex-grow min-h-0"> {/* Ensure DataTable can grow and shrink */}
+        <ContextsDataTable
+          columns={columns}
+          data={contexts}
+          onEditContext={onEditContext}
+          onDeleteContext={onDeleteContext}
+          onAddSelectedToPrompt={onAddSelectedToPrompt}
+          searchQuery={searchTerm}
+          setSearchQuery={setSearchTerm} // Pass setter to DataTable
+          onDragStartRow={onDragStartRow}
         />
       </div>
-
-      <div className="h-4" />
-
-      <ScrollArea className="h-[50%] max-h-[500px] rounded-xl p-4 border border-secondary" >
-        {filteredContexts.length > 0 ? (
-          filteredContexts.map((context) => (
-            <ContextItem
-              key={context.id}
-              context={context}
-              onDragStart={onDragStart}
-              onEdit={onEditContext}
-              onDelete={onDeleteContext}
-              isFocused={isFocused}
-            />
-          ))
-        ) : (
-          <div className="text-center text-muted-foreground bg-background py-10">
-            No contexts found.
-            {contexts.length > 0 && searchTerm && (
-              <p>Try a different search term.</p>
-            )}
-            {contexts.length === 0 && !searchTerm && (
-              <p>Click the '+' button to add a new context.</p>
-            )}
-          </div>
-        )}
-      </ScrollArea>
-
-      <div className="h-4" />
 
       <Button
         variant="default"
         onClick={onAddContextButtonClick}
+      // className="mt-auto" // Keep button at the bottom of its flex container
       >
-        <Plus />
+        <Plus className="mr-2 h-4 w-4" />
         Add Context
       </Button>
     </div>
