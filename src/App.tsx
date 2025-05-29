@@ -5,7 +5,7 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen">
+      <div className="h-screen w-screen flex justify-center">
         <PromptEditor />
       </div>
       <Toaster />

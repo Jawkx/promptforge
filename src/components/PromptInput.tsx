@@ -68,7 +68,7 @@ interface ContextSelectionProps {
 }
 
 const ContextSelection: React.FC<ContextSelectionProps> = ({ selectedContexts, onRemoveContext }) => {
-  return <div className="border-2 rounded-md p-4 min-h-64">
+  return <div className="border-2 border-secondary rounded-md p-4 min-h-64">
     <h1 className="font-semibold text-muted-foreground">Selected Context</h1>
     {
       selectedContexts.length > 0 ? (

@@ -65,9 +65,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       onPaste={handlePaste}
       tabIndex={0} // Make it focusable
     >
-      <h1 className="font-medium text-lg">Context Library</h1>
-      <div className="fixed right-4 top-4">
-        <ThemeToggler />
+      <div className="flex flex-row items-center justify-between">
+        <h1 className="font-medium text-lg">Context Library</h1>
+        <div >
+          <ThemeToggler />
+        </div>
       </div>
 
       <span className="h-1" />
@@ -84,7 +86,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
       <div className="h-4" />
 
-      <ScrollArea >
+      <ScrollArea className="flex-1" >
         {filteredContexts.length > 0 ? (
           filteredContexts.map((context) => (
             <ContextItem

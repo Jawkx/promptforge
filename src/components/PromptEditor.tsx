@@ -142,7 +142,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   };
 
   return (
-    <div className="h-screen w-full">
+    <div className="h-full w-full max-w-screen-2xl">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col p-4">
           <h1 className="font-semibold text-2xl">Context Mixer</h1>
