@@ -20,7 +20,6 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({
     <Card
       className={cn(
         "h-full flex flex-col border-2",
-        isFocused ? "border-primary" : "border-border",
       )}
       onClick={onFocus} // Allows the card to become "focused" visually
     >

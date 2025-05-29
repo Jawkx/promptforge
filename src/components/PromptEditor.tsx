@@ -144,10 +144,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] p-4 pt-0 max-w-7xl mx-auto">
-      <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
-        <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col">
-          <div className="flex-grow pl-4 pt-2 overflow-hidden relative">
+    <div className="h-screen w-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col p-4">
+          <h1 className="font-semibold text-2xl">Context Mixer</h1>
+
+          <div className="h-3" />
+          <div className="flex-grow overflow-hidden relative">
             {isPreviewMode ? (
               <MarkdownPreview
                 content={prompt}
@@ -167,16 +170,9 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
                 onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
               />
             )}
-
-            <Switch
-              id="preview-mode-toggle"
-              className="absolute top-7 right-8"
-              checked={isPreviewMode}
-              onCheckedChange={setIsPreviewMode}
-            />
           </div>
         </ResizablePanel>
-        <ResizableHandle className="mx-2 bg-transparent" withHandle />
+        <ResizableHandle className="bg-transparent" withHandle />
         <ResizablePanel defaultSize={40} minSize={25}>
           <ContextsLibrary
             contexts={contexts}
