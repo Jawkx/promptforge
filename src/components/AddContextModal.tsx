@@ -11,9 +11,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Content } from "@tiptap/core"
 import { useToast } from "@/hooks/use-toast";
+import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 
 interface AddContextModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
   onSave,
 }) => {
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<Content>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,9 +40,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const finalTitle = title.trim();
-    const finalContent = content.trim();
 
-    if (!finalTitle && !finalContent) {
+    if (!finalTitle && !content) {
       toast({
         title: "Empty Context",
         description:
@@ -51,7 +50,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
       });
       return;
     }
-    if (!finalContent) {
+    if (!content) {
       toast({
         title: "Empty Content",
         description: "Content cannot be empty if title is also nearly empty.",
@@ -62,7 +61,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 
     onSave({
       title: finalTitle,
-      content: finalContent,
+      content: content as string,
       category: "Uncategorized",
     });
     onClose();
@@ -70,7 +69,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="border-muted">
+      <DialogContent className="border-muted max-w-screen-lg flex flex-col">
+
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Context</DialogTitle>
           <DialogDescription className="text-foreground">
@@ -78,33 +78,26 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
             auto-generated if left blank.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right text-foreground">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="col-span-3"
-                placeholder="Optional, e.g., 'API Documentation Snippet'"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="content" className="text-right text-foreground">
-                Content
-              </Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="col-span-3 min-h-[200px]"
-                placeholder="Paste your context content here."
-              />
-            </div>
-          </div>
+
+        <form onSubmit={handleSubmit} className="flex-1">
+
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mb-4"
+            placeholder="Title"
+          />
+
+          <MinimalTiptapEditor
+            value={content}
+            onChange={setContent}
+            output="text"
+            className="flex-1 mb-5 max-h-96"
+            editorContentClassName="p-3 overflow-y-auto flex-1"
+            placeholder="Paste your context content here."
+          />
+
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="secondary">
