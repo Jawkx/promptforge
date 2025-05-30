@@ -13,7 +13,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -27,6 +26,15 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Context } from "../types";
 import { ContextsTableMeta } from "./ContextsDataTableColumns";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuLabel,
+} from "@/components/ui/context-menu";
+import { Edit3, Trash2 } from "lucide-react";
 
 interface ContextsDataTableProps {
   columns: ColumnDef<Context>[];
@@ -136,22 +144,45 @@ export function ContextsDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="border-b-muted"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-2 px-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const context = row.original;
+                const meta = table.options.meta as ContextsTableMeta | undefined;
+
+                return (
+                  <ContextMenu key={row.id + "-cm-root"}>
+                    <ContextMenuTrigger asChild>
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className="border-b-muted"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="py-2 px-3">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="border-secondary">
+                      <ContextMenuItem onClick={() => meta?.onEditContext(context)}>
+                        <Edit3 className="mr-2 h-4 w-4" />
+                        Edit
+                      </ContextMenuItem>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        onClick={() => meta?.onDeleteContext(context.id)}
+                        className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

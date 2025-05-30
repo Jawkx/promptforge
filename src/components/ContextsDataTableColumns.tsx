@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit3, Trash2, GripVertical } from "lucide-react";
+import { MoreVertical, Edit3, Trash2 } from "lucide-react"; // Changed MoreHorizontal to MoreVertical
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -71,11 +71,10 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreVertical className="h-4 w-4" /> {/* Changed icon here */}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="border-secondary">
             <DropdownMenuItem onClick={() => meta?.onEditContext(context)}>
               <Edit3 className="mr-2 h-4 w-4" />
               Edit
