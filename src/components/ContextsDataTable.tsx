@@ -102,7 +102,7 @@ export function ContextsDataTable({
   };
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-4 h-full max-h-[800px] flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <Input
           placeholder="Filter contexts..."
