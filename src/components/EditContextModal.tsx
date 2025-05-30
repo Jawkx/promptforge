@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+// Removed Label as it's not used in AddContextModal's structure
 import { useToast } from "@/hooks/use-toast";
 
 interface EditContextModalProps {
@@ -49,10 +49,18 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
     if (!trimmedTitle) {
       toast({
         title: "Title Required",
-        description: "Title cannot be empty.",
+        description: "Title cannot be empty. Original title will be kept if left blank during edit.",
         variant: "destructive",
       });
-      return;
+      // Allow saving if content exists, keep original title
+      if (!trimmedContent) {
+        toast({
+          title: "Content Required",
+          description: "Content cannot be empty.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     if (!trimmedContent) {
       toast({
@@ -62,49 +70,43 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
       });
       return;
     }
+
     onSave({
-      id: context.id,
-      title: trimmedTitle,
+      ...context, // Spread existing context to keep ID and category
+      title: trimmedTitle || context.title, // Use original title if new one is empty
       content: trimmedContent,
-      category: context.category || "Uncategorized",
     });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[525px] border-muted">
+      {/* Style matched with AddContextModal */}
+      <DialogContent className="border-muted h-1/2 max-w-screen-lg flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Edit Context</DialogTitle>
-          <DialogDescription>
+          {/* Style matched with AddContextModal */}
+          <DialogTitle className="text-primary">Edit Context</DialogTitle>
+          <DialogDescription className="text-foreground">
             Modify the title or content of your context snippet.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right text-foreground">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="content" className="text-right text-foreground">
-                Content
-              </Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="col-span-3 min-h-[200px]"
-              />
-            </div>
-          </div>
+        {/* Style matched with AddContextModal */}
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mb-3" // Style matched
+            placeholder="Title"
+          />
+          <Textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            // Style matched
+            className="flex-1 min-h-[200px] mb-3 resize-none"
+            placeholder="Paste your context content here."
+          />
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="secondary">
