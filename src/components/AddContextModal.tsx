@@ -70,7 +70,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="border-muted">
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Context</DialogTitle>
           <DialogDescription className="text-foreground">

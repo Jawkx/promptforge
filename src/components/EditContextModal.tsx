@@ -73,7 +73,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px] border-muted">
         <DialogHeader>
           <DialogTitle className="text-foreground">Edit Context</DialogTitle>
           <DialogDescription>
