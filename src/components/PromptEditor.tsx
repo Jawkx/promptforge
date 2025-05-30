@@ -39,6 +39,7 @@ const PromptEditor: React.FC = () => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
+    reorderSelectedContexts, // Get reorder function
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -145,6 +146,7 @@ const PromptEditor: React.FC = () => {
               onRemoveContext={removeContextFromPrompt}
               onCopyPromptAndContextsClick={handleCopy}
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
+              onReorderContexts={reorderSelectedContexts} // Pass reorder function
             />
           </div>
         </ResizablePanel>

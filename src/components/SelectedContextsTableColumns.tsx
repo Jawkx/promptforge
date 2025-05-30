@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Context } from "../types";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, GripVertical } from "lucide-react"; // Added GripVertical
 import { cn } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
@@ -9,6 +9,17 @@ export type SelectedContextsTableMeta = {
 };
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
+  {
+    id: "drag",
+    header: () => null, // No header text for the drag column
+    // The actual drag handle will be rendered by the DraggableRow component
+    // This cell can be empty or provide a static visual cue if needed.
+    // DraggableRow will handle rendering the interactive handle in this column's cell.
+    cell: () => null,
+    size: 30, // Minimal size for the handle area
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "title",
     header: "Title",
@@ -24,7 +35,7 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   },
   {
     id: "actions",
-    header: () => <div className="text-right w-full pr-2">Action</div>,
+    header: () => <div className="text-right w-full pr-2"></div>, // Removed "Action" text label
     cell: ({ row, table }) => {
       const context = row.original;
       const meta = table.options.meta as SelectedContextsTableMeta | undefined;

@@ -40,7 +40,10 @@ export const useContexts = () => {
       const storedSelectedContexts = localStorage.getItem(
         LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
       );
-      return storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
+      // Ensure IDs are strings, as dnd-kit relies on this.
+      // Older data might have numeric IDs if not careful.
+      const parsed = storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
+      return parsed.map((c: Context) => ({ ...c, id: String(c.id) }));
     } catch (error) {
       console.error(
         "Error loading selected contexts from local storage:",
@@ -98,9 +101,9 @@ export const useContexts = () => {
 
       const newContext: Context = {
         ...newContextData,
-        id: Date.now().toString(),
+        id: Date.now().toString(), // Ensure ID is string
         title: titleToUse,
-        content: newContextData.content.trim(), // Ensure content is also trimmed
+        content: newContextData.content.trim(),
         category: newContextData.category || "Uncategorized",
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
@@ -117,7 +120,7 @@ export const useContexts = () => {
     (content: string) => {
       const title = getNextUntitledTitle(contexts);
       const newContext: Context = {
-        id: Date.now().toString(),
+        id: Date.now().toString(), // Ensure ID is string
         title,
         content,
         category: "Uncategorized",
@@ -146,19 +149,21 @@ export const useContexts = () => {
         return false;
       }
 
+      const updatedContextWithStrId = { ...updatedContext, id: String(updatedContext.id) };
+
       setContexts((prevContexts) =>
         prevContexts.map((context) =>
-          context.id === updatedContext.id ? updatedContext : context,
+          context.id === updatedContextWithStrId.id ? updatedContextWithStrId : context,
         ),
       );
       setSelectedContexts((prevSelectedContexts) =>
         prevSelectedContexts.map((context) =>
-          context.id === updatedContext.id ? updatedContext : context,
+          context.id === updatedContextWithStrId.id ? updatedContextWithStrId : context,
         ),
       );
       toast({
         title: "Context Updated",
-        description: `Context "${updatedContext.title}" has been updated.`,
+        description: `Context "${updatedContextWithStrId.title}" has been updated.`,
       });
       return true;
     },
@@ -239,25 +244,30 @@ export const useContexts = () => {
 
   const addContextToPrompt = useCallback(
     (context: Context) => {
-      if (!selectedContexts.some((c) => c.id === context.id)) {
+      const contextWithStrId = { ...context, id: String(context.id) };
+      if (!selectedContexts.some((c) => c.id === contextWithStrId.id)) {
         setSelectedContexts((prevSelectedContexts) => [
           ...prevSelectedContexts,
-          context,
+          contextWithStrId,
         ]);
         toast({
           title: "Context Selected",
-          description: `Context "${context.title}" added to prompt.`,
+          description: `Context "${contextWithStrId.title}" added to prompt.`,
         });
       } else {
         toast({
           title: "Context Already Selected",
-          description: `Context "${context.title}" is already in the prompt.`,
+          description: `Context "${contextWithStrId.title}" is already in the prompt.`,
           variant: "default",
         });
       }
     },
     [selectedContexts, toast],
   );
+
+  const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {
+    setSelectedContexts(reorderedContexts.map(c => ({ ...c, id: String(c.id) })));
+  }, []);
 
   return {
     contexts,
@@ -271,5 +281,6 @@ export const useContexts = () => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
+    reorderSelectedContexts, // Export the new function
   };
 };

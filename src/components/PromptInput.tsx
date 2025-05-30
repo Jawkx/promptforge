@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
-import { SelectedContextsDataTable } from "./SelectedContextsDataTable"; // Import the new table
-import { getSelectedContextsTableColumns } from "./SelectedContextsTableColumns"; // Import the new columns
+import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
+import { getSelectedContextsTableColumns } from "./SelectedContextsTableColumns";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 
 export interface PromptInputProps {
@@ -15,6 +15,7 @@ export interface PromptInputProps {
   onRemoveContext: (id: string) => void;
   onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
+  onReorderContexts: (reorderedContexts: Context[]) => void; // Added prop
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
@@ -24,6 +25,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onRemoveContext,
   onCopyPromptAndContextsClick,
   onFocus,
+  onReorderContexts, // Destructure prop
 }) => {
   const selectedContextsColumns = React.useMemo(
     () => getSelectedContextsTableColumns(),
@@ -48,18 +50,17 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
       <ResizableHandle withHandle className="my-4" />
 
-      <ResizablePanel>
+      <ResizablePanel >
         <h2 className="font-medium text-muted-foreground mb-3 text-xl">
           Selected Contexts
         </h2>
         {selectedContexts.length > 0 ? (
-          <div className="flex-grow overflow-auto"> {/* Changed to overflow-auto for better scroll handling within flex child */}
-            <SelectedContextsDataTable
-              columns={selectedContextsColumns}
-              data={selectedContexts}
-              onRemoveContext={onRemoveContext}
-            />
-          </div>
+          <SelectedContextsDataTable
+            columns={selectedContextsColumns}
+            data={selectedContexts}
+            onRemoveContext={onRemoveContext}
+            onReorderContexts={onReorderContexts} // Pass prop
+          />
         ) : (
           <div className="flex-grow flex items-center justify-center border border-muted rounded-md">
             <p className="text-sm text-muted-foreground text-center py-10">
