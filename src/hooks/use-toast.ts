@@ -1,188 +1,86 @@
 import * as React from "react";
+import { toast as sonnerToast, ExternalToast } from "sonner";
 
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
-
-const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000; // Keeping this large delay as it was, assuming it's intentional
-
-// Represents the full state of a toast item managed by the toaster
-type ManagedToast = ToastProps & {
-  id: string;
+// This type defines the props our adapter `toast` function will accept,
+// mirroring the old system's options for easier migration.
+type OldToastProps = {
+  id?: string; // Sonner toast functions can take an id for updating
   title?: React.ReactNode;
   description?: React.ReactNode;
-  action?: ToastActionElement;
+  variant?: "default" | "destructive";
+  action?: ExternalToast["action"]; // Sonner's action type
+  // Allow any other props that Sonner's ExternalToast might accept
+  [key: string]: any;
 };
 
-const actionTypes = {
-  ADD_TOAST: "ADD_TOAST",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const;
+function toast(props: OldToastProps) {
+  const { title, description, variant, action, ...rest } = props;
 
-let count = 0;
+  // Sonner's primary message is the first argument.
+  // If title exists, use it as main message. Otherwise, use description.
+  const message = title || description || "Notification";
 
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER;
-  return count.toString();
-}
-
-type ActionType = typeof actionTypes;
-
-type Action =
-  | {
-    type: ActionType["ADD_TOAST"];
-    toast: ManagedToast;
-  }
-  | {
-    type: ActionType["UPDATE_TOAST"];
-    toast: Partial<ManagedToast>; // id must be present in this partial
-  }
-  | {
-    type: ActionType["DISMISS_TOAST"];
-    toastId?: ManagedToast["id"];
-  }
-  | {
-    type: ActionType["REMOVE_TOAST"];
-    toastId?: ManagedToast["id"];
+  const sonnerOptions: ExternalToast = {
+    // If both title and description are provided, and title is used as main message,
+    // then description becomes Sonner's description.
+    // If only description was provided (and used as main message), then Sonner's description is undefined.
+    description: title && description ? description : undefined,
+    action,
+    ...rest,
   };
 
-interface State {
-  toasts: ManagedToast[];
-}
+  let toastId: string | number | undefined;
 
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
-
-const addToRemoveQueue = (toastId: string) => {
-  if (toastTimeouts.has(toastId)) {
-    return;
-  }
-
-  const timeout = setTimeout(() => {
-    toastTimeouts.delete(toastId);
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    });
-  }, TOAST_REMOVE_DELAY);
-
-  toastTimeouts.set(toastId, timeout);
-};
-
-export const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "ADD_TOAST":
-      return {
-        ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
-      };
-
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t,
-        ),
-      };
-
-    case "DISMISS_TOAST": {
-      const { toastId } = action;
-
-      if (toastId) {
-        addToRemoveQueue(toastId);
-      } else {
-        state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id);
-        });
-      }
-
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
-            ? {
-              ...t,
-              open: false,
-            }
-            : t,
-        ),
-      };
+  if (variant === "destructive") {
+    toastId = sonnerToast.error(message, sonnerOptions);
+  } else {
+    // Heuristic to determine if it's a success toast based on title
+    // For "default" variant or when no variant is specified.
+    const titleString = typeof title === 'string' ? title.toLowerCase() : '';
+    if (
+      titleString.includes("success") ||
+      titleString.includes("added") ||
+      titleString.includes("updated") ||
+      titleString.includes("deleted") ||
+      titleString.includes("copied") ||
+      titleString.includes("processed") ||
+      titleString.includes("selected") ||
+      titleString.includes("removed")
+    ) {
+      toastId = sonnerToast.success(message, sonnerOptions);
+    } else {
+      // Default Sonner toast for general messages
+      toastId = sonnerToast(message, sonnerOptions);
     }
-    case "REMOVE_TOAST":
-      if (action.toastId === undefined) {
-        return {
-          ...state,
-          toasts: [],
-        };
-      }
-      return {
-        ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      };
   }
-};
-
-const listeners: Array<(state: State) => void> = [];
-
-let memoryState: State = { toasts: [] };
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action);
-  listeners.forEach((listener) => {
-    listener(memoryState);
-  });
-}
-
-// Options for creating a new toast, excluding the ID
-export type ToastOptions = Omit<ManagedToast, "id">;
-
-function toast({ ...props }: ToastOptions) {
-  const id = genId();
-
-  const update = (updateProps: Partial<ToastOptions>) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...updateProps, id },
-    });
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss();
-      },
-    },
-  });
 
   return {
-    id: id,
-    dismiss,
-    update,
-  };
-}
-
-function useToast() {
-  const [state, setState] = React.useState<State>(memoryState);
-
-  React.useEffect(() => {
-    listeners.push(setState);
-    return () => {
-      const index = listeners.indexOf(setState);
-      if (index > -1) {
-        listeners.splice(index, 1);
+    id: toastId,
+    dismiss: () => {
+      if (toastId !== undefined) {
+        sonnerToast.dismiss(toastId);
       }
-    };
-  }, [state]); // state dependency is correct here for re-subscribing if component re-renders with new state instance.
-
-  return {
-    ...state,
-    toast,
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+    },
+    // update function is not implemented as it was not used in the codebase
+    // and Sonner's update mechanism is `sonnerToast(newContent, { id: toastId, ... })`
   };
 }
 
+// The useToast hook now provides the adapted toast function and a global dismiss.
+// The `toasts` array is no longer part of this hook as Sonner manages its own state.
+function useToast() {
+  return {
+    toast,
+    dismiss: (toastId?: string | number) => {
+      if (toastId !== undefined) {
+        sonnerToast.dismiss(toastId);
+      } else {
+        // Dismiss all toasts if no ID is provided
+        sonnerToast.dismiss();
+      }
+    },
+  };
+}
+
+export type { OldToastProps as ToastOptions }; // Exporting for compatibility if needed, though direct use is unlikely now
 export { useToast, toast };
