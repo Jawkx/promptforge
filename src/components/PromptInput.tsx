@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Context } from "../types";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, Copy as CopyIcon } from "lucide-react";
+import { Content } from "@tiptap/react"
+import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 
 export interface PromptInputProps {
   value: string;
@@ -15,13 +16,16 @@ export interface PromptInputProps {
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
-  value,
+  _value,
   onChange,
   selectedContexts,
   onRemoveContext,
   onCopyPromptAndContextsClick,
   onFocus,
 }) => {
+
+  const [input, setInputValue] = useState<Content>("")
+
   const handleTextAreaChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
@@ -30,14 +34,18 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   return (
     <div onClick={onFocus} className="flex flex-col h-full">
-      <Textarea
-        placeholder="This is a text input. Type your main prompt or instructions here..."
-        value={value}
-        className="ring-inset h-full resize-none"
-        onChange={handleTextAreaChange}
-        onFocus={onFocus}
-      />
 
+      <MinimalTiptapEditor
+        value={input}
+        onChange={setInputValue}
+        className="w-full h-full"
+        editorContentClassName="p-5 overflow-y-auto flex-1"
+        output="html"
+        placeholder="Enter your description..."
+        autofocus={true}
+        editable={true}
+        editorClassName="focus:outline-hidden"
+      />
       <div className="h-8" />
 
       <div>
