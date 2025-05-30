@@ -8,8 +8,6 @@ import { X, Copy as CopyIcon } from "lucide-react";
 export interface PromptInputProps {
   value: string;
   onChange: (value: string) => void;
-  onDrop: (event: React.DragEvent) => void;
-  onDragOver: (event: React.DragEvent) => void;
   selectedContexts: Context[];
   onRemoveContext: (id: string) => void;
   onCopyPromptAndContextsClick: () => void;
@@ -19,8 +17,6 @@ export interface PromptInputProps {
 const PromptInput: React.FC<PromptInputProps> = ({
   value,
   onChange,
-  onDrop,
-  onDragOver,
   selectedContexts,
   onRemoveContext,
   onCopyPromptAndContextsClick,
@@ -44,7 +40,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
       <div className="h-8" />
 
-      <div onDragOver={onDragOver} onDrop={onDrop}>
+      <div>
         <ContextSelection
           selectedContexts={selectedContexts}
           onRemoveContext={onRemoveContext}

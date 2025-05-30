@@ -54,40 +54,6 @@ const PromptEditor: React.FC = () => {
     FOCUSED_PANE_PROMPT_INPUT,
   );
 
-  const handleDropOnPromptInput = useCallback(
-    (event: React.DragEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      try {
-        const contextData = event.dataTransfer.getData("application/json");
-        if (contextData) {
-          const context = JSON.parse(contextData) as Context;
-          addContextToPrompt(context);
-        }
-      } catch (error) {
-        console.error("Error parsing dropped context:", error);
-        toast({
-          title: "Drop Error",
-          description: "Failed to add context from drop.",
-          variant: "destructive",
-        });
-      }
-    },
-    [addContextToPrompt, toast],
-  );
-
-  const handleDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault(); // Necessary to allow dropping
-  }, []);
-
-  const handleDragStartRow = useCallback(
-    (event: React.DragEvent, context: Context) => {
-      event.dataTransfer.setData("application/json", JSON.stringify(context));
-      event.dataTransfer.effectAllowed = "move";
-    },
-    [],
-  );
-
   const handleCopy = () => {
     copyPromptWithContexts();
   };
@@ -175,8 +141,6 @@ const PromptEditor: React.FC = () => {
             <PromptInput
               value={prompt}
               onChange={setPrompt}
-              onDrop={handleDropOnPromptInput}
-              onDragOver={handleDragOver}
               selectedContexts={selectedContexts}
               onRemoveContext={removeContextFromPrompt}
               onCopyPromptAndContextsClick={handleCopy}
@@ -199,7 +163,6 @@ const PromptEditor: React.FC = () => {
             isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
             onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
             onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-            onDragStartRow={handleDragStartRow} // Prop for ContextsDataTable
           />
         </ResizablePanel>
       </ResizablePanelGroup>

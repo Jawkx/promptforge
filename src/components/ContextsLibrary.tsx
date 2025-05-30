@@ -16,7 +16,6 @@ interface ContextsLibraryProps {
   isFocused: boolean;
   onFocus: () => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
-  onDragStartRow: (event: React.DragEvent, context: Context) => void;
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
@@ -28,7 +27,6 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   isFocused,
   onFocus,
   onAddSelectedToPrompt,
-  onDragStartRow,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -80,7 +78,6 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           onAddSelectedToPrompt={onAddSelectedToPrompt}
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
-          onDragStartRow={onDragStartRow}
         />
       </div>
 

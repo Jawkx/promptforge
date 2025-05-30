@@ -15,7 +15,6 @@ import { MoreHorizontal, Edit3, Trash2, GripVertical } from "lucide-react";
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
-  onDragStartRow: (event: React.DragEvent, context: Context) => void;
 };
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
@@ -44,15 +43,9 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row, table }) => {
-      const meta = table.options.meta as ContextsTableMeta | undefined;
+    cell: ({ row }) => {
       return (
-        <div
-          draggable
-          onDragStart={(event) => meta?.onDragStartRow(event, row.original)}
-          className="flex items-center cursor-grab active:cursor-grabbing"
-        >
-          <GripVertical className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex items-center">
           <span className="font-medium truncate" title={row.getValue("title")}>
             {row.getValue("title")}
           </span>

@@ -36,7 +36,6 @@ interface ContextsDataTableProps {
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  onDragStartRow: (event: React.DragEvent, context: Context) => void;
 }
 
 export function ContextsDataTable({
@@ -47,7 +46,6 @@ export function ContextsDataTable({
   onAddSelectedToPrompt,
   searchQuery,
   setSearchQuery,
-  onDragStartRow,
 }: ContextsDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
@@ -57,7 +55,6 @@ export function ContextsDataTable({
   const tableMeta: ContextsTableMeta = {
     onEditContext,
     onDeleteContext,
-    onDragStartRow,
   };
 
   const table = useReactTable({
