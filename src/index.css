@@ -65,3 +65,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+::-webkit-scrollbar {
+    @apply w-2.5 h-2.5;
+   
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-muted
+}
+ 
+::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground border-[1px] border-transparent border-solid bg-clip-padding;
+}
+ 
