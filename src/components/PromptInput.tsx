@@ -8,12 +8,11 @@ import { X, Copy as CopyIcon } from "lucide-react";
 export interface PromptInputProps {
   value: string;
   onChange: (value: string) => void;
-  onDrop: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (event: React.DragEvent) => void;
+  onDragOver: (event: React.DragEvent) => void;
   selectedContexts: Context[];
   onRemoveContext: (id: string) => void;
-  onCopy: () => void;
-  isFocused: boolean;
+  onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
 }
 
@@ -24,18 +23,17 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onDragOver,
   selectedContexts,
   onRemoveContext,
-  onCopy,
+  onCopyPromptAndContextsClick,
   onFocus,
 }) => {
-  const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+  const handleTextAreaChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    onChange(event.target.value);
   };
 
   return (
-    <div
-      onClick={onFocus}
-      className="flex flex-col h-full"
-    >
+    <div onClick={onFocus} className="flex flex-col h-full">
       <Textarea
         placeholder="This is a text input. Type your main prompt or instructions here..."
         value={value}
@@ -46,16 +44,20 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
       <div className="h-8" />
 
-      <div
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-      >
-        <ContextSelection selectedContexts={selectedContexts} onRemoveContext={onRemoveContext} />
+      <div onDragOver={onDragOver} onDrop={onDrop}>
+        <ContextSelection
+          selectedContexts={selectedContexts}
+          onRemoveContext={onRemoveContext}
+        />
       </div>
 
       <div className="h-5" />
 
-      <Button onClick={onCopy} className="mt-auto w-full" size="lg">
+      <Button
+        onClick={onCopyPromptAndContextsClick}
+        className="mt-auto w-full"
+        size="lg"
+      >
         <CopyIcon className="mr-2 h-4 w-4" /> Copy All
       </Button>
     </div>
@@ -67,11 +69,14 @@ interface ContextSelectionProps {
   onRemoveContext: (id: string) => void;
 }
 
-const ContextSelection: React.FC<ContextSelectionProps> = ({ selectedContexts, onRemoveContext }) => {
-  return <div className="border-2 border-secondary rounded-md p-4 min-h-64">
-    <h1 className="font-semibold text-muted-foreground">Selected Context</h1>
-    {
-      selectedContexts.length > 0 ? (
+const ContextSelection: React.FC<ContextSelectionProps> = ({
+  selectedContexts,
+  onRemoveContext,
+}) => {
+  return (
+    <div className="border-2 border-secondary rounded-md p-4 min-h-64">
+      <h1 className="font-semibold text-muted-foreground">Selected Contexts</h1>
+      {selectedContexts.length > 0 ? (
         <ScrollArea className="pr-3 max-h-[160px]">
           <div className="flex flex-wrap gap-2">
             {selectedContexts.map((context) => (
@@ -97,12 +102,11 @@ const ContextSelection: React.FC<ContextSelectionProps> = ({ selectedContexts, o
         </ScrollArea>
       ) : (
         <p className="text-xs text-muted-foreground text-center py-4">
-          No contexts selected. Drag from library.
+          No contexts selected. Drag from library or use "Add Selected" button.
         </p>
-      )
-    }
-  </div>
-}
-
+      )}
+    </div>
+  );
+};
 
 export default PromptInput;

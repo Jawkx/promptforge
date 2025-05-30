@@ -1,14 +1,12 @@
-"use client";
-
-// Inspired by react-hot-toast library
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 1000000; // Keeping this large delay as it was, assuming it's intentional
 
-type ToasterToast = ToastProps & {
+// Represents the full state of a toast item managed by the toaster
+type ManagedToast = ToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -33,24 +31,24 @@ type ActionType = typeof actionTypes;
 
 type Action =
   | {
-      type: ActionType["ADD_TOAST"];
-      toast: ToasterToast;
-    }
+    type: ActionType["ADD_TOAST"];
+    toast: ManagedToast;
+  }
   | {
-      type: ActionType["UPDATE_TOAST"];
-      toast: Partial<ToasterToast>;
-    }
+    type: ActionType["UPDATE_TOAST"];
+    toast: Partial<ManagedToast>; // id must be present in this partial
+  }
   | {
-      type: ActionType["DISMISS_TOAST"];
-      toastId?: ToasterToast["id"];
-    }
+    type: ActionType["DISMISS_TOAST"];
+    toastId?: ManagedToast["id"];
+  }
   | {
-      type: ActionType["REMOVE_TOAST"];
-      toastId?: ToasterToast["id"];
-    };
+    type: ActionType["REMOVE_TOAST"];
+    toastId?: ManagedToast["id"];
+  };
 
 interface State {
-  toasts: ToasterToast[];
+  toasts: ManagedToast[];
 }
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
@@ -90,8 +88,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action;
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId);
       } else {
@@ -105,9 +101,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t,
         ),
       };
@@ -137,15 +133,16 @@ function dispatch(action: Action) {
   });
 }
 
-type Toast = Omit<ToasterToast, "id">;
+// Options for creating a new toast, excluding the ID
+export type ToastOptions = Omit<ManagedToast, "id">;
 
-function toast({ ...props }: Toast) {
+function toast({ ...props }: ToastOptions) {
   const id = genId();
 
-  const update = (props: ToasterToast) =>
+  const update = (updateProps: Partial<ToastOptions>) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id },
+      toast: { ...updateProps, id },
     });
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
@@ -179,7 +176,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+  }, [state]); // state dependency is correct here for re-subscribing if component re-renders with new state instance.
 
   return {
     ...state,

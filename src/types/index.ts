@@ -5,29 +5,14 @@ export interface Context {
   category?: string;
 }
 
-export interface ContextsLibraryProps {
-  contexts: Context[];
-  onDragStart: (context: Context) => void;
-  onAddContext: () => void;
-  onEditContext: (context: Context) => void;
-  onDeleteContext: (id: string) => void;
-}
-
-export interface PromptInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  onDrop: (e: React.DragEvent) => void;
-  selectedContexts: Context[];
-  onRemoveContext: (id: string) => void;
-  onCopy: () => void;
-}
+export type ContextCreationData = Omit<Context, "id">;
 
 export interface PromptEditorProps {
-  onCopy: () => void;
+  onCopySuccess?: () => void;
 }
 
 export interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (context: Omit<Context, "id">) => void;
+  onSave: (newContext: ContextCreationData) => void;
 }

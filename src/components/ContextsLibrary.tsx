@@ -13,8 +13,8 @@ interface ContextsLibraryProps {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   onPasteToAdd: (pastedText: string) => void;
-  isFocused: boolean; // To determine if the library area itself is focused for paste
-  onFocus: () => void; // To set the library area as focused
+  isFocused: boolean;
+  onFocus: () => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   onDragStartRow: (event: React.DragEvent, context: Context) => void;
 }
@@ -33,17 +33,16 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  // Memoize columns to prevent re-creation on every render
   const columns = React.useMemo(() => getContextsTableColumns(), []);
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {
-      // Check if the paste event originated from within an input field in the DataTable
-      // or if the library area itself is "active" for pasting.
       const targetElement = event.target as HTMLElement;
-      const isPastingIntoInput = targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA';
+      const isPastingIntoInput =
+        targetElement.tagName === "INPUT" ||
+        targetElement.tagName === "TEXTAREA";
 
-      if (isFocused && !isPastingIntoInput) { // Only paste if library is focused and not into an input
+      if (isFocused && !isPastingIntoInput) {
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
@@ -63,16 +62,16 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   return (
     <div
       className="h-full flex flex-col py-5 px-4 gap-4 focus:outline-none"
-      onClick={onFocus} // Set library as focused when clicking in its general area
+      onClick={onFocus}
       onPaste={handlePaste}
-      tabIndex={-1} // Make it focusable for paste events, -1 so it's not in tab order
+      tabIndex={-1} // Make it focusable for paste events
     >
       <div className="flex flex-row items-center justify-between">
         <h1 className="font-medium text-lg">Context Library</h1>
         <ThemeToggler />
       </div>
 
-      <div className="flex-grow min-h-0"> {/* Ensure DataTable can grow and shrink */}
+      <div className="flex-grow min-h-0">
         <ContextsDataTable
           columns={columns}
           data={contexts}
@@ -80,16 +79,12 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           onDeleteContext={onDeleteContext}
           onAddSelectedToPrompt={onAddSelectedToPrompt}
           searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm} // Pass setter to DataTable
+          setSearchQuery={setSearchTerm}
           onDragStartRow={onDragStartRow}
         />
       </div>
 
-      <Button
-        variant="default"
-        onClick={onAddContextButtonClick}
-      // className="mt-auto" // Keep button at the bottom of its flex container
-      >
+      <Button variant="default" onClick={onAddContextButtonClick}>
         <Plus className="mr-2 h-4 w-4" />
         Add Context
       </Button>

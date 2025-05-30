@@ -1,12 +1,10 @@
-// src/components/PromptEditor.tsx
 import React, { useState, useCallback } from "react";
 import { useContexts } from "../hooks/useContexts";
-import { Context } from "../types";
+import { Context, ContextCreationData } from "../types";
 import PromptInput from "./PromptInput";
 import ContextsLibrary from "./ContextsLibrary";
 import AddContextModal from "./AddContextModal";
 import EditContextModal from "./EditContextModal";
-// MarkdownPreview is no longer needed
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -24,14 +22,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface PromptEditorProps {
-  onCopySuccess?: () => void;
-}
+const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
+const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 
-const PROMPT_FORGE_AREA = "promptForge";
-const CONTEXT_LIBRARY_AREA = "contextLibrary";
 
-const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
+const PromptEditor: React.FC = () => {
   const {
     contexts,
     prompt,
@@ -50,18 +45,21 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingContext, setEditingContext] = useState<Context | null>(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(null);
-  // isPreviewMode state is removed
+  const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
+    null,
+  );
 
   const { toast } = useToast();
-  const [focusedArea, setFocusedArea] = useState<string>(PROMPT_FORGE_AREA);
+  const [focusedArea, setFocusedArea] = useState<string>(
+    FOCUSED_PANE_PROMPT_INPUT,
+  );
 
   const handleDropOnPromptInput = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
       try {
-        const contextData = e.dataTransfer.getData("application/json");
+        const contextData = event.dataTransfer.getData("application/json");
         if (contextData) {
           const context = JSON.parse(contextData) as Context;
           addContextToPrompt(context);
@@ -78,23 +76,20 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     [addContextToPrompt, toast],
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault(); // Necessary to allow dropping
   }, []);
 
   const handleDragStartRow = useCallback(
-    (e: React.DragEvent, context: Context) => {
-      e.dataTransfer.setData("application/json", JSON.stringify(context));
-      e.dataTransfer.effectAllowed = "move";
+    (event: React.DragEvent, context: Context) => {
+      event.dataTransfer.setData("application/json", JSON.stringify(context));
+      event.dataTransfer.effectAllowed = "move";
     },
     [],
   );
 
   const handleCopy = () => {
-    const copiedText = copyPromptWithContexts();
-    if (copiedText && onCopySuccess) {
-      onCopySuccess();
-    }
+    copyPromptWithContexts();
   };
 
   const handleAddContextButtonClick = () => {
@@ -119,7 +114,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
     setContextToDeleteId(null);
   };
 
-  const handleSaveNewContext = (newContextData: Omit<Context, "id">) => {
+  const handleSaveNewContext = (newContextData: ContextCreationData) => {
     const success = addContext(newContextData);
     if (success) {
       setAddModalOpen(false);
@@ -141,36 +136,42 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
   const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
     let countAdded = 0;
     contextsToAdd.forEach(context => {
-      // addContextToPrompt already checks for duplicates
       const alreadySelected = selectedContexts.some(sc => sc.id === context.id);
       if (!alreadySelected) {
-        addContextToPrompt(context); // This will show individual toasts
+        addContextToPrompt(context);
         countAdded++;
       }
     });
-    if (countAdded > 0 && contextsToAdd.length > 1) { // If more than one attempted, and at least one new was added
-      toast({
-        title: "Contexts Processed",
-        description: `${countAdded} new context(s) added to prompt. Others might have been duplicates.`,
-      });
-    } else if (countAdded === 0 && contextsToAdd.length > 0) {
-      toast({
-        title: "No New Contexts Added",
-        description: `All selected contexts were already in the prompt.`,
-        variant: "default",
-      });
+
+    if (contextsToAdd.length > 1) {
+      if (countAdded > 0) {
+        toast({
+          title: "Contexts Processed",
+          description: `${countAdded} new context(s) added to prompt. ${contextsToAdd.length - countAdded > 0 ? `${contextsToAdd.length - countAdded} were already selected.` : ''}`,
+        });
+      } else {
+        toast({
+          title: "No New Contexts Added",
+          description: `All selected contexts were already in the prompt.`,
+          variant: "default",
+        });
+      }
+    } else if (contextsToAdd.length === 1 && countAdded === 0) {
+      // Single item was already selected, addContextToPrompt handles this toast
     }
-    // Individual toasts from addContextToPrompt will cover single additions or initial duplicates
   };
 
   return (
     <div className="h-full w-full max-w-screen-2xl">
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col p-4">
+        <ResizablePanel
+          defaultSize={60}
+          minSize={30}
+          className="flex flex-col p-4"
+        >
           <h1 className="font-semibold text-2xl">Context Mixer</h1>
           <div className="h-3" />
           <div className="flex-grow overflow-hidden relative">
-            {/* MarkdownPreview and isPreviewMode toggle removed */}
             <PromptInput
               value={prompt}
               onChange={setPrompt}
@@ -178,24 +179,27 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
               onDragOver={handleDragOver}
               selectedContexts={selectedContexts}
               onRemoveContext={removeContextFromPrompt}
-              onCopy={handleCopy}
-              isFocused={focusedArea === PROMPT_FORGE_AREA}
-              onFocus={() => setFocusedArea(PROMPT_FORGE_AREA)}
+              onCopyPromptAndContextsClick={handleCopy}
+              onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
             />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={40} minSize={25} className="flex flex-col">
+        <ResizablePanel
+          defaultSize={40}
+          minSize={25}
+          className="flex flex-col"
+        >
           <ContextsLibrary
             contexts={contexts}
             onAddContextButtonClick={handleAddContextButtonClick}
             onEditContext={handleEditContext}
             onDeleteContext={handleDeleteContextRequest}
             onPasteToAdd={handlePasteToLibrary}
-            isFocused={focusedArea === CONTEXT_LIBRARY_AREA}
-            onFocus={() => setFocusedArea(CONTEXT_LIBRARY_AREA)}
+            isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
+            onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
             onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-            onDragStartRow={handleDragStartRow}
+            onDragStartRow={handleDragStartRow} // Prop for ContextsDataTable
           />
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -204,7 +208,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ onCopySuccess }) => {
         isOpen={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={handleSaveNewContext}
-        contextsCount={contexts.length}
+      // contextsCount prop removed
       />
       {editingContext && (
         <EditContextModal

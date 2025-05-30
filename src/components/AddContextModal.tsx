@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Context } from "../types";
+import { ContextCreationData } from "../types"; // Using ContextCreationData
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,15 +18,13 @@ import { useToast } from "@/hooks/use-toast";
 interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (context: Omit<Context, "id">) => void;
-  contextsCount: number; // To generate unique default titles
+  onSave: (newContext: ContextCreationData) => void;
 }
 
 const AddContextModal: React.FC<AddContextModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  contextsCount,
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -39,44 +37,45 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     }
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    let finalTitle = title.trim();
-    if (!finalTitle && !content.trim()) {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const finalTitle = title.trim();
+    const finalContent = content.trim();
+
+    if (!finalTitle && !finalContent) {
       toast({
         title: "Empty Context",
         description:
-          "Both title and content are empty. Please add some content.",
+          "Both title and content are empty. Please add some content or a title.",
         variant: "destructive",
       });
       return;
     }
-    if (!finalTitle) {
-      finalTitle = `Untitled (${contextsCount + 1})`;
-    }
-    if (!content.trim()) {
+    if (!finalContent) {
       toast({
         title: "Empty Content",
-        description: "Content cannot be empty.",
+        description: "Content cannot be empty if title is also nearly empty.",
         variant: "destructive",
       });
       return;
     }
+
     onSave({
       title: finalTitle,
-      content: content.trim(),
-      category: "Uncategorized", // Default category or implement category input
+      content: finalContent,
+      category: "Uncategorized",
     });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Context</DialogTitle>
           <DialogDescription className="text-foreground">
-            Create a new context snippet to use in your prompts.
+            Create a new context snippet to use in your prompts. Title will be
+            auto-generated if left blank.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -90,7 +89,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="col-span-3"
-                placeholder="Default title will be 'Untitled (N)' if left blank"
+                placeholder="Optional, e.g., 'API Documentation Snippet'"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

@@ -41,8 +41,8 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 
   if (!isOpen || !context) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
 

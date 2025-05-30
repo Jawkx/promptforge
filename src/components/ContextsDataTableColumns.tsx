@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit3, Trash2, GripVertical } from "lucide-react";
 
-// Props for the columns, including handlers from the parent
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
@@ -30,7 +29,6 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
-        className="translate-y-[2px]"
       />
     ),
     cell: ({ row }) => (
@@ -38,7 +36,6 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
-        className="translate-y-[2px]"
       />
     ),
     enableSorting: false,
@@ -48,12 +45,11 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     accessorKey: "title",
     header: "Title",
     cell: ({ row, table }) => {
-      // Cast meta to the correct type. Make sure 'meta' is passed to useReactTable.
       const meta = table.options.meta as ContextsTableMeta | undefined;
       return (
         <div
           draggable
-          onDragStart={(e) => meta?.onDragStartRow(e, row.original)}
+          onDragStart={(event) => meta?.onDragStartRow(event, row.original)}
           className="flex items-center cursor-grab active:cursor-grabbing"
         >
           <GripVertical className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -75,7 +71,6 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     id: "actions",
     cell: ({ row, table }) => {
       const context = row.original;
-      // Cast meta to the correct type. Make sure 'meta' is passed to useReactTable.
       const meta = table.options.meta as ContextsTableMeta | undefined;
 
       return (

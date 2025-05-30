@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react"; // Added useEffect
-import { Context } from "../types";
+import { useState, useCallback, useEffect } from "react";
+import { Context, ContextCreationData } from "../types";
 import { useToast } from "./use-toast";
 
 const LOCAL_STORAGE_KEYS = {
@@ -9,8 +9,6 @@ const LOCAL_STORAGE_KEYS = {
 };
 
 const initialContexts: Context[] = [];
-
-// const untitledCounter = 0; // This variable is not used and can be removed
 
 const getNextUntitledTitle = (existingContexts: Context[]): string => {
   let title: string;
@@ -37,7 +35,7 @@ export const useContexts = () => {
   const [prompt, setPrompt] = useState<string>(() => {
     try {
       const storedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.PROMPT);
-      return storedPrompt !== null ? storedPrompt : ""; // Ensure null is handled, default to empty string
+      return storedPrompt !== null ? storedPrompt : "";
     } catch (error) {
       console.error("Error loading prompt from local storage:", error);
       return "";
@@ -61,7 +59,6 @@ export const useContexts = () => {
 
   const { toast } = useToast();
 
-  // Effect to save contexts to local storage
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -79,17 +76,14 @@ export const useContexts = () => {
     }
   }, [contexts, toast]);
 
-  // Effect to save prompt to local storage
   useEffect(() => {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEYS.PROMPT, prompt);
     } catch (error) {
       console.error("Error saving prompt to local storage:", error);
-      // Potentially toast here if prompt saving is critical and frequent
     }
   }, [prompt]);
 
-  // Effect to save selectedContexts to local storage
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -98,14 +92,13 @@ export const useContexts = () => {
       );
     } catch (error) {
       console.error("Error saving selected contexts to local storage:", error);
-      // Potentially toast here
     }
   }, [selectedContexts]);
 
   const addContext = useCallback(
-    (context: Omit<Context, "id">) => {
-      let titleToUse = context.title;
-      if (!titleToUse.trim()) {
+    (newContextData: ContextCreationData) => {
+      let titleToUse = newContextData.title.trim();
+      if (!titleToUse) {
         titleToUse = getNextUntitledTitle(contexts);
       }
 
@@ -119,9 +112,11 @@ export const useContexts = () => {
       }
 
       const newContext: Context = {
-        ...context,
+        ...newContextData,
         id: Date.now().toString(),
         title: titleToUse,
+        content: newContextData.content.trim(), // Ensure content is also trimmed
+        category: newContextData.category || "Uncategorized",
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       toast({
@@ -207,10 +202,10 @@ export const useContexts = () => {
 
   const removeContextFromPrompt = useCallback(
     (id: string) => {
+      const removedContext = selectedContexts.find((c) => c.id === id);
       setSelectedContexts((prevSelectedContexts) =>
         prevSelectedContexts.filter((context) => context.id !== id),
       );
-      const removedContext = selectedContexts.find((c) => c.id === id); // Find from old state for toast
       if (removedContext) {
         toast({
           title: "Context Removed",
@@ -219,7 +214,7 @@ export const useContexts = () => {
       }
     },
     [selectedContexts, toast],
-  ); // selectedContexts needed here for the find operation
+  );
 
   const copyPromptWithContexts = useCallback(() => {
     const contextsText = selectedContexts
@@ -284,7 +279,6 @@ export const useContexts = () => {
     prompt,
     setPrompt,
     selectedContexts,
-    // Removed setSelectedContexts from direct export as it's managed internally and through add/remove functions
     addContext,
     addContextFromPaste,
     updateContext,
@@ -292,6 +286,5 @@ export const useContexts = () => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
-    getNextUntitledTitle, // This might not be needed by consumers if modals handle titles internally
   };
 };
