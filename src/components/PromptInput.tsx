@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,8 +7,8 @@ import { Content } from "@tiptap/react"
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 
 export interface PromptInputProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: Content;
+  onChange: (value: Content) => void;
   selectedContexts: Context[];
   onRemoveContext: (id: string) => void;
   onCopyPromptAndContextsClick: () => void;
@@ -16,7 +16,7 @@ export interface PromptInputProps {
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
-  _value,
+  value,
   onChange,
   selectedContexts,
   onRemoveContext,
@@ -24,23 +24,15 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onFocus,
 }) => {
 
-  const [input, setInputValue] = useState<Content>("")
-
-  const handleTextAreaChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
-    onChange(event.target.value);
-  };
-
   return (
     <div onClick={onFocus} className="flex flex-col h-full">
 
       <MinimalTiptapEditor
-        value={input}
-        onChange={setInputValue}
+        value={value}
+        onChange={onChange}
         className="w-full h-full"
         editorContentClassName="p-5 overflow-y-auto flex-1"
-        output="html"
+        output="text"
         placeholder="Enter your description..."
         autofocus={true}
         editable={true}

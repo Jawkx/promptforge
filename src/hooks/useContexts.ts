@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Context, ContextCreationData } from "../types";
 import { useToast } from "./use-toast";
+import { Content } from "@tiptap/react"
 
 const LOCAL_STORAGE_KEYS = {
   CONTEXTS: "promptForge_contexts",
@@ -32,15 +33,7 @@ export const useContexts = () => {
     }
   });
 
-  const [prompt, setPrompt] = useState<string>(() => {
-    try {
-      const storedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.PROMPT);
-      return storedPrompt !== null ? storedPrompt : "";
-    } catch (error) {
-      console.error("Error loading prompt from local storage:", error);
-      return "";
-    }
-  });
+  const [prompt, setPrompt] = useState<Content>("");
 
   const [selectedContexts, setSelectedContexts] = useState<Context[]>(() => {
     try {
@@ -75,14 +68,6 @@ export const useContexts = () => {
       });
     }
   }, [contexts, toast]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.PROMPT, prompt);
-    } catch (error) {
-      console.error("Error saving prompt to local storage:", error);
-    }
-  }, [prompt]);
 
   useEffect(() => {
     try {
