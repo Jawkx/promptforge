@@ -1,10 +1,12 @@
 import React from "react";
 import { Context } from "../types";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Copy as CopyIcon } from "lucide-react";
-import { Content } from "@tiptap/react"
+import { Copy as CopyIcon } from "lucide-react";
+import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
+import { SelectedContextsDataTable } from "./SelectedContextsDataTable"; // Import the new table
+import { getSelectedContextsTableColumns } from "./SelectedContextsTableColumns"; // Import the new columns
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 
 export interface PromptInputProps {
   value: Content;
@@ -23,85 +25,60 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onCopyPromptAndContextsClick,
   onFocus,
 }) => {
-
-  return (
-    <div onClick={onFocus} className="flex flex-col h-full">
-
-      <MinimalTiptapEditor
-        value={value}
-        onChange={onChange}
-        className="w-full h-full"
-        editorContentClassName="p-5 overflow-y-auto flex-1"
-        output="text"
-        placeholder="Enter your description..."
-        autofocus={true}
-        editable={true}
-        editorClassName="focus:outline-hidden"
-      />
-      <div className="h-8" />
-
-      <div>
-        <ContextSelection
-          selectedContexts={selectedContexts}
-          onRemoveContext={onRemoveContext}
-        />
-      </div>
-
-      <div className="h-5" />
-
-      <Button
-        onClick={onCopyPromptAndContextsClick}
-        className="mt-auto w-full"
-        size="lg"
-      >
-        <CopyIcon className="mr-2 h-4 w-4" /> Copy All
-      </Button>
-    </div>
+  const selectedContextsColumns = React.useMemo(
+    () => getSelectedContextsTableColumns(),
+    [],
   );
-};
 
-interface ContextSelectionProps {
-  selectedContexts: Context[];
-  onRemoveContext: (id: string) => void;
-}
-
-const ContextSelection: React.FC<ContextSelectionProps> = ({
-  selectedContexts,
-  onRemoveContext,
-}) => {
   return (
-    <div className="border-2 border-secondary rounded-md p-4 min-h-64">
-      <h1 className="font-semibold text-muted-foreground">Selected Contexts</h1>
-      {selectedContexts.length > 0 ? (
-        <ScrollArea className="pr-3 max-h-[160px]">
-          <div className="flex flex-wrap gap-2">
-            {selectedContexts.map((context) => (
-              <div
-                key={context.id}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-background border border-border rounded-md text-sm shadow-sm"
-              >
-                <span className="font-medium text-foreground">
-                  {context.title}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onRemoveContext(context.id)}
-                  className="h-5 w-5 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  aria-label={`Remove ${context.title}`}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
+    <ResizablePanelGroup onClick={onFocus} direction="vertical">
+      <ResizablePanel className="flex-1">
+        <MinimalTiptapEditor
+          value={value}
+          onChange={onChange}
+          className="w-full h-full"
+          editorContentClassName="p-5 overflow-y-auto flex-1"
+          output="text"
+          placeholder="Enter your prompt here..."
+          autofocus={true}
+          editable={true}
+          editorClassName="focus:outline-none"
+        />
+      </ResizablePanel>
+
+      <ResizableHandle withHandle className="my-4" />
+
+      <ResizablePanel>
+        <h2 className="font-medium text-muted-foreground mb-3 text-xl">
+          Selected Contexts
+        </h2>
+        {selectedContexts.length > 0 ? (
+          <div className="flex-grow overflow-auto"> {/* Changed to overflow-auto for better scroll handling within flex child */}
+            <SelectedContextsDataTable
+              columns={selectedContextsColumns}
+              data={selectedContexts}
+              onRemoveContext={onRemoveContext}
+            />
           </div>
-        </ScrollArea>
-      ) : (
-        <p className="text-xs text-muted-foreground text-center py-4">
-          No contexts selected. Drag from library or use "Add Selected" button.
-        </p>
-      )}
-    </div>
+        ) : (
+          <div className="flex-grow flex items-center justify-center border border-muted rounded-md">
+            <p className="text-sm text-muted-foreground text-center py-10">
+              No contexts selected. Add from the library.
+            </p>
+          </div>
+        )}
+
+        <div className="h-5" />
+
+        <Button
+          onClick={onCopyPromptAndContextsClick}
+          className="mt-auto w-full"
+          size="lg"
+        >
+          <CopyIcon className="mr-2 h-4 w-4" /> Copy All
+        </Button>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
 
