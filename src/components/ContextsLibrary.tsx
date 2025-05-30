@@ -69,17 +69,15 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         <ThemeToggler />
       </div>
 
-      <div className="flex-grow min-h-0">
-        <ContextsDataTable
-          columns={columns}
-          data={contexts}
-          onEditContext={onEditContext}
-          onDeleteContext={onDeleteContext}
-          onAddSelectedToPrompt={onAddSelectedToPrompt}
-          searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm}
-        />
-      </div>
+      <ContextsDataTable
+        columns={columns}
+        data={contexts}
+        onEditContext={onEditContext}
+        onDeleteContext={onDeleteContext}
+        onAddSelectedToPrompt={onAddSelectedToPrompt}
+        searchQuery={searchTerm}
+        setSearchQuery={setSearchTerm}
+      />
 
       <Button variant="default" onClick={onAddContextButtonClick}>
         <Plus className="mr-2 h-4 w-4" />
