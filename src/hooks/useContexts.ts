@@ -190,6 +190,28 @@ export const useContexts = () => {
     [contexts, toast],
   );
 
+
+  const deleteMultipleContexts = useCallback(
+    (ids: string[]) => {
+      const contextsToDelete = contexts.filter((c) => ids.includes(c.id));
+      if (contextsToDelete.length > 0) {
+        setContexts((prevContexts) =>
+          prevContexts.filter((context) => !ids.includes(context.id)),
+        );
+        setSelectedContexts((prevSelectedContexts) =>
+          prevSelectedContexts.filter((context) => !ids.includes(context.id)),
+        );
+        toast({
+          title: `${contextsToDelete.length} Contexts Deleted`,
+          description: `Successfully deleted ${contextsToDelete.length} context(s) from the library.`,
+          variant: "destructive",
+        });
+      }
+    },
+    [contexts, toast],
+  );
+
+
   const removeContextFromPrompt = useCallback(
     (id: string) => {
       const removedContext = selectedContexts.find((c) => c.id === id);
@@ -281,6 +303,7 @@ export const useContexts = () => {
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
-    reorderSelectedContexts, // Export the new function
+    reorderSelectedContexts,
+    deleteMultipleContexts
   };
 };

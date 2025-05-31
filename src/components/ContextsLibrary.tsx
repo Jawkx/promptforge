@@ -12,6 +12,7 @@ interface ContextsLibraryProps {
   onAddContextButtonClick: () => void;
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+  onDeleteSelectedContexts: (ids: string[]) => void;
   onPasteToAdd: (pastedText: string) => void;
   isFocused: boolean;
   onFocus: () => void;
@@ -23,6 +24,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   onAddContextButtonClick,
   onEditContext,
   onDeleteContext,
+  onDeleteSelectedContexts,
   onPasteToAdd,
   isFocused,
   onFocus,
@@ -62,7 +64,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       className="h-full flex flex-col py-5 px-4 gap-4 focus:outline-none"
       onClick={onFocus}
       onPaste={handlePaste}
-      tabIndex={-1} // Make it focusable for paste events
+      tabIndex={-1}
     >
       <div className="flex flex-row items-center justify-between">
         <h1 className="font-medium text-lg">Context Library</h1>
@@ -74,6 +76,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         data={contexts}
         onEditContext={onEditContext}
         onDeleteContext={onDeleteContext}
+        onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}

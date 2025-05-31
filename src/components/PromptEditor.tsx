@@ -36,10 +36,11 @@ const PromptEditor: React.FC = () => {
     addContextFromPaste,
     updateContext,
     deleteContext,
+    deleteMultipleContexts,
     removeContextFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
-    reorderSelectedContexts, // Get reorder function
+    reorderSelectedContexts,
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -49,6 +50,8 @@ const PromptEditor: React.FC = () => {
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
     null,
   );
+  const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] = useState(false);
+  const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
 
   const { toast } = useToast();
   const [focusedArea, setFocusedArea] = useState<string>(
@@ -79,6 +82,20 @@ const PromptEditor: React.FC = () => {
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
+  };
+
+  const handleDeleteMultipleContextsRequest = (ids: string[]) => {
+    if (ids.length === 0) return;
+    setContextsToDeleteIds(ids);
+    setDeleteMultipleConfirmationOpen(true);
+  };
+
+  const confirmDeleteMultipleContexts = () => {
+    if (contextsToDeleteIds.length > 0) {
+      deleteMultipleContexts(contextsToDeleteIds);
+    }
+    setDeleteMultipleConfirmationOpen(false);
+    setContextsToDeleteIds([]);
   };
 
   const handleSaveNewContext = (newContextData: ContextCreationData) => {
@@ -146,7 +163,7 @@ const PromptEditor: React.FC = () => {
               onRemoveContext={removeContextFromPrompt}
               onCopyPromptAndContextsClick={handleCopy}
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
-              onReorderContexts={reorderSelectedContexts} // Pass reorder function
+              onReorderContexts={reorderSelectedContexts}
             />
           </div>
         </ResizablePanel>
@@ -161,6 +178,7 @@ const PromptEditor: React.FC = () => {
             onAddContextButtonClick={handleAddContextButtonClick}
             onEditContext={handleEditContext}
             onDeleteContext={handleDeleteContextRequest}
+            onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
             onPasteToAdd={handlePasteToLibrary}
             isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
             onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
@@ -173,7 +191,6 @@ const PromptEditor: React.FC = () => {
         isOpen={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={handleSaveNewContext}
-      // contextsCount prop removed
       />
       {editingContext && (
         <EditContextModal
@@ -208,6 +225,30 @@ const PromptEditor: React.FC = () => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmDeleteContext}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={deleteMultipleConfirmationOpen}
+        onOpenChange={setDeleteMultipleConfirmationOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-primary">
+              Are you sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete{" "}
+              {contextsToDeleteIds.length} context(s) from the library.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setContextsToDeleteIds([])}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteMultipleContexts}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
