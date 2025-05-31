@@ -41,7 +41,9 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     ),
     enableSorting: false,
     enableHiding: false,
-    size: 40,
+    size: 20,
+    minSize: 20,
+    maxSize: 20
   },
   {
     accessorKey: "colorLabel",
@@ -61,8 +63,10 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         </div>
       );
     },
-    size: 40,
-    enableSorting: false, // Typically users sort by title or date, not color itself
+    size: 20,
+    minSize: 20,
+    maxSize: 20,
+    enableSorting: false,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
@@ -79,6 +83,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         </div>
       );
     },
+    minSize: 500
   },
   {
     id: "actions",
@@ -89,7 +94,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreVertical className="h-4 w-4" />
             </Button>
@@ -111,8 +116,10 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         </DropdownMenu>
       );
     },
+    size: 20,
+    minSize: 20,
+    maxSize: 20,
     enableSorting: false,
-    size: 60,
   },
 ];
 
