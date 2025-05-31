@@ -35,14 +35,14 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [colorLabel, setColorLabel] = useState<ContextColorValue>("");
+  const [colorLabel, setColorLabel] = useState<ContextColorValue>("none");
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
       setTitle("");
       setContent("");
-      setColorLabel(""); // Reset color label on open
+      setColorLabel("none");
     }
   }, [isOpen]);
 
@@ -72,7 +72,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     onSave({
       title: finalTitle,
       content: finalContent,
-      colorLabel: colorLabel, // Pass selected color label
+      colorLabel: colorLabel,
     });
     onClose();
   };

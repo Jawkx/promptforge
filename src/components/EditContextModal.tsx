@@ -37,14 +37,14 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [colorLabel, setColorLabel] = useState<ContextColorValue>("");
+  const [colorLabel, setColorLabel] = useState<ContextColorValue>("none");
   const { toast } = useToast();
 
   useEffect(() => {
     if (context && isOpen) {
       setTitle(context.title);
       setContent(context.content);
-      setColorLabel(context.colorLabel || ""); // Initialize color label
+      setColorLabel(context.colorLabel || "none"); // Initialize color label
     }
   }, [context, isOpen]);
 
