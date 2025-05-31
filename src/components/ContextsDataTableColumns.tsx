@@ -6,19 +6,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  // DropdownMenuLabel, // No longer used
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit3, Trash2, Palette } from "lucide-react"; // Added Palette icon
-import { Label } from "@/components/ui/label"; // For color picker in future iteration, not used directly in columns now
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"; // For color picker in actions or filters
+import { MoreVertical, Edit3, Trash2, Palette } from "lucide-react";
 
 
 export type ContextsTableMeta = {

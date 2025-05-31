@@ -115,7 +115,7 @@ export function ContextsDataTable({
     // When colorFilter changes, update the table's column filter for 'colorLabel'
     const colorLabelColumn = table.getColumn("colorLabel");
     if (colorLabelColumn) {
-      if (colorFilter === "all" || colorFilter === "") {
+      if (colorFilter === "all" || colorFilter === "none") {
         colorLabelColumn.setFilterValue(undefined); // Clear filter
       } else {
         colorLabelColumn.setFilterValue(colorFilter);
@@ -182,7 +182,7 @@ export function ContextsDataTable({
                   </div>
                 </SelectItem>
                 {CONTEXT_COLOR_OPTIONS.map((option) => (
-                  option.value !== "" && // Don't show "None" as a filterable option, "All" covers it. Or show it to filter for specifically uncolored.
+                  option.value !== "none" &&
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
                       <span className={`inline-block h-3 w-3 rounded-full ${option.twBgClass}`} />
@@ -294,7 +294,7 @@ export function ContextsDataTable({
                             Edit (select one)
                           </ContextMenuItem>
                           <ContextMenuItem onClick={() => meta?.onDeleteContext(context.id)} disabled>
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <LucideTrash2 className="mr-2 h-4 w-4" />
                             Delete (select one)
                           </ContextMenuItem>
                         </>
