@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LucideAnvil } from "lucide-react";
 
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
@@ -153,8 +154,11 @@ const PromptEditor: React.FC = () => {
           minSize={30}
           className="flex flex-col p-4"
         >
-          <h1 className="font-semibold text-2xl">Context Mixer</h1>
-          <div className="h-3" />
+          <div className="flex flex-row mb-4">
+            <LucideAnvil className="h-9 w-9 mr-3" />
+            <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
+          </div>
+
           <div className="flex-grow overflow-hidden relative">
             <PromptInput
               value={prompt}
