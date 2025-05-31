@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ContextCreationData } from "../types"; // Using ContextCreationData
+import { ContextCreationData, CONTEXT_COLOR_OPTIONS, ContextColorValue } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddContextModalProps {
@@ -27,12 +35,14 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [colorLabel, setColorLabel] = useState<ContextColorValue>("");
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
       setTitle("");
       setContent("");
+      setColorLabel(""); // Reset color label on open
     }
   }, [isOpen]);
 
@@ -62,15 +72,14 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     onSave({
       title: finalTitle,
       content: finalContent,
-      category: "Uncategorized",
+      colorLabel: colorLabel, // Pass selected color label
     });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="border-muted h-1/2 max-w-screen-lg flex flex-col">
-
+      <DialogContent className="border-muted h-auto max-h-[70vh] max-w-screen-lg flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Context</DialogTitle>
           <DialogDescription className="text-foreground">
@@ -79,19 +88,41 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mb-3"
             placeholder="Title"
           />
+          <div>
+            <Label htmlFor="colorLabel" className="mb-1 block text-sm font-medium text-foreground">
+              Color Label
+            </Label>
+            <Select
+              value={colorLabel}
+              onValueChange={(value) => setColorLabel(value as ContextColorValue)}
+            >
+              <SelectTrigger id="colorLabel">
+                <SelectValue placeholder="Select a color..." />
+              </SelectTrigger>
+              <SelectContent>
+                {CONTEXT_COLOR_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block h-3 w-3 rounded-full ${option.twBgClass}`} />
+                      {option.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Textarea
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 min-h-[200px] mb-3 resize-none"
+            className="flex-1 min-h-[200px] resize-none"
             placeholder="Paste your context content here."
           />
           <DialogFooter>

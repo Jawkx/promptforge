@@ -1,20 +1,31 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context } from "../types";
+import { Context, CONTEXT_COLOR_OPTIONS, ContextColorValue } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
+  // DropdownMenuLabel, // No longer used
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit3, Trash2 } from "lucide-react"; // Changed MoreHorizontal to MoreVertical
+import { MoreVertical, Edit3, Trash2, Palette } from "lucide-react"; // Added Palette icon
+import { Label } from "@/components/ui/label"; // For color picker in future iteration, not used directly in columns now
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; // For color picker in actions or filters
+
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+  // Add a way to update color directly if needed, though Edit modal handles it now
+  // onUpdateContextColor: (id: string, color: ContextColorValue) => void; 
 };
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
@@ -39,6 +50,31 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     ),
     enableSorting: false,
     enableHiding: false,
+    size: 40,
+  },
+  {
+    accessorKey: "colorLabel",
+    header: () => <Palette className="h-4 w-4 text-muted-foreground" />,
+    cell: ({ row }) => {
+      const colorValue = row.original.colorLabel;
+      const colorOption = CONTEXT_COLOR_OPTIONS.find(opt => opt.value === colorValue);
+      // Default to a neutral or invisible representation if no color or not found
+      const bgColorClass = colorOption && colorOption.value ? colorOption.twBgClass : 'bg-transparent border border-dashed border-gray-400';
+
+      return (
+        <div className="flex items-center justify-center">
+          <span
+            title={colorOption?.label || "No color"}
+            className={`inline-block h-3.5 w-3.5 rounded-full ${bgColorClass}`}
+          />
+        </div>
+      );
+    },
+    size: 40,
+    enableSorting: false, // Typically users sort by title or date, not color itself
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
   },
   {
     accessorKey: "title",
@@ -54,13 +90,6 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     },
   },
   {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => {
-      return <span className="truncate">{row.original.category || "Uncategorized"}</span>;
-    },
-  },
-  {
     id: "actions",
     cell: ({ row, table }) => {
       const context = row.original;
@@ -71,7 +100,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreVertical className="h-4 w-4" /> {/* Changed icon here */}
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border-secondary">
@@ -82,7 +111,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => meta?.onDeleteContext(context.id)}
-              className="text-destructive"
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -92,5 +121,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
       );
     },
     enableSorting: false,
+    size: 60,
   },
 ];
+

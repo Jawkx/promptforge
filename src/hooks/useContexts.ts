@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, ContextCreationData } from "../types";
+import { Context, ContextCreationData, ContextColorValue } from "../types"; // Added ContextColorValue
 import { useToast } from "./use-toast";
 import { Content } from "@tiptap/react"
 
@@ -40,8 +40,6 @@ export const useContexts = () => {
       const storedSelectedContexts = localStorage.getItem(
         LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
       );
-      // Ensure IDs are strings, as dnd-kit relies on this.
-      // Older data might have numeric IDs if not careful.
       const parsed = storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
       return parsed.map((c: Context) => ({ ...c, id: String(c.id) }));
     } catch (error) {
@@ -100,11 +98,10 @@ export const useContexts = () => {
       }
 
       const newContext: Context = {
-        ...newContextData,
-        id: Date.now().toString(), // Ensure ID is string
+        id: Date.now().toString(),
         title: titleToUse,
         content: newContextData.content.trim(),
-        category: newContextData.category || "Uncategorized",
+        colorLabel: newContextData.colorLabel || "", // Handle colorLabel
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       toast({
@@ -120,10 +117,10 @@ export const useContexts = () => {
     (content: string) => {
       const title = getNextUntitledTitle(contexts);
       const newContext: Context = {
-        id: Date.now().toString(), // Ensure ID is string
+        id: Date.now().toString(),
         title,
         content,
-        category: "Uncategorized",
+        colorLabel: "", // Default colorLabel for pasted content
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       toast({
@@ -149,21 +146,27 @@ export const useContexts = () => {
         return false;
       }
 
-      const updatedContextWithStrId = { ...updatedContext, id: String(updatedContext.id) };
+      // Ensure colorLabel is part of the update, defaulting to empty string if undefined
+      const contextToUpdate: Context = {
+        ...updatedContext,
+        id: String(updatedContext.id),
+        colorLabel: updatedContext.colorLabel || "" as ContextColorValue,
+      };
+
 
       setContexts((prevContexts) =>
         prevContexts.map((context) =>
-          context.id === updatedContextWithStrId.id ? updatedContextWithStrId : context,
+          context.id === contextToUpdate.id ? contextToUpdate : context,
         ),
       );
       setSelectedContexts((prevSelectedContexts) =>
         prevSelectedContexts.map((context) =>
-          context.id === updatedContextWithStrId.id ? updatedContextWithStrId : context,
+          context.id === contextToUpdate.id ? contextToUpdate : context,
         ),
       );
       toast({
         title: "Context Updated",
-        description: `Context "${updatedContextWithStrId.title}" has been updated.`,
+        description: `Context "${contextToUpdate.title}" has been updated.`,
       });
       return true;
     },
@@ -307,3 +310,4 @@ export const useContexts = () => {
     deleteMultipleContexts
   };
 };
+
