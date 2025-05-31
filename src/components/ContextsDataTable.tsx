@@ -12,7 +12,7 @@ import {
   RowSelectionState,
   getFacetedRowModel,
   getFacetedUniqueValues,
-  ColumnFiltersState, // Added for column filtering
+  ColumnFiltersState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -42,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LucideEdit3, LucideListPlus, LucidePalette, LucideTrash, LucideTrash2 } from "lucide-react";
+import { LucideEdit3, LucideListPlus, LucidePalette, LucideTrash, LucideTrash2, LucideX } from "lucide-react";
 
 interface ContextsDataTableProps {
   columns: ColumnDef<Context>[];
@@ -200,7 +200,7 @@ export function ContextsDataTable({
                 onClick={() => setColorFilter("all")}
                 aria-label="Clear color filter"
               >
-                <XIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <LucideX className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             )}
           </div>
