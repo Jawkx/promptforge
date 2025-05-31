@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LucideEdit3, LucideListPlus, LucidePalette, LucideTrash, LucideTrash2, LucideX } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ContextsDataTableProps {
   columns: ColumnDef<Context>[];
@@ -218,12 +219,12 @@ export function ContextsDataTable({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-b-muted">
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, idx) => {
                   return (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      className="py-2 px-3 h-auto"
+                      className={cn("py-2", idx === 0 ? "pl-3" : "px-2")}
                       style={{ width: header.getSize() === 0 ? undefined : header.getSize() }}
                     >
                       {header.isPlaceholder
@@ -259,10 +260,10 @@ export function ContextsDataTable({
                           }
                         }}
                       >
-                        {row.getVisibleCells().map((cell) => (
+                        {row.getVisibleCells().map((cell, idx) => (
                           <TableCell
                             key={cell.id}
-                            className="py-2 px-3"
+                            className={cn("py-2", idx === 0 ? "pl-3" : "px-2")}
                             style={{ width: cell.column.getSize() === 0 ? undefined : cell.column.getSize() }}
                           >
                             {flexRender(

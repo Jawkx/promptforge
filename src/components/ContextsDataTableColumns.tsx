@@ -21,6 +21,31 @@ export type ContextsTableMeta = {
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
   {
+    accessorKey: "colorLabel",
+    header: () => null,
+    cell: ({ row }) => {
+      const colorValue = row.original.colorLabel;
+      const colorOption = CONTEXT_COLOR_OPTIONS.find(opt => opt.value === colorValue);
+      const bgColorClass = colorOption && colorOption.value ? colorOption.twBgClass : 'bg-transparent border border-dashed border-gray-400';
+
+      return (
+        <div className="flex items-center justify-center">
+          <span
+            title={colorOption?.label || "No color"}
+            className={`inline-block h-3.5 w-3.5  rounded-full ${bgColorClass}`}
+          />
+        </div>
+      );
+    },
+    size: 20,
+    minSize: 20,
+    maxSize: 20,
+    enableSorting: false,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
     id: "select",
     header: ({ table }) => (
       <Checkbox
@@ -44,32 +69,6 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     size: 20,
     minSize: 20,
     maxSize: 20
-  },
-  {
-    accessorKey: "colorLabel",
-    header: () => <Palette className="h-4 w-4 text-muted-foreground" />,
-    cell: ({ row }) => {
-      const colorValue = row.original.colorLabel;
-      const colorOption = CONTEXT_COLOR_OPTIONS.find(opt => opt.value === colorValue);
-      // Default to a neutral or invisible representation if no color or not found
-      const bgColorClass = colorOption && colorOption.value ? colorOption.twBgClass : 'bg-transparent border border-dashed border-gray-400';
-
-      return (
-        <div className="flex items-center justify-center">
-          <span
-            title={colorOption?.label || "No color"}
-            className={`inline-block h-3.5 w-3.5 rounded-full ${bgColorClass}`}
-          />
-        </div>
-      );
-    },
-    size: 20,
-    minSize: 20,
-    maxSize: 20,
-    enableSorting: false,
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
   },
   {
     accessorKey: "title",
