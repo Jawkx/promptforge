@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, ContextCreationData, ContextColorValue } from "../types"; // Added ContextColorValue
+import { Context, ContextCreationData, ContextLabel, PREDEFINED_LABEL_COLORS } from "../types";
 import { useToast } from "./use-toast";
 import { Content } from "@tiptap/react"
 
@@ -97,11 +97,16 @@ export const useContexts = () => {
         return false;
       }
 
+      const newContextLabels: ContextLabel[] = newContextData.labels.map(label => ({
+        ...label,
+        id: `label-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Ensure unique ID
+      }));
+
       const newContext: Context = {
         id: Date.now().toString(),
         title: titleToUse,
         content: newContextData.content.trim(),
-        colorLabel: newContextData.colorLabel || "", // Handle colorLabel
+        labels: newContextLabels,
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       toast({
@@ -120,7 +125,7 @@ export const useContexts = () => {
         id: Date.now().toString(),
         title,
         content,
-        colorLabel: "", // Default colorLabel for pasted content
+        labels: [], // Pasted content starts with no labels
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       toast({
@@ -146,11 +151,18 @@ export const useContexts = () => {
         return false;
       }
 
-      // Ensure colorLabel is part of the update, defaulting to empty string if undefined
+      // Ensure labels have unique IDs, text, and a valid color
+      const processedLabels: ContextLabel[] = updatedContext.labels.map(label => ({
+        id: label.id || `label-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        text: label.text.trim(),
+        color: label.color || PREDEFINED_LABEL_COLORS[0].value, // Default to first color if somehow missing
+      })).filter(label => label.text); // Remove empty labels
+
+
       const contextToUpdate: Context = {
         ...updatedContext,
         id: String(updatedContext.id),
-        colorLabel: updatedContext.colorLabel || "" as ContextColorValue,
+        labels: processedLabels,
       };
 
 

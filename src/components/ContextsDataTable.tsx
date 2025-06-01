@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Context, CONTEXT_COLOR_OPTIONS, ContextColorValue } from "../types";
+import { Context } from "../types";
 import { ContextsTableMeta } from "./ContextsDataTableColumns";
 import {
   ContextMenu,
@@ -35,14 +35,7 @@ import {
   ContextMenuSeparator,
   ContextMenuLabel,
 } from "@/components/ui/context-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { LucideEdit3, LucideListPlus, LucidePalette, LucideTrash, LucideTrash2, LucideX } from "lucide-react";
+import { LucideEdit3, LucideListPlus, LucideSearch, LucideTrash, LucideTrash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ContextsDataTableProps {
@@ -67,11 +60,9 @@ export function ContextsDataTable({
   setSearchQuery,
 }: ContextsDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  // globalFilter is controlled by searchQuery prop
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [colorFilter, setColorFilter] = React.useState<ContextColorValue | "all">("all");
 
 
   const tableMeta: ContextsTableMeta = {
@@ -84,45 +75,34 @@ export function ContextsDataTable({
     columns,
     meta: tableMeta,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters, // Added
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    // globalFilter is set directly via state
-    getFacetedRowModel: getFacetedRowModel(), // For advanced filtering UI, if needed
-    getFacetedUniqueValues: getFacetedUniqueValues(), // For advanced filtering UI
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       globalFilter: searchQuery,
-      columnFilters, // Added
+      columnFilters,
     },
     initialState: {
       pagination: {
         pageSize: 10,
       },
     },
+    onGlobalFilterChange: setSearchQuery, // Connects table's global filter state back to searchQuery
   });
 
+  // This effect syncs the external searchQuery to the table's global filter state.
   React.useEffect(() => {
     table.setGlobalFilter(searchQuery);
   }, [searchQuery, table]);
-
-  React.useEffect(() => {
-    // When colorFilter changes, update the table's column filter for 'colorLabel'
-    const colorLabelColumn = table.getColumn("colorLabel");
-    if (colorLabelColumn) {
-      if (colorFilter === "all" || colorFilter === "none") {
-        colorLabelColumn.setFilterValue(undefined); // Clear filter
-      } else {
-        colorLabelColumn.setFilterValue(colorFilter);
-      }
-    }
-  }, [colorFilter, table]);
 
 
   const handleAddSelectedButtonClick = () => {
@@ -156,63 +136,15 @@ export function ContextsDataTable({
 
 
   return (
-    <div className="space-y-4 h-full max-h-[800px] flex flex-col">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-grow">
-          <Input
-            placeholder="Filter contexts..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="max-w-xs h-9"
-          />
-          <div className="relative flex items-center">
-            <Select
-              value={colorFilter}
-              onValueChange={(value) => setColorFilter(value as ContextColorValue | "all")}
-            >
-              <SelectTrigger className="w-[150px] h-9">
-                <div className="flex items-center gap-2">
-                  <LucidePalette className="h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="Filter by color..." />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  <div className="flex items-center gap-2">
-                    All Colors
-                  </div>
-                </SelectItem>
-                {CONTEXT_COLOR_OPTIONS.map((option) => (
-                  option.value !== "none" &&
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex items-center gap-2">
-                      <span className={`inline-block h-3 w-3 rounded-full ${option.twBgClass}`} />
-                      {option.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {colorFilter !== "all" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 absolute right-8 top-1/2 -translate-y-1/2" // Adjusted for select padding/border
-                onClick={() => setColorFilter("all")}
-                aria-label="Clear color filter"
-              >
-                <LucideX className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-            )}
-          </div>
-        </div>
-        <Button
-          onClick={handleAddSelectedButtonClick}
-          disabled={Object.keys(rowSelection).length === 0}
-          size="sm"
-        >
-          Add Selected
-        </Button>
+    <div className="h-full max-h-[800px] flex flex-col ">
+      <div className="flex items-center mb-3">
+        <LucideSearch className="text-primary mr-4" />
+        <Input
+          placeholder="Filter contexts by title, content, or labels..."
+          value={searchQuery} // Controlled by external state
+          onChange={(event) => setSearchQuery(event.target.value)} // Updates external state
+          className="h-9 "
+        />
       </div>
       <ScrollArea className="rounded-md border border-muted flex-grow relative">
         <Table>
@@ -224,8 +156,8 @@ export function ContextsDataTable({
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      className={cn("py-2", idx === 0 ? "pl-3" : "px-2")}
-                      style={{ width: header.getSize() === 0 ? undefined : header.getSize() }}
+                      className={cn("py-2 sticky top-0 bg-background z-10", idx === 0 ? "pl-3" : "px-2")}
+                      style={{ width: header.getSize() === 0 || header.getSize() === 150 ? undefined : header.getSize() }} // 150 is default from tanstack
                     >
                       {header.isPlaceholder
                         ? null
@@ -264,7 +196,7 @@ export function ContextsDataTable({
                           <TableCell
                             key={cell.id}
                             className={cn("py-2", idx === 0 ? "pl-3" : "px-2")}
-                            style={{ width: cell.column.getSize() === 0 ? undefined : cell.column.getSize() }}
+                            style={{ width: cell.column.getSize() === 0 || cell.column.getSize() === 150 ? undefined : cell.column.getSize() }}
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
@@ -330,10 +262,10 @@ export function ContextsDataTable({
                   className="h-24 text-center"
                 >
                   No contexts found.
-                  {(searchQuery || colorFilter !== 'all') && totalDataCount > 0 && (
-                    <p className="text-xs">Try different filter criteria.</p>
+                  {searchQuery && totalDataCount > 0 && (
+                    <p className="text-xs">Try a different search term.</p>
                   )}
-                  {totalDataCount === 0 && !searchQuery && colorFilter === 'all' && (
+                  {totalDataCount === 0 && !searchQuery && (
                     <p className="text-xs">Click the 'Add Context' button to create one.</p>
                   )}
                 </TableCell>
@@ -347,13 +279,13 @@ export function ContextsDataTable({
         <div>
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {displayedDataCount} row(s) selected.
-          {(searchQuery || colorFilter !== 'all') && ` (Filtered from ${totalDataCount})`}
+          {searchQuery && ` (Filtered from ${totalDataCount})`}
         </div>
         <div className="flex items-center space-x-2">
           <span>
             Page{' '}
             {table.getState().pagination.pageIndex + 1} of {' '}
-            {table.getPageCount()}
+            {table.getPageCount() || 1}
           </span>
           <Button
             variant="outline"

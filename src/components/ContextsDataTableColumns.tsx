@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, CONTEXT_COLOR_OPTIONS, ContextColorValue } from "../types";
+import { Context, PREDEFINED_LABEL_COLORS, ContextLabel } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,42 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit3, Trash2, Palette } from "lucide-react";
+import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
-  // Add a way to update color directly if needed, though Edit modal handles it now
-  // onUpdateContextColor: (id: string, color: ContextColorValue) => void; 
 };
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
-  {
-    accessorKey: "colorLabel",
-    header: () => null,
-    cell: ({ row }) => {
-      const colorValue = row.original.colorLabel;
-      const colorOption = CONTEXT_COLOR_OPTIONS.find(opt => opt.value === colorValue);
-      const bgColorClass = colorOption && colorOption.value ? colorOption.twBgClass : 'bg-transparent border border-dashed border-gray-400';
-
-      return (
-        <div className="flex items-center justify-center">
-          <span
-            title={colorOption?.label || "No color"}
-            className={`inline-block h-3.5 w-3.5  rounded-full ${bgColorClass}`}
-          />
-        </div>
-      );
-    },
-    size: 20,
-    minSize: 20,
-    maxSize: 20,
-    enableSorting: false,
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-  },
   {
     id: "select",
     header: ({ table }) => (
@@ -66,9 +39,9 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     ),
     enableSorting: false,
     enableHiding: false,
-    size: 20,
-    minSize: 20,
-    maxSize: 20
+    size: 40,
+    minSize: 40,
+    maxSize: 40,
   },
   {
     accessorKey: "title",
@@ -82,7 +55,37 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         </div>
       );
     },
-    minSize: 500
+    minSize: 300,
+  },
+  {
+    accessorKey: "labels",
+    header: "Labels",
+    accessorFn: (row) => row.labels.map(l => l.text).join(" "), // For filtering
+    cell: ({ row }) => {
+      const labels = row.original.labels;
+      if (!labels || labels.length === 0) {
+        return <span className="text-xs text-muted-foreground italic">No labels</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-hidden">
+          {labels.map((label) => {
+            const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
+            return (
+              <span
+                key={label.id}
+                title={label.text}
+                className={`px-1.5 py-0.5 rounded-full text-xs font-medium border truncate ${colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500'}`}
+              >
+                {label.text}
+              </span>
+            );
+          })}
+        </div>
+      );
+    },
+    minSize: 150,
+    maxSize: 300,
+    enableSorting: false,
   },
   {
     id: "actions",
@@ -93,7 +96,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreVertical className="h-4 w-4" />
             </Button>
@@ -115,9 +118,9 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
         </DropdownMenu>
       );
     },
-    size: 20,
-    minSize: 20,
-    maxSize: 20,
+    size: 60,
+    minSize: 60,
+    maxSize: 60,
     enableSorting: false,
   },
 ];
