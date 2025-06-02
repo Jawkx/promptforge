@@ -63,8 +63,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
       });
       return;
     }
-    if (!finalContent && finalTitle) { // Content can be empty if title is not
-      // Allow this case, or add specific validation if content must exist
+    if (!finalContent && finalTitle) {
+      // Allow this case
     } else if (!finalContent) {
       toast({
         title: "Empty Content",
@@ -90,7 +90,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
           <DialogTitle className="text-primary">Add New Context</DialogTitle>
           <DialogDescription className="text-foreground">
             Create a new context snippet to use in your prompts. Title will be
-            auto-generated if left blank. Labels can be created or selected from global list.
+            auto-generated if left blank. Labels can be created or selected.
           </DialogDescription>
         </DialogHeader>
 
@@ -106,13 +106,12 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
             currentContextLabels={labelManager.currentContextLabels}
             onUpdateLabelDetails={labelManager.handleUpdateLabelDetailsInContext}
             onRemoveLabelFromContext={labelManager.handleRemoveLabelFromContext}
-            newLabelText={labelManager.newLabelText}
-            setNewLabelText={labelManager.setNewLabelText}
             newLabelColor={labelManager.newLabelColor}
             setNewLabelColor={labelManager.setNewLabelColor}
-            onAddNewLabelToContext={labelManager.handleAddNewLabelToContext}
             availableGlobalLabels={labelManager.availableGlobalLabelsToSelect}
-            onSelectGlobalLabel={labelManager.handleSelectGlobalLabelForContext}
+            createTemporaryLabel={labelManager.createTemporaryLabel}
+            replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
+            allGlobalLabels={allGlobalLabels}
           />
 
           <Textarea

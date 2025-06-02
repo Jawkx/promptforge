@@ -59,7 +59,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
         .filter(Boolean) as GlobalLabel[];
       labelManager.initializeLabels(resolvedInitialLabels, allGlobalLabels);
     }
-  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]);
+  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]); // CORRECTED: Use .initializeLabels
 
   if (!isOpen || !context) return null;
 
@@ -78,7 +78,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
     }
 
     onSave({
-      id: context.id, // Include context ID for update
+      id: context.id,
       title: trimmedTitle,
       content: trimmedContent,
       labels: labelManager.getLabelsForSave(),
@@ -92,7 +92,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-primary">Edit Context</DialogTitle>
           <DialogDescription className="text-foreground">
-            Modify the title, content, or labels of your context snippet. Changes to labels may affect other contexts.
+            Modify the title, content, or labels of your context snippet.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-hidden">
@@ -107,13 +107,12 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
             currentContextLabels={labelManager.currentContextLabels}
             onUpdateLabelDetails={labelManager.handleUpdateLabelDetailsInContext}
             onRemoveLabelFromContext={labelManager.handleRemoveLabelFromContext}
-            newLabelText={labelManager.newLabelText}
-            setNewLabelText={labelManager.setNewLabelText}
             newLabelColor={labelManager.newLabelColor}
             setNewLabelColor={labelManager.setNewLabelColor}
-            onAddNewLabelToContext={labelManager.handleAddNewLabelToContext}
             availableGlobalLabels={labelManager.availableGlobalLabelsToSelect}
-            onSelectGlobalLabel={labelManager.handleSelectGlobalLabelForContext}
+            createTemporaryLabel={labelManager.createTemporaryLabel}
+            replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
+            allGlobalLabels={allGlobalLabels}
           />
 
           <Textarea
