@@ -11,10 +11,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 
-
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+};
+
+// Helper function to format character count
+const formatCharCount = (count: number): string => {
+  if (count < 1000) {
+    return String(count);
+  }
+  if (count < 1_000_000) {
+    const num = Math.floor(count / 1000);
+    return `${num}k`;
+  }
+  const num = Math.floor(count / 1_000_000);
+  return `${num}M`;
 };
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
@@ -88,6 +100,23 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     enableSorting: false,
   },
   {
+    accessorFn: (row) => row.content.length,
+    id: "charCount",
+    header: "Chars",
+    cell: ({ row }) => {
+      const charCount = row.original.content.length;
+      return (
+        <div className="text-center" title={String(charCount)}>
+          {formatCharCount(charCount)}
+        </div>
+      );
+    },
+    enableSorting: true,
+    size: 80,
+    minSize: 60,
+    maxSize: 100,
+  },
+  {
     id: "actions",
     cell: ({ row, table }) => {
       const context = row.original;
@@ -124,4 +153,3 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     enableSorting: false,
   },
 ];
-
