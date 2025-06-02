@@ -17,7 +17,7 @@ export interface PromptInputProps {
   onFocus: () => void;
   onReorderContexts: (reorderedContexts: Context[]) => void;
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
-  getResolvedLabelsForContext: (context: Context) => GlobalLabel[]; // For selected contexts table
+  getResolvedLabelsByIds: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
@@ -29,14 +29,13 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onFocus,
   onReorderContexts,
   onDeleteMultipleFromPrompt,
-  getResolvedLabelsForContext, // Destructure new prop
+  getResolvedLabelsByIds,
 }) => {
 
   // Prepare meta for SelectedContextsDataTable
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
-    // Resolve labels for each context in the selected list for display in its table
-    getResolvedLabels: (context: Context) => getResolvedLabelsForContext(context),
+    getResolvedLabels: getResolvedLabelsByIds,
   };
 
   const selectedContextsColumns = React.useMemo(
@@ -72,7 +71,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
             columns={selectedContextsColumns}
             data={selectedContexts}
             tableMeta={selectedContextsTableMeta} // Pass tableMeta
-            onRemoveContext={onRemoveContext} // Can be removed if only using meta
             onReorderContexts={onReorderContexts}
             onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
           />
@@ -99,4 +97,3 @@ const PromptInput: React.FC<PromptInputProps> = ({
 };
 
 export default PromptInput;
-
