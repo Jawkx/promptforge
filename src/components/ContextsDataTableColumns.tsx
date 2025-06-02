@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, PREDEFINED_LABEL_COLORS, ContextLabel } from "../types";
+import { Context, PREDEFINED_LABEL_COLORS } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
