@@ -1,7 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context } from "../types";
+import { Context, PREDEFINED_LABEL_COLORS } from "../types";
 import { Button } from "@/components/ui/button";
-import { X, GripVertical } from "lucide-react"; // Added GripVertical
+import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
@@ -11,14 +12,40 @@ export type SelectedContextsTableMeta = {
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     id: "drag",
-    header: () => null, // No header text for the drag column
-    // The actual drag handle will be rendered by the DraggableRow component
-    // This cell can be empty or provide a static visual cue if needed.
-    // DraggableRow will handle rendering the interactive handle in this column's cell.
-    cell: () => null,
-    size: 30, // Minimal size for the handle area
+    header: () => null,
+    cell: () => null, // Drag handle is rendered by DraggableRow component
+    size: 30,
+    minSize: 30,
+    maxSize: 30,
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 40,
+    minSize: 40,
+    maxSize: 40,
   },
   {
     accessorKey: "title",
@@ -32,10 +59,41 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
         </div>
       );
     },
+    minSize: 200,
+  },
+  {
+    accessorKey: "labels",
+    header: "Labels",
+    cell: ({ row }) => {
+      const labels = row.original.labels;
+      if (!labels || labels.length === 0) {
+        return <span className="text-xs text-muted-foreground italic">No labels</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
+          {labels.slice(0, 3).map((label) => { // Show max 3 labels, for example
+            const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
+            return (
+              <span
+                key={label.id}
+                title={label.text}
+                className={`px-1.5 py-0.5 rounded-full text-xs font-medium border truncate ${colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500'}`}
+              >
+                {label.text}
+              </span>
+            );
+          })}
+          {labels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
+        </div>
+      );
+    },
+    minSize: 120,
+    maxSize: 250,
+    enableSorting: false,
   },
   {
     id: "actions",
-    header: () => <div className="text-right w-full pr-2"></div>, // Removed "Action" text label
+    header: () => <div className="text-right w-full pr-2"></div>,
     cell: ({ row, table }) => {
       const context = row.original;
       const meta = table.options.meta as SelectedContextsTableMeta | undefined;
@@ -57,6 +115,8 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
       );
     },
     enableSorting: false,
-    size: 80, // Adjusted size for the column header and button
+    size: 60,
+    minSize: 60,
+    maxSize: 60,
   },
 ];

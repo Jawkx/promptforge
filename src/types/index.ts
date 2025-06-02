@@ -34,4 +34,3 @@ export interface AddContextModalProps {
   onClose: () => void;
   onSave: (newContext: ContextCreationData) => void;
 }
-

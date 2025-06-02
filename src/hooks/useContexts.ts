@@ -243,6 +243,25 @@ export const useContexts = () => {
     [selectedContexts, toast],
   );
 
+  const removeMultipleSelectedContextsFromPrompt = useCallback(
+    (ids: string[]) => {
+      const currentSelectedCount = selectedContexts.length;
+      setSelectedContexts((prevSelectedContexts) =>
+        prevSelectedContexts.filter((context) => !ids.includes(context.id)),
+      );
+      const removedCount = currentSelectedCount - selectedContexts.filter((context) => !ids.includes(context.id)).length;
+
+      if (removedCount > 0) {
+        toast({
+          title: `${removedCount} Context(s) Removed`,
+          description: `${removedCount} context(s) have been removed from the prompt.`,
+        });
+      }
+    },
+    [selectedContexts, toast],
+  );
+
+
   const copyPromptWithContexts = useCallback(() => {
     const contextsText = selectedContexts
       .map((context) => `# ${context.title}\n${context.content}`)
@@ -316,10 +335,10 @@ export const useContexts = () => {
     updateContext,
     deleteContext,
     removeContextFromPrompt,
+    removeMultipleSelectedContextsFromPrompt, // Export new function
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
     deleteMultipleContexts
   };
 };
-

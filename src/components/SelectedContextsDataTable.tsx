@@ -5,6 +5,10 @@ import {
   getCoreRowModel,
   useReactTable,
   Row,
+  RowSelectionState, // Added import
+  getFilteredRowModel,
+  getFacetedRowModel, // Added for potential future use
+  getFacetedUniqueValues, // Added for potential future use
 } from "@tanstack/react-table";
 import {
   DndContext,
@@ -24,7 +28,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { GripVertical, LucideTrash, LucideListX } from "lucide-react";
 
 import {
   Table,
@@ -38,16 +42,26 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Context } from "../types";
 import { SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
 import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
+import { cn } from "@/lib/utils";
 
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<Context>[];
   data: Context[];
   onRemoveContext: (id: string) => void;
-  onReorderContexts: (reorderedContexts: Context[]) => void; // New prop
+  onReorderContexts: (reorderedContexts: Context[]) => void;
+  onDeleteMultipleFromPrompt: (ids: string[]) => void; // New prop
 }
 
 // DraggableRow component
-function DraggableRow({ row }: { row: Row<Context> }) {
+function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typeof useReactTable<Context>> }) {
   const {
     attributes,
     listeners,
@@ -63,71 +77,120 @@ function DraggableRow({ row }: { row: Row<Context> }) {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 10 : 0, // Ensure dragging item is on top
-    position: 'relative', // Needed for z-index to take effect on table rows
+    zIndex: isDragging ? 10 : 0,
+    position: 'relative',
   };
 
+  const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+  const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
+  const { onDeleteMultipleFromPrompt, onRemoveContext } = table.options.meta as any; // Accessing props passed via meta or directly
+
   return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      className="border-b-muted bg-background" // Ensure bg for stacking context
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell
-          key={cell.id}
-          className="py-2 px-3"
-          style={{ width: cell.column.getSize() !== 150 ? `${cell.column.getSize()}px` : undefined }}
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <TableRow
+          ref={setNodeRef}
+          style={style}
+          data-state={row.getIsSelected() && "selected"}
+          data-dragging={isDragging}
+          className="border-b-muted bg-background"
+          onContextMenuCapture={() => {
+            if (!row.getIsSelected() && currentSelectedCount <= 1) {
+              table.resetRowSelection(); // Reset if not part of current multi-selection
+              row.toggleSelected(true); // Select the right-clicked row
+            } else if (!row.getIsSelected() && currentSelectedCount > 1) {
+              // If right-clicking on a non-selected row while others are selected,
+              // deselect others and select this one.
+              table.resetRowSelection();
+              row.toggleSelected(true);
+            }
+          }}
         >
-          {cell.column.id === "drag" ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              {...attributes}
-              {...listeners}
-              className="p-0 h-auto w-auto text-muted-foreground hover:bg-transparent cursor-grab active:cursor-grabbing"
-            // Prevent click propagation if it interferes with row selection or other actions
-            // onClick={(e) => e.stopPropagation()} 
+          {row.getVisibleCells().map((cell, idx) => (
+            <TableCell
+              key={cell.id}
+              className={cn("py-2",
+                cell.column.id === 'drag' || cell.column.id === 'select' ? "px-2" : "px-3"
+              )}
+              style={{ width: cell.column.getSize() !== 150 ? cell.column.getSize() : undefined }}
             >
-              <GripVertical className="h-4 w-4" />
-              <span className="sr-only">Drag to reorder</span>
-            </Button>
-          ) : (
-            flexRender(cell.column.columnDef.cell, cell.getContext())
-          )}
-        </TableCell>
-      ))}
-    </TableRow>
+              {cell.column.id === "drag" ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  {...attributes}
+                  {...listeners}
+                  className="p-0 h-auto w-auto text-muted-foreground hover:bg-transparent cursor-grab active:cursor-grabbing"
+                >
+                  <GripVertical className="h-4 w-4" />
+                  <span className="sr-only">Drag to reorder</span>
+                </Button>
+              ) : (
+                flexRender(cell.column.columnDef.cell, cell.getContext())
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="border-secondary">
+        {currentSelectedCount > 1 && row.getIsSelected() ? (
+          <>
+            <ContextMenuLabel>{currentSelectedCount} items selected</ContextMenuLabel>
+            <ContextMenuItem
+              onClick={() => {
+                const selectedIds = table.getFilteredSelectedRowModel().rows.map(r => r.original.id);
+                onDeleteMultipleFromPrompt(selectedIds);
+                table.resetRowSelection();
+              }}
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <LucideTrash className="mr-2 h-4 w-4" />
+              Remove {currentSelectedCount} from Prompt
+            </ContextMenuItem>
+          </>
+        ) : (
+          <>
+            <ContextMenuLabel>Context: {row.original.title}</ContextMenuLabel>
+            <ContextMenuItem
+              onClick={() => {
+                onRemoveContext(row.original.id);
+                table.resetRowSelection();
+              }}
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <LucideListX className="mr-2 h-4 w-4" />
+              Remove from Prompt
+            </ContextMenuItem>
+          </>
+        )}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
+
 
 export function SelectedContextsDataTable({
   columns: initialColumns,
   data,
   onRemoveContext,
   onReorderContexts,
+  onDeleteMultipleFromPrompt,
 }: SelectedContextsDataTableProps) {
-  const tableMeta: SelectedContextsTableMeta = {
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
+  const tableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt: (ids: string[]) => void } = {
     onRemoveContext,
+    onDeleteMultipleFromPrompt, // Pass this to meta for DraggableRow's context menu
   };
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(() => data.map(({ id }) => id), [data]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
-      // Require the mouse to move by a few pixels before activating
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     }),
     useSensor(TouchSensor, {
-      // Press delay of 250ms, with a tolerance of 5px of movement
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {})
   );
@@ -135,9 +198,17 @@ export function SelectedContextsDataTable({
   const table = useReactTable({
     data,
     columns: initialColumns,
+    state: {
+      rowSelection,
+    },
     meta: tableMeta,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: (row) => row.id, // Crucial for dnd-kit
+    getFilteredRowModel: getFilteredRowModel(), // For selected row model
+    getFacetedRowModel: getFacetedRowModel(), // For potential future filtering
+    getFacetedUniqueValues: getFacetedUniqueValues(), // For potential future filtering
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
   });
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -166,12 +237,11 @@ export function SelectedContextsDataTable({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
-                    className="py-2 px-3 h-auto bg-background" // Ensure header bg for stacking
+                    className={cn("py-2 bg-background sticky top-0 z-[1]",
+                      header.id === 'drag' || header.id === 'select' ? "px-2" : "px-3"
+                    )}
                     style={{
-                      width: header.getSize() !== 150 ? `${header.getSize()}px` : undefined,
-                      position: 'sticky',
-                      top: 0,
-                      zIndex: 1
+                      width: header.getSize() !== 150 ? header.getSize() : undefined,
                     }}
                   >
                     {header.isPlaceholder
@@ -189,7 +259,7 @@ export function SelectedContextsDataTable({
             {table.getRowModel().rows?.length ? (
               <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
                 {table.getRowModel().rows.map((row) => (
-                  <DraggableRow key={row.id} row={row} />
+                  <DraggableRow key={row.id} row={row} table={table} />
                 ))}
               </SortableContext>
             ) : (
@@ -206,6 +276,12 @@ export function SelectedContextsDataTable({
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+      {table.getRowModel().rows?.length > 0 && (
+        <div className="flex items-center justify-end space-x-2 py-2 text-xs text-muted-foreground pr-2">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getRowModel().rows.length} row(s) selected.
+        </div>
+      )}
     </DndContext>
   );
 }

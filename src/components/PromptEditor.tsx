@@ -39,6 +39,7 @@ const PromptEditor: React.FC = () => {
     deleteContext,
     deleteMultipleContexts,
     removeContextFromPrompt,
+    removeMultipleSelectedContextsFromPrompt, // Import new hook function
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
@@ -146,6 +147,10 @@ const PromptEditor: React.FC = () => {
     }
   };
 
+  const handleDeleteMultipleSelectedFromPrompt = (ids: string[]) => {
+    removeMultipleSelectedContextsFromPrompt(ids);
+  };
+
   return (
     <div className="h-full w-full max-w-screen-2xl">
       <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -159,7 +164,7 @@ const PromptEditor: React.FC = () => {
             <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
           </div>
 
-          <div className="flex-grow overflow-hidden relative">
+          <div className="flex-grow  relative">
             <PromptInput
               value={prompt}
               onChange={setPrompt}
@@ -168,6 +173,7 @@ const PromptEditor: React.FC = () => {
               onCopyPromptAndContextsClick={handleCopy}
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
               onReorderContexts={reorderSelectedContexts}
+              onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt} // Pass handler
             />
           </div>
         </ResizablePanel>

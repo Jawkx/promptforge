@@ -15,7 +15,8 @@ export interface PromptInputProps {
   onRemoveContext: (id: string) => void;
   onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
-  onReorderContexts: (reorderedContexts: Context[]) => void; // Added prop
+  onReorderContexts: (reorderedContexts: Context[]) => void;
+  onDeleteMultipleFromPrompt: (ids: string[]) => void; // Added prop
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
@@ -25,7 +26,8 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onRemoveContext,
   onCopyPromptAndContextsClick,
   onFocus,
-  onReorderContexts, // Destructure prop
+  onReorderContexts,
+  onDeleteMultipleFromPrompt, // Destructure prop
 }) => {
   const selectedContextsColumns = React.useMemo(
     () => getSelectedContextsTableColumns(),
@@ -50,7 +52,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
       <ResizableHandle withHandle className="my-4" />
 
-      <ResizablePanel >
+      <ResizablePanel defaultSize={40} minSize={20} maxSize={80}>
         <h2 className="font-medium text-muted-foreground mb-3 text-xl">
           Selected Contexts
         </h2>
@@ -59,7 +61,8 @@ const PromptInput: React.FC<PromptInputProps> = ({
             columns={selectedContextsColumns}
             data={selectedContexts}
             onRemoveContext={onRemoveContext}
-            onReorderContexts={onReorderContexts} // Pass prop
+            onReorderContexts={onReorderContexts}
+            onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt} // Pass prop
           />
         ) : (
           <div className="flex-grow flex items-center justify-center border border-muted rounded-md">
