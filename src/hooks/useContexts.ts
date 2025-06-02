@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Context, ContextCreationData, ContextLabel, PREDEFINED_LABEL_COLORS } from "../types";
-import { useToast } from "./use-toast";
+import { useToast, ToastOptions } from "./use-toast"; // Import ToastOptions
 import { Content } from "@tiptap/react"
 
 const LOCAL_STORAGE_KEYS = {
@@ -21,6 +21,74 @@ const getNextUntitledTitle = (existingContexts: Context[]): string => {
   } while (existingContexts.some((c) => c.title === title));
   return title;
 };
+
+// Helper for standardized toast notifications
+type ContextOperation =
+  | "Added"
+  | "Updated"
+  | "Deleted"
+  | "RemovedFromPrompt"
+  | "Selected"
+  | "Copied"
+  | "Processed"
+  | "MultipleDeleted"
+  | "MultipleRemovedFromPrompt";
+
+const showContextOperationNotification = (
+  toastFn: (props: ToastOptions) => void,
+  operation: ContextOperation,
+  itemName: string, // Can be context title or count for multiple items
+  variant?: "destructive" | "default",
+  customDescription?: string,
+) => {
+  let title = "";
+  let description = "";
+
+  switch (operation) {
+    case "Added":
+      title = "Context Added";
+      description = customDescription || `Context "${itemName}" has been added.`;
+      break;
+    case "Updated":
+      title = "Context Updated";
+      description = customDescription || `Context "${itemName}" has been updated.`;
+      break;
+    case "Deleted":
+      title = "Context Deleted";
+      description = customDescription || `Context "${itemName}" has been deleted.`;
+      break;
+    case "RemovedFromPrompt":
+      title = "Context Removed";
+      description = customDescription || `Context "${itemName}" removed from prompt.`;
+      break;
+    case "Selected":
+      title = "Context Selected";
+      description = customDescription || `Context "${itemName}" added to prompt.`;
+      break;
+    case "Copied":
+      title = "Copied to Clipboard!";
+      description = customDescription || "The prompt and contexts have been copied.";
+      break;
+    case "MultipleDeleted":
+      title = `${itemName} Contexts Deleted`;
+      description = customDescription || `Successfully deleted ${itemName} context(s) from the library.`;
+      break;
+    case "MultipleRemovedFromPrompt":
+      title = `${itemName} Context(s) Removed`;
+      description = customDescription || `${itemName} context(s) have been removed from the prompt.`;
+      break;
+    default:
+      title = `Operation Successful`;
+      description = customDescription || `${itemName} processed.`;
+  }
+
+  toastFn({
+    title,
+    description,
+    variant: variant || (operation.includes("Delete") || operation.includes("Removed") ? "destructive" : "default"),
+  });
+};
+
 
 export const useContexts = () => {
   const [contexts, setContexts] = useState<Context[]>(() => {
@@ -109,10 +177,7 @@ export const useContexts = () => {
         labels: newContextLabels,
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
-      toast({
-        title: "Context Added",
-        description: `Context "${newContext.title}" has been added.`,
-      });
+      showContextOperationNotification(toast, "Added", newContext.title);
       return true;
     },
     [contexts, toast],
@@ -128,10 +193,7 @@ export const useContexts = () => {
         labels: [], // Pasted content starts with no labels
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
-      toast({
-        title: "Context Added",
-        description: `Context "${newContext.title}" (from paste) has been added.`,
-      });
+      showContextOperationNotification(toast, "Added", newContext.title, "default", `Context "${newContext.title}" (from paste) has been added.`);
     },
     [contexts, toast],
   );
@@ -176,10 +238,7 @@ export const useContexts = () => {
           context.id === contextToUpdate.id ? contextToUpdate : context,
         ),
       );
-      toast({
-        title: "Context Updated",
-        description: `Context "${contextToUpdate.title}" has been updated.`,
-      });
+      showContextOperationNotification(toast, "Updated", contextToUpdate.title);
       return true;
     },
     [contexts, toast],
@@ -195,11 +254,7 @@ export const useContexts = () => {
         setSelectedContexts((prevSelectedContexts) =>
           prevSelectedContexts.filter((context) => context.id !== id),
         );
-        toast({
-          title: "Context Deleted",
-          description: `Context "${contextToDelete.title}" has been deleted.`,
-          variant: "destructive",
-        });
+        showContextOperationNotification(toast, "Deleted", contextToDelete.title, "destructive");
       }
     },
     [contexts, toast],
@@ -216,11 +271,7 @@ export const useContexts = () => {
         setSelectedContexts((prevSelectedContexts) =>
           prevSelectedContexts.filter((context) => !ids.includes(context.id)),
         );
-        toast({
-          title: `${contextsToDelete.length} Contexts Deleted`,
-          description: `Successfully deleted ${contextsToDelete.length} context(s) from the library.`,
-          variant: "destructive",
-        });
+        showContextOperationNotification(toast, "MultipleDeleted", String(contextsToDelete.length), "destructive");
       }
     },
     [contexts, toast],
@@ -234,10 +285,7 @@ export const useContexts = () => {
         prevSelectedContexts.filter((context) => context.id !== id),
       );
       if (removedContext) {
-        toast({
-          title: "Context Removed",
-          description: `Context "${removedContext.title}" removed from prompt.`,
-        });
+        showContextOperationNotification(toast, "RemovedFromPrompt", removedContext.title);
       }
     },
     [selectedContexts, toast],
@@ -246,16 +294,13 @@ export const useContexts = () => {
   const removeMultipleSelectedContextsFromPrompt = useCallback(
     (ids: string[]) => {
       const currentSelectedCount = selectedContexts.length;
-      setSelectedContexts((prevSelectedContexts) =>
-        prevSelectedContexts.filter((context) => !ids.includes(context.id)),
-      );
-      const removedCount = currentSelectedCount - selectedContexts.filter((context) => !ids.includes(context.id)).length;
+      const updatedSelectedContexts = selectedContexts.filter((context) => !ids.includes(context.id));
+      setSelectedContexts(updatedSelectedContexts);
+
+      const removedCount = currentSelectedCount - updatedSelectedContexts.length;
 
       if (removedCount > 0) {
-        toast({
-          title: `${removedCount} Context(s) Removed`,
-          description: `${removedCount} context(s) have been removed from the prompt.`,
-        });
+        showContextOperationNotification(toast, "MultipleRemovedFromPrompt", String(removedCount));
       }
     },
     [selectedContexts, toast],
@@ -281,10 +326,7 @@ export const useContexts = () => {
     navigator.clipboard
       .writeText(fullText)
       .then(() => {
-        toast({
-          title: "Copied to Clipboard!",
-          description: "The prompt and contexts have been copied.",
-        });
+        showContextOperationNotification(toast, "Copied", "Prompt");
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);
@@ -306,10 +348,7 @@ export const useContexts = () => {
           ...prevSelectedContexts,
           contextWithStrId,
         ]);
-        toast({
-          title: "Context Selected",
-          description: `Context "${contextWithStrId.title}" added to prompt.`,
-        });
+        showContextOperationNotification(toast, "Selected", contextWithStrId.title);
       } else {
         toast({
           title: "Context Already Selected",
