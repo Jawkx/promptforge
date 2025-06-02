@@ -55,9 +55,9 @@ import { cn } from "@/lib/utils";
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<Context>[];
   data: Context[];
-  onRemoveContext: (id: string) => void;
+  tableMeta: SelectedContextsTableMeta; // Changed from onRemoveContext to tableMeta
   onReorderContexts: (reorderedContexts: Context[]) => void;
-  onDeleteMultipleFromPrompt: (ids: string[]) => void; // New prop
+  onDeleteMultipleFromPrompt: (ids: string[]) => void;
 }
 
 // DraggableRow component
@@ -81,9 +81,20 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
     position: 'relative',
   };
 
-  const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+  const meta = table.options.meta as SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } | undefined;
   const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
-  const { onDeleteMultipleFromPrompt, onRemoveContext } = table.options.meta as any; // Accessing props passed via meta or directly
+
+  const handleRemoveFromPrompt = () => {
+    meta?.onRemoveContext(row.original.id);
+    table.resetRowSelection();
+  };
+
+  const handleDeleteMultiple = () => {
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map(r => r.original.id);
+    meta?.onDeleteMultipleFromPrompt?.(selectedIds);
+    table.resetRowSelection();
+  }
+
 
   return (
     <ContextMenu>
@@ -96,11 +107,9 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
           className="border-b-muted bg-background"
           onContextMenuCapture={() => {
             if (!row.getIsSelected() && currentSelectedCount <= 1) {
-              table.resetRowSelection(); // Reset if not part of current multi-selection
-              row.toggleSelected(true); // Select the right-clicked row
+              table.resetRowSelection();
+              row.toggleSelected(true);
             } else if (!row.getIsSelected() && currentSelectedCount > 1) {
-              // If right-clicking on a non-selected row while others are selected,
-              // deselect others and select this one.
               table.resetRowSelection();
               row.toggleSelected(true);
             }
@@ -137,11 +146,7 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
           <>
             <ContextMenuLabel>{currentSelectedCount} items selected</ContextMenuLabel>
             <ContextMenuItem
-              onClick={() => {
-                const selectedIds = table.getFilteredSelectedRowModel().rows.map(r => r.original.id);
-                onDeleteMultipleFromPrompt(selectedIds);
-                table.resetRowSelection();
-              }}
+              onClick={handleDeleteMultiple}
               className="text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
               <LucideTrash className="mr-2 h-4 w-4" />
@@ -152,10 +157,7 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
           <>
             <ContextMenuLabel>Context: {row.original.title}</ContextMenuLabel>
             <ContextMenuItem
-              onClick={() => {
-                onRemoveContext(row.original.id);
-                table.resetRowSelection();
-              }}
+              onClick={handleRemoveFromPrompt}
               className="text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
               <LucideListX className="mr-2 h-4 w-4" />
@@ -172,16 +174,18 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
 export function SelectedContextsDataTable({
   columns: initialColumns,
   data,
-  onRemoveContext,
+  tableMeta, // Changed from onRemoveContext to tableMeta
   onReorderContexts,
   onDeleteMultipleFromPrompt,
 }: SelectedContextsDataTableProps) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
-  const tableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt: (ids: string[]) => void } = {
-    onRemoveContext,
-    onDeleteMultipleFromPrompt, // Pass this to meta for DraggableRow's context menu
+  // Extend tableMeta with onDeleteMultipleFromPrompt for DraggableRow context menu
+  const extendedTableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } = {
+    ...tableMeta,
+    onDeleteMultipleFromPrompt,
   };
+
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(() => data.map(({ id }) => id), [data]);
 
@@ -201,12 +205,12 @@ export function SelectedContextsDataTable({
     state: {
       rowSelection,
     },
-    meta: tableMeta,
+    meta: extendedTableMeta, // Pass the extended meta
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(), // For selected row model
-    getFacetedRowModel: getFacetedRowModel(), // For potential future filtering
-    getFacetedUniqueValues: getFacetedUniqueValues(), // For potential future filtering
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
   });
@@ -285,3 +289,4 @@ export function SelectedContextsDataTable({
     </DndContext>
   );
 }
+

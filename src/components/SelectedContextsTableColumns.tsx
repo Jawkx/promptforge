@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, PREDEFINED_LABEL_COLORS } from "../types";
+import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types"; // Added GlobalLabel
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
+  // Function to resolve label IDs for a specific context
+  getResolvedLabels: (context: Context) => GlobalLabel[];
 };
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
@@ -64,14 +66,17 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "labels",
     header: "Labels",
-    cell: ({ row }) => {
-      const labels = row.original.labels;
-      if (!labels || labels.length === 0) {
+    // No accessorFn needed here if display is handled by cell; filtering would need it
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+      const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original) : [];
+
+      if (!resolvedLabels || resolvedLabels.length === 0) {
         return <span className="text-xs text-muted-foreground italic">No labels</span>;
       }
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
-          {labels.slice(0, 3).map((label) => { // Show max 3 labels, for example
+          {resolvedLabels.slice(0, 3).map((label) => {
             const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
             return (
               <span
@@ -83,7 +88,7 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
               </span>
             );
           })}
-          {labels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
+          {resolvedLabels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
         </div>
       );
     },
@@ -120,3 +125,4 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     maxSize: 60,
   },
 ];
+

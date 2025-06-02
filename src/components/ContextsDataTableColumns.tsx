@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, PREDEFINED_LABEL_COLORS } from "../types";
+import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types"; // Added GlobalLabel
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,8 @@ import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+  // Function to resolve label IDs to GlobalLabel objects
+  getResolvedLabels: (labelIds: string[]) => GlobalLabel[];
 };
 
 // Helper function to format character count
@@ -72,19 +74,30 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "labels",
     header: "Labels",
-    accessorFn: (row) => row.labels.map(l => l.text).join(" "), // For filtering
-    cell: ({ row }) => {
-      const labels = row.original.labels;
-      if (!labels || labels.length === 0) {
+    // AccessorFn for filtering: joins resolved label texts.
+    accessorFn: (row, index) => {
+      const tableMeta = row.table.options.meta as ContextsTableMeta | undefined;
+      if (tableMeta?.getResolvedLabels) {
+        const resolved = tableMeta.getResolvedLabels(row.labels);
+        return resolved.map(l => l.text).join(" ");
+      }
+      return "";
+    },
+    cell: ({ row, table }) => {
+      // Use meta function to resolve label IDs to GlobalLabel objects
+      const tableMeta = table.options.meta as ContextsTableMeta | undefined;
+      const resolvedLabels = tableMeta?.getResolvedLabels ? tableMeta.getResolvedLabels(row.original.labels) : [];
+
+      if (!resolvedLabels || resolvedLabels.length === 0) {
         return <span className="text-xs text-muted-foreground italic">No labels</span>;
       }
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-hidden">
-          {labels.map((label) => {
+          {resolvedLabels.map((label) => {
             const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
             return (
               <span
-                key={label.id}
+                key={label.id} // Use global label ID as key
                 title={label.text}
                 className={`px-1.5 py-0.5 rounded-full text-xs font-medium border truncate ${colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500'}`}
               >
@@ -153,3 +166,4 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     enableSorting: false,
   },
 ];
+

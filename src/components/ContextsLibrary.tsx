@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { Context } from "../types";
+import { Context, GlobalLabel } from "../types"; // Added GlobalLabel
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
-import { getContextsTableColumns } from "./ContextsDataTableColumns";
+import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableColumns"; // Added ContextsTableMeta
 
 interface ContextsLibraryProps {
   contexts: Context[];
@@ -17,6 +17,8 @@ interface ContextsLibraryProps {
   isFocused: boolean;
   onFocus: () => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
+  // For resolving label IDs to GlobalLabel objects for the table
+  getResolvedLabels: (labelIds: string[]) => GlobalLabel[];
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
@@ -29,11 +31,20 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   isFocused,
   onFocus,
   onAddSelectedToPrompt,
+  getResolvedLabels, // Destructure new prop
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
+  // Pass getResolvedLabels to table meta
+  const tableMeta: ContextsTableMeta = {
+    onEditContext,
+    onDeleteContext,
+    getResolvedLabels,
+  };
+
   const columns = React.useMemo(() => getContextsTableColumns(), []);
+
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {
@@ -74,8 +85,10 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       <ContextsDataTable
         columns={columns}
         data={contexts}
-        onEditContext={onEditContext}
-        onDeleteContext={onDeleteContext}
+        // Pass the extended tableMeta here
+        tableMeta={tableMeta}
+        onEditContext={onEditContext} // Kept for compatibility if table directly uses them, but meta is preferred
+        onDeleteContext={onDeleteContext} // Kept for compatibility
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
@@ -91,3 +104,4 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 };
 
 export default ContextsLibrary;
+

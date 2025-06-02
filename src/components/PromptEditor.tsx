@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useContexts } from "../hooks/useContexts";
-import { Context, ContextCreationData } from "../types";
+import { Context, ContextFormData, GlobalLabel } from "../types"; // Added GlobalLabel
 import PromptInput from "./PromptInput";
 import ContextsLibrary from "./ContextsLibrary";
 import AddContextModal from "./AddContextModal";
@@ -39,10 +39,14 @@ const PromptEditor: React.FC = () => {
     deleteContext,
     deleteMultipleContexts,
     removeContextFromPrompt,
-    removeMultipleSelectedContextsFromPrompt, // Import new hook function
+    removeMultipleSelectedContextsFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
+    // Label-related functions from useContexts
+    getAllGlobalLabels,
+    getGlobalLabelById,
+    getResolvedContextLabels,
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -100,14 +104,14 @@ const PromptEditor: React.FC = () => {
     setContextsToDeleteIds([]);
   };
 
-  const handleSaveNewContext = (newContextData: ContextCreationData) => {
+  const handleSaveNewContext = (newContextData: ContextFormData) => {
     const success = addContext(newContextData);
     if (success) {
       setAddModalOpen(false);
     }
   };
 
-  const handleSaveEdit = (updatedContextData: Context) => {
+  const handleSaveEdit = (updatedContextData: ContextFormData) => {
     const success = updateContext(updatedContextData);
     if (success) {
       setEditModalOpen(false);
@@ -173,7 +177,9 @@ const PromptEditor: React.FC = () => {
               onCopyPromptAndContextsClick={handleCopy}
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
               onReorderContexts={reorderSelectedContexts}
-              onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt} // Pass handler
+              onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
+              // Pass label-related data/functions to PromptInput if needed for display
+              getResolvedLabelsForContext={getResolvedContextLabels}
             />
           </div>
         </ResizablePanel>
@@ -193,6 +199,8 @@ const PromptEditor: React.FC = () => {
             isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
             onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
             onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
+            // Pass the function to resolve label IDs for the table
+            getResolvedLabels={getResolvedContextLabels}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -201,6 +209,7 @@ const PromptEditor: React.FC = () => {
         isOpen={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={handleSaveNewContext}
+        allGlobalLabels={getAllGlobalLabels()}
       />
       {editingContext && (
         <EditContextModal
@@ -211,6 +220,8 @@ const PromptEditor: React.FC = () => {
           }}
           onSave={handleSaveEdit}
           context={editingContext}
+          allGlobalLabels={getAllGlobalLabels()}
+          getGlobalLabelById={getGlobalLabelById}
         />
       )}
       <AlertDialog
@@ -269,3 +280,4 @@ const PromptEditor: React.FC = () => {
 };
 
 export default PromptEditor;
+

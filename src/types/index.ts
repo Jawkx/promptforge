@@ -8,7 +8,8 @@ export const PREDEFINED_LABEL_COLORS = [
 
 export type LabelColorValue = typeof PREDEFINED_LABEL_COLORS[number]['value'];
 
-export interface ContextLabel {
+// Represents a globally unique label definition
+export interface GlobalLabel {
   id: string;
   text: string;
   color: LabelColorValue;
@@ -18,12 +19,18 @@ export interface Context {
   id: string;
   title: string;
   content: string;
-  labels: ContextLabel[];
+  labels: string[]; // Array of GlobalLabel IDs
 }
 
-export type ContextCreationData = Omit<Context, "id" | "labels"> & {
-  labels: Omit<ContextLabel, "id">[];
+// Data structure for forms when creating or updating a context.
+// Labels are full GlobalLabel objects; their IDs might be existing global IDs or temporary client-side IDs.
+export type ContextFormData = {
+  id?: string; // Present when updating, undefined when creating
+  title: string;
+  content: string;
+  labels: GlobalLabel[];
 };
+
 
 export interface PromptEditorProps {
   onCopySuccess?: () => void;
@@ -32,5 +39,16 @@ export interface PromptEditorProps {
 export interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newContext: ContextCreationData) => void;
+  onSave: (newContextData: ContextFormData) => void;
+  allGlobalLabels: GlobalLabel[];
 }
+
+export interface EditContextModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (updatedContextData: ContextFormData) => void;
+  context: Context | null; // Context being edited (contains label IDs)
+  allGlobalLabels: GlobalLabel[];
+  getGlobalLabelById: (id: string) => GlobalLabel | undefined;
+}
+

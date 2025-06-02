@@ -1,11 +1,11 @@
 import React from "react";
-import { Context } from "../types";
+import { Context, GlobalLabel } from "../types"; // Added GlobalLabel
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
-import { getSelectedContextsTableColumns } from "./SelectedContextsTableColumns";
+import { getSelectedContextsTableColumns, SelectedContextsTableMeta } from "./SelectedContextsTableColumns"; // Added SelectedContextsTableMeta
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 
 export interface PromptInputProps {
@@ -16,7 +16,8 @@ export interface PromptInputProps {
   onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
   onReorderContexts: (reorderedContexts: Context[]) => void;
-  onDeleteMultipleFromPrompt: (ids: string[]) => void; // Added prop
+  onDeleteMultipleFromPrompt: (ids: string[]) => void;
+  getResolvedLabelsForContext: (context: Context) => GlobalLabel[]; // For selected contexts table
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
@@ -27,12 +28,22 @@ const PromptInput: React.FC<PromptInputProps> = ({
   onCopyPromptAndContextsClick,
   onFocus,
   onReorderContexts,
-  onDeleteMultipleFromPrompt, // Destructure prop
+  onDeleteMultipleFromPrompt,
+  getResolvedLabelsForContext, // Destructure new prop
 }) => {
+
+  // Prepare meta for SelectedContextsDataTable
+  const selectedContextsTableMeta: SelectedContextsTableMeta = {
+    onRemoveContext,
+    // Resolve labels for each context in the selected list for display in its table
+    getResolvedLabels: (context: Context) => getResolvedLabelsForContext(context),
+  };
+
   const selectedContextsColumns = React.useMemo(
     () => getSelectedContextsTableColumns(),
     [],
   );
+
 
   return (
     <ResizablePanelGroup onClick={onFocus} direction="vertical">
@@ -60,9 +71,10 @@ const PromptInput: React.FC<PromptInputProps> = ({
           <SelectedContextsDataTable
             columns={selectedContextsColumns}
             data={selectedContexts}
-            onRemoveContext={onRemoveContext}
+            tableMeta={selectedContextsTableMeta} // Pass tableMeta
+            onRemoveContext={onRemoveContext} // Can be removed if only using meta
             onReorderContexts={onReorderContexts}
-            onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt} // Pass prop
+            onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
           />
         ) : (
           <div className="flex-grow flex items-center justify-center border border-muted rounded-md">
@@ -87,3 +99,4 @@ const PromptInput: React.FC<PromptInputProps> = ({
 };
 
 export default PromptInput;
+
