@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, ContextFormData, GlobalLabel, PREDEFINED_LABEL_COLORS, LabelColorValue } from "../types";
+import { Context, ContextFormData, GlobalLabel, LabelColorValue } from "../types";
 import { useToast, ToastOptions } from "./use-toast";
 import { Content } from "@tiptap/react";
 
 const LOCAL_STORAGE_KEYS = {
   CONTEXTS: "promptForge_contexts",
-  GLOBAL_LABELS: "promptForge_globalLabels", // New key for global labels
+  GLOBAL_LABELS: "promptForge_globalLabels",
   PROMPT: "promptForge_prompt",
   SELECTED_CONTEXTS: "promptForge_selectedContexts",
 };
@@ -131,7 +131,7 @@ export const useContexts = () => {
         LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
       );
       const parsed = storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
-      return parsed.map((c: Context) => ({ ...c, id: String(c.id) }));
+      return parsed.map((c: Context) => ({ ...c, id: String(c.id), labels: c.labels || [] })); // Ensure labels is an array
     } catch (error) {
       console.error("Error loading selected contexts from local storage:", error);
       return [];
@@ -179,22 +179,19 @@ export const useContexts = () => {
 
   const getGlobalLabelById = useCallback((id: string) => globalLabels.find(gl => gl.id === id), [globalLabels]);
 
-  const getResolvedContextLabels = useCallback((context: Context | null): GlobalLabel[] => {
-    if (!context) return [];
-    return context.labels.map(labelId => getGlobalLabelById(labelId)).filter(Boolean) as GlobalLabel[];
+  // Changed to accept labelIds directly
+  const getResolvedLabelsByIds = useCallback((labelIds: string[] | undefined): GlobalLabel[] => {
+    if (!labelIds || !Array.isArray(labelIds)) return [];
+    return labelIds.map(labelId => getGlobalLabelById(labelId)).filter(Boolean) as GlobalLabel[];
   }, [getGlobalLabelById]);
 
 
-  // Manages global labels, ensuring uniqueness by text (case-insensitive)
-  // and updating color if a label with the same text but different color is added.
-  // Returns the final GlobalLabel (either existing or newly created/updated).
   const findOrCreateGlobalLabel = useCallback((labelText: string, labelColor: LabelColorValue): GlobalLabel => {
     const normalizedText = labelText.trim().toLowerCase();
     const existingLabel = globalLabels.find(gl => gl.text.toLowerCase() === normalizedText);
 
     if (existingLabel) {
       if (existingLabel.color !== labelColor) {
-        // Update color of existing label
         setGlobalLabels(prevGlobalLabels =>
           prevGlobalLabels.map(gl =>
             gl.id === existingLabel!.id ? { ...gl, color: labelColor } : gl
@@ -205,7 +202,6 @@ export const useContexts = () => {
       }
       return existingLabel;
     } else {
-      // Create new global label
       const newGlobalLabel: GlobalLabel = {
         id: generateId(),
         text: labelText.trim(),
@@ -221,18 +217,15 @@ export const useContexts = () => {
     const existingLabelById = globalLabels.find(gl => gl.id === updatedLabel.id);
     if (!existingLabelById) {
       console.error("Attempted to update non-existent global label by ID:", updatedLabel.id);
-      // Fallback: try to find by text or create new
       return findOrCreateGlobalLabel(updatedLabel.text, updatedLabel.color);
     }
 
-    // Check if another label with the new text already exists (excluding current label)
     const conflictingLabelByText = globalLabels.find(gl => gl.text.toLowerCase() === updatedLabel.text.trim().toLowerCase() && gl.id !== updatedLabel.id);
     if (conflictingLabelByText) {
       toast({ title: "Label Exists", description: `A label with text "${updatedLabel.text.trim()}" already exists. Choose a different name.`, variant: "destructive" });
-      return existingLabelById; // Return original label to prevent change
+      return existingLabelById;
     }
 
-    // No conflict, proceed with update
     const newGlobalLabels = globalLabels.map(gl =>
       gl.id === updatedLabel.id ? { ...gl, text: updatedLabel.text.trim(), color: updatedLabel.color } : gl
     );
@@ -260,25 +253,21 @@ export const useContexts = () => {
       }
 
       const labelIdsForContext: string[] = formData.labels.map(labelInput => {
-        // If labelInput has a valid global ID, it means it was an existing global label selected in the modal.
-        // If its text/color was edited in the modal, updateGlobalLabelDefinition would handle it.
-        // Otherwise, it's a new label from the modal (temp ID or no ID).
         const existingGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
-        if (existingGlobalLabel) { // It's an existing global label, potentially edited
+        if (existingGlobalLabel) {
           const updatedGlobal = updateGlobalLabelDefinition(labelInput);
           return updatedGlobal!.id;
         }
-        // It's a new label text/color combo from the modal
         const globalLabel = findOrCreateGlobalLabel(labelInput.text, labelInput.color);
         return globalLabel.id;
-      }).filter((id, index, self) => self.indexOf(id) === index); // Ensure unique IDs
+      }).filter((id, index, self) => self.indexOf(id) === index);
 
 
       const newContext: Context = {
         id: generateId(),
         title: titleToUse,
         content: formData.content.trim(),
-        labels: labelIdsForContext,
+        labels: labelIdsForContext || [], // Ensure labels is an array
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       showContextOperationNotification(toast, "Added", newContext.title);
@@ -322,23 +311,20 @@ export const useContexts = () => {
       const labelIdsForContext: string[] = formData.labels.map(labelInput => {
         const knownGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
         if (knownGlobalLabel) {
-          // User might have edited text/color of an existing global label via this context
           const updatedGlobalLabel = updateGlobalLabelDefinition(labelInput);
-          return updatedGlobalLabel!.id; // Use the ID of the (potentially updated) global label
+          return updatedGlobalLabel!.id;
         } else {
-          // This label was newly created in the modal (had a temp ID or no ID)
-          // Or it's an old label whose ID is no longer in globalLabels (shouldn't happen if managed well)
           const globalLabel = findOrCreateGlobalLabel(labelInput.text, labelInput.color);
           return globalLabel.id;
         }
-      }).filter((id, index, self) => self.indexOf(id) === index); // Ensure unique IDs
+      }).filter((id, index, self) => self.indexOf(id) === index);
 
 
       const updatedContext: Context = {
         id: contextId,
         title: formData.title.trim(),
         content: formData.content.trim(),
-        labels: labelIdsForContext,
+        labels: labelIdsForContext || [], // Ensure labels is an array
       };
 
       setContexts((prevContexts) =>
@@ -348,7 +334,7 @@ export const useContexts = () => {
       );
       setSelectedContexts((prevSelectedContexts) =>
         prevSelectedContexts.map((context) =>
-          context.id === updatedContext.id ? updatedContext : context, // Keep selected contexts in sync if they are edited
+          context.id === updatedContext.id ? updatedContext : context,
         ),
       );
       showContextOperationNotification(toast, "Updated", updatedContext.title);
@@ -399,10 +385,11 @@ export const useContexts = () => {
         prevSelectedContexts.filter((context) => context.id !== id),
       );
       if (removedContext) {
-        showContextOperationNotification(toast, "RemovedFromPrompt", getGlobalLabelById(removedContext.labels[0])?.text || removedContext.title); // Example: show first label or title
+        const firstLabelText = getResolvedLabelsByIds(removedContext.labels)[0]?.text;
+        showContextOperationNotification(toast, "RemovedFromPrompt", firstLabelText || removedContext.title);
       }
     },
-    [selectedContexts, toast, getGlobalLabelById], // Added getGlobalLabelById dependency
+    [selectedContexts, toast, getResolvedLabelsByIds],
   );
 
   const removeMultipleSelectedContextsFromPrompt = useCallback(
@@ -423,7 +410,7 @@ export const useContexts = () => {
 
   const copyPromptWithContexts = useCallback(() => {
     const contextsText = selectedContexts
-      .map((context) => `# ${context.title}\n${context.content}`) // Assuming selectedContexts are full Context objects
+      .map((context) => `# ${context.title}\n${context.content}`)
       .join("\n\n");
 
     const fullText = prompt ? `${prompt}\n\n${contextsText}` : contextsText;
@@ -456,12 +443,11 @@ export const useContexts = () => {
 
   const addContextToPrompt = useCallback(
     (context: Context) => {
-      // Ensure context added to prompt is the full Context object, not just IDs
-      const contextWithStrId = { ...context, id: String(context.id) };
+      const contextWithStrId = { ...context, id: String(context.id), labels: context.labels || [] }; // Ensure labels is array
       if (!selectedContexts.some((c) => c.id === contextWithStrId.id)) {
         setSelectedContexts((prevSelectedContexts) => [
           ...prevSelectedContexts,
-          contextWithStrId, // Add the full context object
+          contextWithStrId,
         ]);
         showContextOperationNotification(toast, "Selected", contextWithStrId.title);
       } else {
@@ -476,14 +462,14 @@ export const useContexts = () => {
   );
 
   const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {
-    setSelectedContexts(reorderedContexts.map(c => ({ ...c, id: String(c.id) })));
+    setSelectedContexts(reorderedContexts.map(c => ({ ...c, id: String(c.id), labels: c.labels || [] }))); // Ensure labels is array
   }, []);
 
   return {
-    contexts, // These are Context[] with label IDs
+    contexts,
     prompt,
     setPrompt,
-    selectedContexts, // These are full Context[] used in the prompt
+    selectedContexts,
     addContext,
     addContextFromPaste,
     updateContext,
@@ -494,11 +480,8 @@ export const useContexts = () => {
     addContextToPrompt,
     reorderSelectedContexts,
     deleteMultipleContexts,
-    // Label specific functions
     getAllGlobalLabels,
     getGlobalLabelById,
-    getResolvedContextLabels,
-    // updateGlobalLabelDefinition, // Expose if direct global label editing UI is added later
+    getResolvedLabelsByIds, // Changed name for clarity
   };
 };
-

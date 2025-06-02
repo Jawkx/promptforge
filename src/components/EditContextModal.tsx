@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Context, ContextFormData, PREDEFINED_LABEL_COLORS, LabelColorValue, GlobalLabel } from "../types";
+import { Context, ContextFormData, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,7 +59,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
         .filter(Boolean) as GlobalLabel[];
       labelManager.initializeLabels(resolvedInitialLabels, allGlobalLabels);
     }
-  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager]);
+  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]);
 
   if (!isOpen || !context) return null;
 
@@ -138,4 +138,3 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 };
 
 export default EditContextModal;
-

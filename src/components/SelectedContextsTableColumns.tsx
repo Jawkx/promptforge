@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types"; // Added GlobalLabel
+import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
@@ -7,15 +7,14 @@ import { cn } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
-  // Function to resolve label IDs for a specific context
-  getResolvedLabels: (context: Context) => GlobalLabel[];
+  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[]; // Matches PromptInput and useContexts
 };
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     id: "drag",
     header: () => null,
-    cell: () => null, // Drag handle is rendered by DraggableRow component
+    cell: () => null,
     size: 30,
     minSize: 30,
     maxSize: 30,
@@ -66,10 +65,10 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "labels",
     header: "Labels",
-    // No accessorFn needed here if display is handled by cell; filtering would need it
     cell: ({ row, table }) => {
       const meta = table.options.meta as SelectedContextsTableMeta | undefined;
-      const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original) : [];
+      // Pass row.original.labels (which is string[] | undefined)
+      const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original.labels) : [];
 
       if (!resolvedLabels || resolvedLabels.length === 0) {
         return <span className="text-xs text-muted-foreground italic">No labels</span>;
@@ -125,4 +124,3 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     maxSize: 60,
   },
 ];
-

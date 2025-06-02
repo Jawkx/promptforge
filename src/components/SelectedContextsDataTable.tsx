@@ -5,10 +5,10 @@ import {
   getCoreRowModel,
   useReactTable,
   Row,
-  RowSelectionState, // Added import
+  RowSelectionState,
   getFilteredRowModel,
-  getFacetedRowModel, // Added for potential future use
-  getFacetedUniqueValues, // Added for potential future use
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 import {
   DndContext,
@@ -48,14 +48,14 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuLabel,
-  ContextMenuSeparator,
+  // ContextMenuSeparator, // Unused import
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<Context>[];
   data: Context[];
-  tableMeta: SelectedContextsTableMeta; // Changed from onRemoveContext to tableMeta
+  tableMeta: SelectedContextsTableMeta;
   onReorderContexts: (reorderedContexts: Context[]) => void;
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
 }
@@ -115,7 +115,7 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
             }
           }}
         >
-          {row.getVisibleCells().map((cell, idx) => (
+          {row.getVisibleCells().map((cell) => ( // Removed unused 'idx'
             <TableCell
               key={cell.id}
               className={cn("py-2",
@@ -174,13 +174,12 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
 export function SelectedContextsDataTable({
   columns: initialColumns,
   data,
-  tableMeta, // Changed from onRemoveContext to tableMeta
+  tableMeta,
   onReorderContexts,
   onDeleteMultipleFromPrompt,
 }: SelectedContextsDataTableProps) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
-  // Extend tableMeta with onDeleteMultipleFromPrompt for DraggableRow context menu
   const extendedTableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } = {
     ...tableMeta,
     onDeleteMultipleFromPrompt,
@@ -205,7 +204,7 @@ export function SelectedContextsDataTable({
     state: {
       rowSelection,
     },
-    meta: extendedTableMeta, // Pass the extended meta
+    meta: extendedTableMeta,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -289,4 +288,3 @@ export function SelectedContextsDataTable({
     </DndContext>
   );
 }
-

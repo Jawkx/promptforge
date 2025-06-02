@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types"; // Added GlobalLabel
+import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +14,9 @@ import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
-  // Function to resolve label IDs to GlobalLabel objects
-  getResolvedLabels: (labelIds: string[]) => GlobalLabel[];
+  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[]; // Updated to accept string[] | undefined
 };
 
-// Helper function to format character count
 const formatCharCount = (count: number): string => {
   if (count < 1000) {
     return String(count);
@@ -74,18 +72,18 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "labels",
     header: "Labels",
-    // AccessorFn for filtering: joins resolved label texts.
-    accessorFn: (row, index) => {
+    accessorFn: (row) => {
       const tableMeta = row.table.options.meta as ContextsTableMeta | undefined;
       if (tableMeta?.getResolvedLabels) {
+        // Pass row.labels (which is string[] | undefined)
         const resolved = tableMeta.getResolvedLabels(row.labels);
         return resolved.map(l => l.text).join(" ");
       }
       return "";
     },
     cell: ({ row, table }) => {
-      // Use meta function to resolve label IDs to GlobalLabel objects
       const tableMeta = table.options.meta as ContextsTableMeta | undefined;
+      // Pass row.original.labels (which is string[] | undefined)
       const resolvedLabels = tableMeta?.getResolvedLabels ? tableMeta.getResolvedLabels(row.original.labels) : [];
 
       if (!resolvedLabels || resolvedLabels.length === 0) {
@@ -97,7 +95,7 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
             const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
             return (
               <span
-                key={label.id} // Use global label ID as key
+                key={label.id}
                 title={label.text}
                 className={`px-1.5 py-0.5 rounded-full text-xs font-medium border truncate ${colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500'}`}
               >
@@ -166,4 +164,3 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
     enableSorting: false,
   },
 ];
-

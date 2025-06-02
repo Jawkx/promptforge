@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ContextFormData, PREDEFINED_LABEL_COLORS, LabelColorValue, GlobalLabel } from "../types";
+import { ContextFormData, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -47,7 +47,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
       // Reset label manager with current global labels, and empty initial context labels
       labelManager.initializeLabels([], allGlobalLabels);
     }
-  }, [isOpen, allGlobalLabels, labelManager]);
+  }, [isOpen, allGlobalLabels, labelManager.initializeLabels]);
 
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -137,4 +137,3 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 };
 
 export default AddContextModal;
-

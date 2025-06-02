@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 interface ContextsDataTableProps {
   columns: ColumnDef<Context>[];
   data: Context[];
+  tableMeta: ContextsTableMeta; // Added to pass getResolvedLabels
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
@@ -52,6 +53,7 @@ interface ContextsDataTableProps {
 export function ContextsDataTable({
   columns,
   data,
+  tableMeta: providedTableMeta, // Renamed to avoid conflict
   onEditContext,
   onDeleteContext,
   onDeleteSelectedContexts,
@@ -65,9 +67,12 @@ export function ContextsDataTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
 
+  // Combine providedTableMeta with other meta properties if needed
+  // For now, it seems providedTableMeta is complete for what columns need.
   const tableMeta: ContextsTableMeta = {
-    onEditContext,
-    onDeleteContext,
+    ...providedTableMeta, // Includes getResolvedLabels
+    onEditContext,       // Still needed by column actions
+    onDeleteContext,     // Still needed by column actions
   };
 
   const table = useReactTable({
@@ -96,22 +101,20 @@ export function ContextsDataTable({
         pageSize: 10,
       },
     },
-    onGlobalFilterChange: setSearchQuery, // Connects table's global filter state back to searchQuery
+    onGlobalFilterChange: setSearchQuery,
   });
 
-  // This effect syncs the external searchQuery to the table's global filter state.
   React.useEffect(() => {
     table.setGlobalFilter(searchQuery);
   }, [searchQuery, table]);
 
-
-  const handleAddSelectedButtonClick = () => {
-    const selectedRowsData = table.getFilteredSelectedRowModel().rows.map(row => row.original);
-    if (selectedRowsData.length > 0) {
-      onAddSelectedToPrompt(selectedRowsData);
-      table.resetRowSelection();
-    }
-  };
+  // const handleAddSelectedButtonClick = () => { // This was unused
+  //   const selectedRowsData = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+  //   if (selectedRowsData.length > 0) {
+  //     onAddSelectedToPrompt(selectedRowsData);
+  //     table.resetRowSelection();
+  //   }
+  // };
 
   const handleAddSelectedFromContextMenu = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -141,8 +144,8 @@ export function ContextsDataTable({
         <LucideSearch className="text-primary mr-4" />
         <Input
           placeholder="Filter contexts by title, content, or labels..."
-          value={searchQuery} // Controlled by external state
-          onChange={(event) => setSearchQuery(event.target.value)} // Updates external state
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
           className="h-9 "
         />
       </div>
@@ -157,7 +160,7 @@ export function ContextsDataTable({
                       key={header.id}
                       colSpan={header.colSpan}
                       className={cn("py-2 sticky top-0 bg-background z-10", idx === 0 ? "pl-3" : "px-2")}
-                      style={{ width: header.getSize() === 0 || header.getSize() === 150 ? undefined : header.getSize() }} // 150 is default from tanstack
+                      style={{ width: header.getSize() === 0 || header.getSize() === 150 ? undefined : header.getSize() }}
                     >
                       {header.isPlaceholder
                         ? null
@@ -175,7 +178,7 @@ export function ContextsDataTable({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const context = row.original;
-                const meta = table.options.meta as ContextsTableMeta | undefined;
+                const metaFromTable = table.options.meta as ContextsTableMeta | undefined;
                 const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
 
                 return (
@@ -222,11 +225,11 @@ export function ContextsDataTable({
                             Delete {currentSelectedCount} contexts
                           </ContextMenuItem>
                           <ContextMenuSeparator />
-                          <ContextMenuItem onClick={() => meta?.onEditContext(context)} disabled>
+                          <ContextMenuItem onClick={() => metaFromTable?.onEditContext(context)} disabled>
                             <LucideEdit3 className="mr-2 h-4 w-4" />
                             Edit (select one)
                           </ContextMenuItem>
-                          <ContextMenuItem onClick={() => meta?.onDeleteContext(context.id)} disabled>
+                          <ContextMenuItem onClick={() => metaFromTable?.onDeleteContext(context.id)} disabled>
                             <LucideTrash2 className="mr-2 h-4 w-4" />
                             Delete (select one)
                           </ContextMenuItem>
@@ -237,13 +240,13 @@ export function ContextsDataTable({
                             <LucideListPlus className="mr-2 h-4 w-4" />
                             Add to Prompt
                           </ContextMenuItem>
-                          <ContextMenuItem onClick={() => meta?.onEditContext(context)}>
+                          <ContextMenuItem onClick={() => metaFromTable?.onEditContext(context)}>
                             <LucideEdit3 className="mr-2 h-4 w-4" />
                             Edit "{context.title}"
                           </ContextMenuItem>
                           <ContextMenuSeparator />
                           <ContextMenuItem
-                            onClick={() => meta?.onDeleteContext(context.id)}
+                            onClick={() => metaFromTable?.onDeleteContext(context.id)}
                             className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                           >
                             <LucideTrash2 className="mr-2 h-4 w-4" />
@@ -308,4 +311,3 @@ export function ContextsDataTable({
     </div>
   );
 }
-

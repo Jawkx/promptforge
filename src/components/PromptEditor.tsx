@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useContexts } from "../hooks/useContexts";
-import { Context, ContextFormData, GlobalLabel } from "../types"; // Added GlobalLabel
+import { Context, ContextFormData } from "../types";
 import PromptInput from "./PromptInput";
 import ContextsLibrary from "./ContextsLibrary";
 import AddContextModal from "./AddContextModal";
@@ -43,10 +43,9 @@ const PromptEditor: React.FC = () => {
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
-    // Label-related functions from useContexts
     getAllGlobalLabels,
     getGlobalLabelById,
-    getResolvedContextLabels,
+    getResolvedLabelsByIds,
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -178,8 +177,7 @@ const PromptEditor: React.FC = () => {
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
               onReorderContexts={reorderSelectedContexts}
               onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
-              // Pass label-related data/functions to PromptInput if needed for display
-              getResolvedLabelsForContext={getResolvedContextLabels}
+              getResolvedLabelsForContextByIds={getResolvedLabelsByIds} // Pass the correctly named function
             />
           </div>
         </ResizablePanel>
@@ -199,8 +197,7 @@ const PromptEditor: React.FC = () => {
             isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
             onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
             onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-            // Pass the function to resolve label IDs for the table
-            getResolvedLabels={getResolvedContextLabels}
+            getResolvedLabels={getResolvedLabelsByIds} // Pass the correctly named function
           />
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -280,4 +277,3 @@ const PromptEditor: React.FC = () => {
 };
 
 export default PromptEditor;
-

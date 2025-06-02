@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X as XIcon, PlusCircle, Edit3, Palette, Check, ChevronsUpDown } from "lucide-react";
+import { X as XIcon, PlusCircle, Palette, Check, ChevronsUpDown } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command";
@@ -199,7 +199,7 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-5 w-5" title={`Change color for "${label.text}"`}>
-                          <Palette className="h-3 w-3" style={{ color: label.color === "yellow" && PREDEFINED_LABEL_COLORS.find(c => c.value === "yellow") ? 'black' : label.color }} />
+                          <Palette className="h-3 w-3" style={{ color: label.color === "yellow" && PREDEFINED_LABEL_COLORS.find(c => c.value === "yellow") ? 'black' : label.color /* This is not ideal for general color mapping */ }} />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-1">
@@ -244,4 +244,3 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
 };
 
 export default LabelManagerUI;
-
