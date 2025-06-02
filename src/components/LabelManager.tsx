@@ -2,14 +2,6 @@ import React from "react";
 import { GlobalLabel, PREDEFINED_LABEL_COLORS, LabelColorValue } from "../types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { X as XIcon, Palette, Check } from "lucide-react"; // Removed PlusCircle, ChevronsUpDown
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "@/lib/utils";
