@@ -8,9 +8,7 @@ type OldToastProps = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   variant?: "default" | "destructive";
-  action?: ExternalToast["action"]; // Sonner's action type
-  // Allow any other props that Sonner's ExternalToast might accept
-  [key: string]: any;
+  action?: ExternalToast["action"];
 };
 
 function toast(props: OldToastProps) {

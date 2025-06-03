@@ -95,7 +95,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
             Modify the title, content, or labels of your context snippet.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
           <Input
             id="title"
             value={title}

@@ -40,7 +40,7 @@ const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
     return (
       <div
         className={cn(
-          "border-input dark:bg-input/30 flex min-h-10 w-full flex-wrap gap-2 rounded-md border bg-transparent px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50",
+          "border-input focus-within:border-white flex min-h-10 w-full flex-wrap items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
@@ -60,7 +60,7 @@ const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
           </Badge>
         ))}
         <input
-          className="placeholder:text-muted-foreground flex-1 outline-none"
+          className="placeholder:text-muted-foreground flex-1 bg-transparent outline-none"
           value={pendingDataPoint}
           onChange={(e) => setPendingDataPoint(e.target.value)}
           onKeyDown={(e) => {

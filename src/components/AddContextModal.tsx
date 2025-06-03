@@ -44,7 +44,6 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     if (isOpen) {
       setTitle("");
       setContent("");
-      // Reset label manager with current global labels, and empty initial context labels
       labelManager.initializeLabels([], allGlobalLabels);
     }
   }, [isOpen, allGlobalLabels, labelManager.initializeLabels]);
@@ -94,7 +93,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
           <Input
             id="title"
             value={title}
