@@ -1,9 +1,9 @@
 import React from "react";
-import { GlobalLabel, PREDEFINED_LABEL_COLORS, LabelColorValue } from "../types";
+import { GlobalLabel, LabelColorValue } from "../types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X as XIcon, Palette, Check } from "lucide-react"; // Removed PlusCircle, ChevronsUpDown
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { X as XIcon, Check } from "lucide-react"; // Removed Palette, PlusCircle, ChevronsUpDown
+// Removed Popover, PopoverContent, PopoverTrigger as they are no longer needed for color picking
 import { cn } from "@/lib/utils";
 import { TagInput, type Tag as EmblorTag } from "emblor"; // Assuming Emblor is installed
 
@@ -15,7 +15,7 @@ interface LabelManagerUIProps {
   // Callback to remove a label from the current context
   onRemoveLabelFromContext: (labelId: string) => void;
 
-  // For new label color selection
+  // For new label color selection (will be used for data, not visually distinct)
   newLabelColor: LabelColorValue;
   setNewLabelColor: (color: LabelColorValue) => void;
 
@@ -44,6 +44,7 @@ const LabelChip: React.FC<{
 
   const handleSaveEdit = () => {
     if (editText.trim() && editText.trim() !== globalLabel.text) {
+      // Color is not changed here, only text. The original color from globalLabel is preserved.
       onUpdate({ ...globalLabel, text: editText.trim() });
     }
     setIsEditingText(false);
@@ -54,17 +55,13 @@ const LabelChip: React.FC<{
     setIsEditingText(false);
   };
 
-  const handleColorChange = (newColor: LabelColorValue) => {
-    onUpdate({ ...globalLabel, color: newColor });
-  };
-
-  const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === globalLabel.color);
+  // Standardized style for all labels
+  const chipStyle = "flex items-center justify-between gap-1 text-xs p-1 rounded-md border border-border text-foreground bg-transparent";
 
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-1 text-xs p-1 rounded-md border",
-        colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500',
+        chipStyle,
         isActiveTag ? 'ring-2 ring-ring ring-offset-1 ring-offset-background' : ''
       )}
     >
@@ -95,30 +92,6 @@ const LabelChip: React.FC<{
       )}
 
       <div className="flex items-center">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-5 w-5 hover:bg-transparent" title={`Change color for "${globalLabel.text}"`}>
-              <Palette className="h-3 w-3" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-1">
-            <div className="flex gap-1">
-              {PREDEFINED_LABEL_COLORS.map(colorOpt => (
-                <Button
-                  key={colorOpt.value}
-                  variant="outline"
-                  size="icon"
-                  className={`h-6 w-6 rounded-full border-2 ${globalLabel.color === colorOpt.value ? 'border-primary' : 'border-transparent'}`}
-                  style={{ backgroundColor: PREDEFINED_LABEL_COLORS.find(c => c.value === colorOpt.value)?.twBgClass.replace('bg-', '') }}
-                  onClick={() => handleColorChange(colorOpt.value)}
-                  title={colorOpt.name}
-                >
-                  {globalLabel.color === colorOpt.value && <Check className="h-3 w-3" style={{ color: globalLabel.color === 'yellow' ? 'black' : 'white' }} />}
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
         <Button
           type="button"
           variant="ghost"
@@ -139,7 +112,7 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
   currentContextLabels,
   onUpdateLabelDetails,
   onRemoveLabelFromContext,
-  newLabelColor,
+  newLabelColor, // This will be used by createTemporaryLabel for data, not for visual distinction
   availableGlobalLabels,
   createTemporaryLabel,
   replaceAllCurrentContextLabels,
@@ -162,20 +135,23 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
       const existingInContext = currentContextLabels.find(gl => gl.id === emblorTag.id);
 
       if (existingInContext) {
-        updatedGlobalLabels.push({ ...existingInContext, text: emblorTag.text }); // Keep color
+        // If text changed in Emblor, update it, keep original color
+        updatedGlobalLabels.push({ ...existingInContext, text: emblorTag.text });
       } else {
-        const existingGlobalMatch = allGlobalLabels.find(gl => gl.id === emblorTag.id && gl.text === emblorTag.text);
-        if (existingGlobalMatch) {
-          updatedGlobalLabels.push(existingGlobalMatch);
+        // Check if it's a known global label being added
+        const existingGlobalMatchByIdAndText = allGlobalLabels.find(gl => gl.id === emblorTag.id && gl.text.toLowerCase() === emblorTag.text.toLowerCase());
+        if (existingGlobalMatchByIdAndText) {
+          updatedGlobalLabels.push(existingGlobalMatchByIdAndText);
         } else {
-          const tempLabel = createTemporaryLabel(emblorTag.text, newLabelColor);
+          // If it's a new tag created via Emblor input (likely has a temporary client ID from Emblor or is just text)
+          // Or if it's a global tag whose text was modified to something new
+          const tempLabel = createTemporaryLabel(emblorTag.text, newLabelColor); // newLabelColor is the default from useLabelManager
           updatedGlobalLabels.push(tempLabel);
         }
       }
     });
     replaceAllCurrentContextLabels(updatedGlobalLabels);
   };
-
 
   return (
     <>
@@ -187,8 +163,8 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
         placeholder="Add or create labels..."
         enableAutocomplete
         autocompleteOptions={availableGlobalLabels.map(gl => ({ id: gl.id, text: gl.text }))}
-        restrictTagsToAutocompleteOptions={false} // Allow creating new tags
-        draggable={true} // Enable drag and drop reordering
+        restrictTagsToAutocompleteOptions={false}
+        draggable={true}
         addOnPaste={true}
         styleClasses={{
           input: "h-8 text-sm",
@@ -196,7 +172,19 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
         }}
         customTagRenderer={(tag, isActive) => {
           const globalLabel = currentContextLabels.find(gl => gl.id === tag.id);
-          if (!globalLabel) return null;
+          if (!globalLabel) {
+            console.warn("LabelChip: Could not find full GlobalLabel for tag id:", tag.id, "text:", tag.text);
+            const tempDisplayLabel: GlobalLabel = { id: tag.id, text: tag.text, color: newLabelColor };
+            return (
+              <LabelChip
+                key={tag.id}
+                globalLabel={tempDisplayLabel}
+                isActiveTag={isActive}
+                onUpdate={onUpdateLabelDetails} // This will eventually update currentContextLabels
+                onRemove={onRemoveLabelFromContext}
+              />
+            );
+          }
           return (
             <LabelChip
               key={globalLabel.id}

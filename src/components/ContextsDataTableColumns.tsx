@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types";
+import { Context, GlobalLabel } from "../types"; // Removed PREDEFINED_LABEL_COLORS as it's not used for styling here
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,9 @@ const formatCharCount = (count: number): string => {
   const num = Math.floor(count / 1_000_000);
   return `${num}M`;
 };
+
+// Standardized style for all labels in tables
+const tableLabelStyle = "px-1.5 py-0.5 rounded-full text-xs font-medium border truncate border-border text-foreground bg-transparent";
 
 export const getContextsTableColumns = (): ColumnDef<Context>[] => [
   {
@@ -92,12 +95,11 @@ export const getContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-hidden">
           {resolvedLabels.map((label) => {
-            const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
             return (
               <span
                 key={label.id}
                 title={label.text}
-                className={`px-1.5 py-0.5 rounded-full text-xs font-medium border truncate ${colorInfo?.twChipClass || 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500'}`}
+                className={tableLabelStyle}
               >
                 {label.text}
               </span>
