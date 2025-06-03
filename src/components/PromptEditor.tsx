@@ -10,7 +10,6 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,13 +28,14 @@ const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 
 const PromptEditor: React.FC = () => {
   const {
-    contexts,
+    contexts, // Library contexts
     prompt,
     setPrompt,
-    selectedContexts,
+    selectedContexts, // Selected context copies
     addContext,
     addContextFromPaste,
-    updateContext,
+    updateContextInLibrary, // Renamed from updateContext
+    updateSelectedContext,  // New function for selected copies
     deleteContext,
     deleteMultipleContexts,
     removeContextFromPrompt,
@@ -49,8 +49,15 @@ const PromptEditor: React.FC = () => {
   } = useContexts();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingContext, setEditingContext] = useState<Context | null>(null);
+
+  // State for editing library contexts
+  const [editLibraryModalOpen, setEditLibraryModalOpen] = useState(false);
+  const [editingLibraryContext, setEditingLibraryContext] = useState<Context | null>(null);
+
+  // State for editing selected contexts
+  const [editSelectedModalOpen, setEditSelectedModalOpen] = useState(false);
+  const [editingSelectedContext, setEditingSelectedContext] = useState<Context | null>(null);
+
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
     null,
@@ -58,7 +65,6 @@ const PromptEditor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] = useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
 
-  const { toast } = useToast();
   const [focusedArea, setFocusedArea] = useState<string>(
     FOCUSED_PANE_PROMPT_INPUT,
   );
@@ -71,9 +77,16 @@ const PromptEditor: React.FC = () => {
     setAddModalOpen(true);
   };
 
-  const handleEditContext = (context: Context) => {
-    setEditingContext(context);
-    setEditModalOpen(true);
+  // Handler for initiating edit of a library context
+  const handleEditLibraryContext = (context: Context) => {
+    setEditingLibraryContext(context);
+    setEditLibraryModalOpen(true);
+  };
+
+  // Handler for initiating edit of a selected context copy
+  const handleEditSelectedContext = (context: Context) => {
+    setEditingSelectedContext(context);
+    setEditSelectedModalOpen(true);
   };
 
   const handleDeleteContextRequest = (id: string) => {
@@ -83,7 +96,7 @@ const PromptEditor: React.FC = () => {
 
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
-      deleteContext(contextToDeleteId);
+      deleteContext(contextToDeleteId); // Deletes from library only
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
@@ -97,57 +110,49 @@ const PromptEditor: React.FC = () => {
 
   const confirmDeleteMultipleContexts = () => {
     if (contextsToDeleteIds.length > 0) {
-      deleteMultipleContexts(contextsToDeleteIds);
+      deleteMultipleContexts(contextsToDeleteIds); // Deletes from library only
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
   };
 
   const handleSaveNewContext = (newContextData: ContextFormData) => {
-    const success = addContext(newContextData);
+    const success = addContext(newContextData); // Adds to library
     if (success) {
       setAddModalOpen(false);
     }
   };
 
-  const handleSaveEdit = (updatedContextData: ContextFormData) => {
-    const success = updateContext(updatedContextData);
+  // Handler for saving edits to a library context
+  const handleSaveLibraryEdit = (updatedContextData: ContextFormData) => {
+    const success = updateContextInLibrary(updatedContextData);
     if (success) {
-      setEditModalOpen(false);
-      setEditingContext(null);
+      setEditLibraryModalOpen(false);
+      setEditingLibraryContext(null);
     }
   };
 
+  // Handler for saving edits to a selected context copy
+  const handleSaveSelectedEdit = (updatedContextData: ContextFormData) => {
+    const success = updateSelectedContext(updatedContextData);
+    if (success) {
+      setEditSelectedModalOpen(false);
+      setEditingSelectedContext(null);
+    }
+  };
+
+
   const handlePasteToLibrary = (pastedText: string) => {
-    addContextFromPaste(pastedText);
+    addContextFromPaste(pastedText); // Adds to library
   };
 
   const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
-    let countAdded = 0;
+    // `contextsToAdd` are from the library. `addContextToPrompt` creates copies.
     contextsToAdd.forEach(context => {
-      const alreadySelected = selectedContexts.some(sc => sc.id === context.id);
-      if (!alreadySelected) {
-        addContextToPrompt(context);
-        countAdded++;
-      }
+      addContextToPrompt(context);
     });
-
-    if (contextsToAdd.length > 1) {
-      if (countAdded > 0) {
-        toast({
-          title: "Contexts Processed",
-          description: `${countAdded} new context(s) added to prompt. ${contextsToAdd.length - countAdded > 0 ? `${contextsToAdd.length - countAdded} were already selected.` : ''}`,
-        });
-      } else {
-        toast({
-          title: "No New Contexts Added",
-          description: `All selected contexts were already in the prompt.`,
-          variant: "default",
-        });
-      }
-    } else if (contextsToAdd.length === 1 && countAdded === 0) {
-      // Single item was already selected, addContextToPrompt handles this toast
-    }
+    // Toasting for multiple items might be redundant if addContextToPrompt toasts individually.
+    // For simplicity, addContextToPrompt handles its own toast for each successful addition.
   };
 
   const handleDeleteMultipleSelectedFromPrompt = (ids: string[]) => {
@@ -172,7 +177,9 @@ const PromptEditor: React.FC = () => {
               value={prompt}
               onChange={setPrompt}
               selectedContexts={selectedContexts}
+              libraryContexts={contexts} // Pass library contexts for sync check
               onRemoveContext={removeContextFromPrompt}
+              onEditSelectedContext={handleEditSelectedContext} // Pass handler for editing selected
               onCopyPromptAndContextsClick={handleCopy}
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
               onReorderContexts={reorderSelectedContexts}
@@ -190,14 +197,14 @@ const PromptEditor: React.FC = () => {
           <ContextsLibrary
             contexts={contexts}
             onAddContextButtonClick={handleAddContextButtonClick}
-            onEditContext={handleEditContext}
+            onEditContext={handleEditLibraryContext} // This edits library contexts
             onDeleteContext={handleDeleteContextRequest}
             onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
             onPasteToAdd={handlePasteToLibrary}
             isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
             onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
             onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-            getResolvedLabels={getResolvedLabelsByIds} // Pass the correctly named function
+            getResolvedLabels={getResolvedLabelsByIds}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -208,15 +215,30 @@ const PromptEditor: React.FC = () => {
         onSave={handleSaveNewContext}
         allGlobalLabels={getAllGlobalLabels()}
       />
-      {editingContext && (
+      {/* Edit Modal for Library Contexts */}
+      {editingLibraryContext && (
         <EditContextModal
-          isOpen={editModalOpen}
+          isOpen={editLibraryModalOpen}
           onClose={() => {
-            setEditModalOpen(false);
-            setEditingContext(null);
+            setEditLibraryModalOpen(false);
+            setEditingLibraryContext(null);
           }}
-          onSave={handleSaveEdit}
-          context={editingContext}
+          onSave={handleSaveLibraryEdit}
+          context={editingLibraryContext}
+          allGlobalLabels={getAllGlobalLabels()}
+          getGlobalLabelById={getGlobalLabelById}
+        />
+      )}
+      {/* Edit Modal for Selected Context Copies */}
+      {editingSelectedContext && (
+        <EditContextModal
+          isOpen={editSelectedModalOpen}
+          onClose={() => {
+            setEditSelectedModalOpen(false);
+            setEditingSelectedContext(null);
+          }}
+          onSave={handleSaveSelectedEdit}
+          context={editingSelectedContext}
           allGlobalLabels={getAllGlobalLabels()}
           getGlobalLabelById={getGlobalLabelById}
         />
@@ -235,7 +257,7 @@ const PromptEditor: React.FC = () => {
               context "
               {contexts.find((c) => c.id === contextToDeleteId)?.title ||
                 "this context"}
-              " from the library.
+              " from the library. Copies in the selected list will remain but become orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -259,7 +281,7 @@ const PromptEditor: React.FC = () => {
             </AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete{" "}
-              {contextsToDeleteIds.length} context(s) from the library.
+              {contextsToDeleteIds.length} context(s) from the library. Copies in the selected list will remain but become orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

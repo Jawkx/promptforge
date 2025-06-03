@@ -1,22 +1,24 @@
 import React from "react";
-import { Context, GlobalLabel } from "../types"; // Added GlobalLabel
+import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
-import { getSelectedContextsTableColumns, SelectedContextsTableMeta } from "./SelectedContextsTableColumns"; // Added SelectedContextsTableMeta
+import { getSelectedContextsTableColumns, SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 
 export interface PromptInputProps {
   value: Content;
   onChange: (value: Content) => void;
-  selectedContexts: Context[];
-  onRemoveContext: (id: string) => void;
+  selectedContexts: Context[]; // These are copies with unique IDs and originalId
+  libraryContexts: Context[]; // Full library for sync checks
+  onRemoveContext: (id: string) => void; // id is unique ID of selected copy
+  onEditSelectedContext: (context: Context) => void; // To edit a selected copy
   onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
   onReorderContexts: (reorderedContexts: Context[]) => void;
-  onDeleteMultipleFromPrompt: (ids: string[]) => void;
+  onDeleteMultipleFromPrompt: (ids: string[]) => void; // ids are unique IDs of selected copies
   getResolvedLabelsByIds: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
@@ -24,7 +26,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
   value,
   onChange,
   selectedContexts,
+  libraryContexts, // Received prop
   onRemoveContext,
+  onEditSelectedContext, // Received prop
   onCopyPromptAndContextsClick,
   onFocus,
   onReorderContexts,
@@ -32,10 +36,11 @@ const PromptInput: React.FC<PromptInputProps> = ({
   getResolvedLabelsByIds,
 }) => {
 
-  // Prepare meta for SelectedContextsDataTable
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
     getResolvedLabels: getResolvedLabelsByIds,
+    libraryContexts, // Pass library contexts for sync checks
+    onEditSelectedContext, // Pass handler for editing selected contexts
   };
 
   const selectedContextsColumns = React.useMemo(
@@ -70,7 +75,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
           <SelectedContextsDataTable
             columns={selectedContextsColumns}
             data={selectedContexts}
-            tableMeta={selectedContextsTableMeta} // Pass tableMeta
+            tableMeta={selectedContextsTableMeta}
             onReorderContexts={onReorderContexts}
             onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
           />

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
-import { LucidePlus } from "lucide-react"; // Updated Lucide import
+import { LucidePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
@@ -10,38 +10,37 @@ import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableC
 interface ContextsLibraryProps {
   contexts: Context[];
   onAddContextButtonClick: () => void;
-  onEditContext: (context: Context) => void;
+  onEditContext: (context: Context) => void; // For editing library contexts
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   onPasteToAdd: (pastedText: string) => void;
   isFocused: boolean;
   onFocus: () => void;
-  onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
-  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[]; // Changed parameter to string[] | undefined
+  onAddSelectedToPrompt: (selectedContexts: Context[]) => void; // Contexts from library to be copied
+  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   contexts,
   onAddContextButtonClick,
-  onEditContext,
+  onEditContext, // This is for library contexts
   onDeleteContext,
   onDeleteSelectedContexts,
   onPasteToAdd,
   isFocused,
   onFocus,
-  onAddSelectedToPrompt,
+  onAddSelectedToPrompt, // Contexts passed here are from the library
   getResolvedLabels,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const tableMeta: ContextsTableMeta = {
-    onEditContext,
+    onEditContext, // This callback is for editing library contexts
     onDeleteContext,
     getResolvedLabels,
   };
 
-  // Pass getResolvedLabels to getContextsTableColumns
   const columns = React.useMemo(() => getContextsTableColumns(getResolvedLabels), [getResolvedLabels]);
 
 
@@ -84,11 +83,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       <ContextsDataTable
         columns={columns}
         data={contexts}
-        tableMeta={tableMeta}
-        onEditContext={onEditContext}
+        tableMeta={tableMeta} // Meta for library context table
+        onEditContext={onEditContext} // Propagated for library context edits
         onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
-        onAddSelectedToPrompt={onAddSelectedToPrompt}
+        onAddSelectedToPrompt={onAddSelectedToPrompt} // To add copies to selected list
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
       />

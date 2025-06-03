@@ -28,7 +28,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, LucideTrash, LucideListX } from "lucide-react";
+import { GripVertical, LucideTrash, LucideListX, LucideEdit3 } from "lucide-react"; // Added LucideEdit3
 
 import {
   Table,
@@ -48,7 +48,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuLabel,
-  // ContextMenuSeparator, // Unused import
+  ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +89,12 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
     table.resetRowSelection();
   };
 
+  const handleEditSelected = () => {
+    if (meta?.onEditSelectedContext) {
+      meta.onEditSelectedContext(row.original);
+    }
+  };
+
   const handleDeleteMultiple = () => {
     const selectedIds = table.getFilteredSelectedRowModel().rows.map(r => r.original.id);
     meta?.onDeleteMultipleFromPrompt?.(selectedIds);
@@ -110,12 +116,17 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
               table.resetRowSelection();
               row.toggleSelected(true);
             } else if (!row.getIsSelected() && currentSelectedCount > 1) {
+              // If multiple are selected and this row is not part of them,
+              // deselect others and select this one.
+              // Or, if user right-clicks an unselected row when multiple are selected,
+              // it's often expected to act on that single row.
               table.resetRowSelection();
               row.toggleSelected(true);
             }
+            // If right-clicking an already selected row within a multiple selection, keep selection.
           }}
         >
-          {row.getVisibleCells().map((cell) => ( // Removed unused 'idx'
+          {row.getVisibleCells().map((cell) => (
             <TableCell
               key={cell.id}
               className={cn("py-2",
@@ -152,10 +163,20 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
               <LucideTrash className="mr-2 h-4 w-4" />
               Remove {currentSelectedCount} from Prompt
             </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={handleEditSelected} disabled>
+              <LucideEdit3 className="mr-2 h-4 w-4" />
+              Edit (select one)
+            </ContextMenuItem>
           </>
         ) : (
           <>
             <ContextMenuLabel>Context: {row.original.title}</ContextMenuLabel>
+            <ContextMenuItem onClick={handleEditSelected}>
+              <LucideEdit3 className="mr-2 h-4 w-4" />
+              Edit Context
+            </ContextMenuItem>
+            <ContextMenuSeparator />
             <ContextMenuItem
               onClick={handleRemoveFromPrompt}
               className="text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -174,12 +195,13 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
 export function SelectedContextsDataTable({
   columns: initialColumns,
   data,
-  tableMeta,
+  tableMeta, // This already includes libraryContexts and onEditSelectedContext from PromptInput
   onReorderContexts,
   onDeleteMultipleFromPrompt,
 }: SelectedContextsDataTableProps) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
+  // Extend tableMeta passed down to rows/cells if needed for additional actions like delete multiple
   const extendedTableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } = {
     ...tableMeta,
     onDeleteMultipleFromPrompt,
@@ -204,13 +226,13 @@ export function SelectedContextsDataTable({
     state: {
       rowSelection,
     },
-    meta: extendedTableMeta,
+    meta: extendedTableMeta, // Pass the fully typed meta
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getRowId: (row) => row.id,
+    getRowId: (row) => row.id, // Crucial for dnd-kit and selection state with unique IDs
     enableRowSelection: true,
   });
 

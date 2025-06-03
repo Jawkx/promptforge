@@ -5,6 +5,7 @@ export interface GlobalLabel {
 
 export interface Context {
   id: string;
+  originalId?: string;
   title: string;
   content: string;
   labels: string[];
@@ -33,8 +34,7 @@ export interface EditContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedContextData: ContextFormData) => void;
-  context: Context | null;
+  context: Context | null; // Can be a library context or a selected context copy
   allGlobalLabels: GlobalLabel[];
   getGlobalLabelById: (id: string) => GlobalLabel | undefined;
 }
-

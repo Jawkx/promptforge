@@ -1,14 +1,24 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel } from "../types"; // Removed PREDEFINED_LABEL_COLORS
+import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X } from "lucide-react";
+import { X, CircleSlash } from "lucide-react"; // Added CircleSlash
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
   getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
+  libraryContexts: Context[]; // To access original contexts for sync check
+  onEditSelectedContext: (context: Context) => void; // To trigger edit modal
+};
+
+// Helper to compare labels arrays (order-insensitive)
+const areLabelsSame = (labelsA: string[], labelsB: string[]): boolean => {
+  if (labelsA.length !== labelsB.length) return false;
+  const sortedA = [...labelsA].sort();
+  const sortedB = [...labelsB].sort();
+  return sortedA.every((val, index) => val === sortedB[index]);
 };
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
@@ -52,11 +62,39 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const selectedCopy = row.original;
+      const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+      let isOutOfSync = false;
+
+      if (selectedCopy.originalId && meta?.libraryContexts) {
+        const originalLibraryContext = meta.libraryContexts.find(
+          (libCtx) => libCtx.id === selectedCopy.originalId
+        );
+
+        if (originalLibraryContext) {
+          const titleChanged = selectedCopy.title !== originalLibraryContext.title;
+          const contentChanged = selectedCopy.content !== originalLibraryContext.content;
+          const labelsChanged = !areLabelsSame(selectedCopy.labels, originalLibraryContext.labels);
+
+          if (titleChanged || contentChanged || labelsChanged) {
+            isOutOfSync = true;
+          }
+        }
+        // If originalLibraryContext is not found (orphaned), it's not "out of sync" in the sense of being edited.
+        // It just has no original to compare against. No icon shown for this case.
+      }
+
       return (
-        <div className="flex items-center">
-          <span className="font-medium truncate" title={row.getValue("title")}>
-            {row.getValue("title")}
+        <div className="flex items-center gap-2">
+          {isOutOfSync && (
+            <CircleSlash
+              className="h-4 w-4 text-orange-500 flex-shrink-0"
+              title="Modified: This context differs from its original in the library."
+            />
+          )}
+          <span className="font-medium truncate" title={selectedCopy.title}>
+            {selectedCopy.title}
           </span>
         </div>
       );
@@ -76,12 +114,11 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
           {resolvedLabels.slice(0, 3).map((label) => {
-            // Removed colorInfo and twChipClass logic
             return (
               <Badge
                 key={label.id}
                 title={label.text}
-                variant="outline" // Using default outline variant
+                variant="outline"
                 className="truncate"
               >
                 {label.text}
@@ -125,4 +162,3 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     maxSize: 60,
   },
 ];
-
