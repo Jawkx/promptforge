@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { Context, GlobalLabel } from "../types"; // Added GlobalLabel
+import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { LucidePlus } from "lucide-react"; // Updated Lucide import
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
-import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableColumns"; // Added ContextsTableMeta
+import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableColumns";
 
 interface ContextsLibraryProps {
   contexts: Context[];
@@ -17,8 +17,7 @@ interface ContextsLibraryProps {
   isFocused: boolean;
   onFocus: () => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
-  // For resolving label IDs to GlobalLabel objects for the table
-  getResolvedLabels: (labelIds: string[]) => GlobalLabel[];
+  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[]; // Changed parameter to string[] | undefined
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
@@ -31,19 +30,19 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   isFocused,
   onFocus,
   onAddSelectedToPrompt,
-  getResolvedLabels, // Destructure new prop
+  getResolvedLabels,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  // Pass getResolvedLabels to table meta
   const tableMeta: ContextsTableMeta = {
     onEditContext,
     onDeleteContext,
     getResolvedLabels,
   };
 
-  const columns = React.useMemo(() => getContextsTableColumns(), []);
+  // Pass getResolvedLabels to getContextsTableColumns
+  const columns = React.useMemo(() => getContextsTableColumns(getResolvedLabels), [getResolvedLabels]);
 
 
   const handlePaste = useCallback(
@@ -85,10 +84,9 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       <ContextsDataTable
         columns={columns}
         data={contexts}
-        // Pass the extended tableMeta here
         tableMeta={tableMeta}
-        onEditContext={onEditContext} // Kept for compatibility if table directly uses them, but meta is preferred
-        onDeleteContext={onDeleteContext} // Kept for compatibility
+        onEditContext={onEditContext}
+        onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
@@ -96,7 +94,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       />
 
       <Button variant="default" onClick={onAddContextButtonClick}>
-        <Plus className="mr-2 h-4 w-4" />
+        <LucidePlus className="mr-2 h-4 w-4" />
         Add Context
       </Button>
     </div>
@@ -104,4 +102,3 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 };
 
 export default ContextsLibrary;
-
