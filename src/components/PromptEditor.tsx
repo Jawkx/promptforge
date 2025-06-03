@@ -177,7 +177,7 @@ const PromptEditor: React.FC = () => {
               onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
               onReorderContexts={reorderSelectedContexts}
               onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
-              getResolvedLabelsForContextByIds={getResolvedLabelsByIds} // Pass the correctly named function
+              getResolvedLabelsByIds={getResolvedLabelsByIds}
             />
           </div>
         </ResizablePanel>
