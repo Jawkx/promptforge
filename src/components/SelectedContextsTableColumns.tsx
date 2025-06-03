@@ -1,16 +1,15 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel } from "../types"; // Removed PREDEFINED_LABEL_COLORS import
+import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
-  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[]; // Matches PromptInput and useContexts
+  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
 };
-
-const tableLabelStyle = "px-1.5 py-0.5 rounded-full text-xs font-medium border truncate border-border text-foreground bg-transparent";
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
@@ -78,15 +77,16 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
           {resolvedLabels.slice(0, 3).map((label) => {
-            // const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color); // Removed color logic
+            const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
             return (
-              <span
+              <Badge
                 key={label.id}
                 title={label.text}
-                className={tableLabelStyle} // Apply generic, non-colored style
+                variant="outline"
+                className={cn(colorInfo?.twChipClass, "truncate")}
               >
                 {label.text}
-              </span>
+              </Badge>
             );
           })}
           {resolvedLabels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
