@@ -15,6 +15,19 @@ const initialGlobalLabels: GlobalLabel[] = [];
 
 const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
+const generateContextHash = (title: string, content: string, labelIds: string[]): string => {
+  const sortedLabelsString = [...(labelIds || [])].sort().join(',');
+  const dataString = JSON.stringify({ title, content, labels: sortedLabelsString });
+
+  let hash = 5381;
+  for (let i = 0; i < dataString.length; i++) {
+    const char = dataString.charCodeAt(i);
+    hash = ((hash << 5) + hash) + char; /* hash * 33 + char */
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return String(hash >>> 0); // Ensure positive integer string
+};
+
 const getNextUntitledTitle = (existingContexts: Context[]): string => {
   let title: string;
   let counter =
@@ -112,9 +125,13 @@ export const useContexts = () => {
   const [contexts, setContexts] = useState<Context[]>(() => {
     try {
       const storedContexts = localStorage.getItem(LOCAL_STORAGE_KEYS.CONTEXTS);
-      // Ensure no originalId for library contexts for backward compatibility or clean state
       const parsed = storedContexts ? JSON.parse(storedContexts) : initialContexts;
-      return parsed.map((c: any) => ({ ...c, originalId: undefined, labels: c.labels || [] }));
+      return parsed.map((c: any) => ({
+        ...c,
+        originalId: undefined,
+        labels: c.labels || [],
+        contentHash: c.contentHash || generateContextHash(c.title, c.content, c.labels || [])
+      }));
     } catch (error) {
       console.error("Error loading contexts from local storage:", error);
       return initialContexts;
@@ -139,8 +156,12 @@ export const useContexts = () => {
         LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
       );
       const parsed = storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
-      // Ensure selected contexts have own ID and labels array, originalId might exist
-      return parsed.map((c: Context) => ({ ...c, id: c.id || generateId(), labels: c.labels || [] }));
+      return parsed.map((c: Context) => ({
+        ...c,
+        id: c.id || generateId(),
+        labels: c.labels || [],
+        contentHash: c.contentHash || generateContextHash(c.title, c.content, c.labels || [])
+      }));
     } catch (error) {
       console.error("Error loading selected contexts from local storage:", error);
       return [];
@@ -234,6 +255,9 @@ export const useContexts = () => {
     );
     setGlobalLabels(newGlobalLabels);
     showContextOperationNotification(toast, "LabelUpdated", trimmedText);
+    // Note: Updating a global label's text does not automatically update contentHashes of contexts using it.
+    // The hash is based on label IDs. The visual display will change, but sync status for this specific change won't trigger via hash.
+    // This is a design choice for simplicity of the hash.
     return newGlobalLabels.find(gl => gl.id === updatedLabel.id)!;
 
   }, [globalLabels, toast, findOrCreateGlobalLabel]);
@@ -265,13 +289,13 @@ export const useContexts = () => {
         return globalLabel.id;
       }).filter((id, index, self) => self.indexOf(id) === index);
 
-
+      const content = formData.content.trim();
       const newContext: Context = {
         id: generateId(),
-        // originalId is undefined for library contexts
         title: titleToUse,
-        content: formData.content.trim(),
+        content: content,
         labels: labelIdsForContext || [],
+        contentHash: generateContextHash(titleToUse, content, labelIdsForContext || []),
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       showContextOperationNotification(toast, "Added", newContext.title);
@@ -285,10 +309,10 @@ export const useContexts = () => {
       const title = getNextUntitledTitle(contexts);
       const newContext: Context = {
         id: generateId(),
-        // originalId is undefined for library contexts
         title,
         content,
         labels: [],
+        contentHash: generateContextHash(title, content, []),
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       showContextOperationNotification(toast, "Added", newContext.title, "default", `Context "${newContext.title}" (from paste) has been added.`);
@@ -310,10 +334,11 @@ export const useContexts = () => {
         return false;
       }
 
-      if (contexts.some(c => c.id !== contextId && c.title === formData.title.trim())) {
+      const newTitle = formData.title.trim();
+      if (contexts.some(c => c.id !== contextId && c.title === newTitle)) {
         toast({
           title: "Duplicate Title",
-          description: `A context with the title "${formData.title.trim()}" already exists in the library. Please choose a unique title.`,
+          description: `A context with the title "${newTitle}" already exists in the library. Please choose a unique title.`,
           variant: "destructive",
         });
         return false;
@@ -330,12 +355,14 @@ export const useContexts = () => {
         }
       }).filter((id, index, self) => self.indexOf(id) === index);
 
+      const newContent = formData.content.trim();
       const updatedContext: Context = {
-        ...libraryContextToUpdate, // Preserve originalId if it somehow existed (should be undefined)
+        ...libraryContextToUpdate,
         id: contextId,
-        title: formData.title.trim(),
-        content: formData.content.trim(),
+        title: newTitle,
+        content: newContent,
         labels: labelIdsForContext || [],
+        contentHash: generateContextHash(newTitle, newContent, labelIdsForContext || []),
       };
 
       setContexts((prevContexts) =>
@@ -343,7 +370,6 @@ export const useContexts = () => {
           context.id === updatedContext.id ? updatedContext : context,
         ),
       );
-      // No longer directly updates selectedContexts. Sync status will handle visual changes.
       showContextOperationNotification(toast, "Updated", updatedContext.title);
       return true;
     },
@@ -363,10 +389,7 @@ export const useContexts = () => {
         toast({ title: "Error", description: "Selected context not found for update.", variant: "destructive" });
         return false;
       }
-
-      // Optional: Check for title uniqueness within selectedContexts if needed
-      // if (selectedContexts.some(c => c.id !== selectedContextId && c.title === formData.title.trim())) { ... }
-
+      const newTitle = formData.title.trim();
       const labelIdsForContext: string[] = formData.labels.map(labelInput => {
         const knownGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
         if (knownGlobalLabel) {
@@ -378,11 +401,13 @@ export const useContexts = () => {
         }
       }).filter((id, index, self) => self.indexOf(id) === index);
 
+      const newContent = formData.content.trim();
       const updatedSelectedCopy: Context = {
-        ...selectedContextToUpdate, // Preserve originalId and its own unique id
-        title: formData.title.trim(),
-        content: formData.content.trim(),
+        ...selectedContextToUpdate,
+        title: newTitle,
+        content: newContent,
         labels: labelIdsForContext || [],
+        contentHash: generateContextHash(newTitle, newContent, labelIdsForContext || []),
       };
 
       setSelectedContexts((prevSelectedContexts) =>
@@ -398,16 +423,12 @@ export const useContexts = () => {
 
 
   const deleteContext = useCallback(
-    (id: string) => { // id is from the library context
+    (id: string) => {
       const contextToDelete = contexts.find((c) => c.id === id);
       if (contextToDelete) {
         setContexts((prevContexts) =>
           prevContexts.filter((context) => context.id !== id),
         );
-        // Selected contexts that were copies of this will become "orphaned"
-        // Their originalId will point to a non-existent ID.
-        // The UI (sync icon) should handle displaying this state if needed.
-        // No direct removal from selectedContexts here based on originalId.
         showContextOperationNotification(toast, "Deleted", contextToDelete.title, "destructive");
       }
     },
@@ -416,13 +437,12 @@ export const useContexts = () => {
 
 
   const deleteMultipleContexts = useCallback(
-    (ids: string[]) => { // ids are from the library contexts
+    (ids: string[]) => {
       const contextsToDelete = contexts.filter((c) => ids.includes(c.id));
       if (contextsToDelete.length > 0) {
         setContexts((prevContexts) =>
           prevContexts.filter((context) => !ids.includes(context.id)),
         );
-        // Similar to deleteContext, selected copies become orphaned.
         showContextOperationNotification(toast, "MultipleDeleted", String(contextsToDelete.length), "destructive");
       }
     },
@@ -431,7 +451,7 @@ export const useContexts = () => {
 
 
   const removeContextFromPrompt = useCallback(
-    (id: string) => { // id is the unique ID of the selected context copy
+    (id: string) => {
       const removedContext = selectedContexts.find((c) => c.id === id);
       setSelectedContexts((prevSelectedContexts) =>
         prevSelectedContexts.filter((context) => context.id !== id),
@@ -445,7 +465,7 @@ export const useContexts = () => {
   );
 
   const removeMultipleSelectedContextsFromPrompt = useCallback(
-    (ids: string[]) => { // ids are unique IDs of selected context copies
+    (ids: string[]) => {
       const currentSelectedCount = selectedContexts.length;
       const updatedSelectedContexts = selectedContexts.filter((context) => !ids.includes(context.id));
       setSelectedContexts(updatedSelectedContexts);
@@ -494,18 +514,14 @@ export const useContexts = () => {
   }, [prompt, selectedContexts, toast]);
 
   const addContextToPrompt = useCallback(
-    (libraryContext: Context) => { // Takes a context from the library
-      // Ensure it's not already selected based on originalId to prevent duplicate copies of the same library item *if desired*.
-      // Current requirement is to create a copy, so allowing multiple copies of same original is fine.
-      // If we wanted to prevent adding same original twice:
-      // if (selectedContexts.some(sc => sc.originalId === libraryContext.id)) { ... }
-
+    (libraryContext: Context) => {
       const newSelectedContextCopy: Context = {
-        id: generateId(), // New unique ID for the copy
-        originalId: libraryContext.id, // Reference to the original
+        id: generateId(),
+        originalId: libraryContext.id,
         title: libraryContext.title,
         content: libraryContext.content,
-        labels: [...libraryContext.labels], // Deep copy of label IDs
+        labels: [...libraryContext.labels],
+        contentHash: libraryContext.contentHash || generateContextHash(libraryContext.title, libraryContext.content, libraryContext.labels), // Use original's hash or recompute
       };
 
       setSelectedContexts((prevSelectedContexts) => [
@@ -514,16 +530,15 @@ export const useContexts = () => {
       ]);
       showContextOperationNotification(toast, "Selected", newSelectedContextCopy.title);
     },
-    [selectedContexts, toast], // Removed toast check for "already selected" as we create a new copy
+    [selectedContexts, toast],
   );
 
   const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {
-    // Ensure properties are maintained correctly, especially originalId
     setSelectedContexts(reorderedContexts.map(c => ({
       ...c,
       id: String(c.id),
       labels: c.labels || [],
-      // originalId should already be part of 'c' if it existed
+      // contentHash should already be part of 'c'
     })));
   }, []);
 

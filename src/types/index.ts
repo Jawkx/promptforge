@@ -9,6 +9,7 @@ export interface Context {
   title: string;
   content: string;
   labels: string[];
+  contentHash?: string;
 }
 
 export type ContextFormData = {
@@ -34,7 +35,7 @@ export interface EditContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedContextData: ContextFormData) => void;
-  context: Context | null; // Can be a library context or a selected context copy
+  context: Context | null;
   allGlobalLabels: GlobalLabel[];
   getGlobalLabelById: (id: string) => GlobalLabel | undefined;
 }

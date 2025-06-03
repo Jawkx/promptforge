@@ -2,24 +2,17 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, CircleSlash } from "lucide-react"; // Added CircleSlash
+import { X, CircleSlash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
   getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
-  libraryContexts: Context[]; // To access original contexts for sync check
-  onEditSelectedContext: (context: Context) => void; // To trigger edit modal
+  libraryContexts: Context[];
+  onEditSelectedContext: (context: Context) => void;
 };
 
-// Helper to compare labels arrays (order-insensitive)
-const areLabelsSame = (labelsA: string[], labelsB: string[]): boolean => {
-  if (labelsA.length !== labelsB.length) return false;
-  const sortedA = [...labelsA].sort();
-  const sortedB = [...labelsB].sort();
-  return sortedA.every((val, index) => val === sortedB[index]);
-};
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
@@ -73,16 +66,14 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
         );
 
         if (originalLibraryContext) {
-          const titleChanged = selectedCopy.title !== originalLibraryContext.title;
-          const contentChanged = selectedCopy.content !== originalLibraryContext.content;
-          const labelsChanged = !areLabelsSame(selectedCopy.labels, originalLibraryContext.labels);
-
-          if (titleChanged || contentChanged || labelsChanged) {
+          if (selectedCopy.contentHash && originalLibraryContext.contentHash) {
+            if (selectedCopy.contentHash !== originalLibraryContext.contentHash) {
+              isOutOfSync = true;
+            }
+          } else if (selectedCopy.contentHash && !originalLibraryContext.contentHash) {
             isOutOfSync = true;
           }
         }
-        // If originalLibraryContext is not found (orphaned), it's not "out of sync" in the sense of being edited.
-        // It just has no original to compare against. No icon shown for this case.
       }
 
       return (
@@ -90,7 +81,6 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
           {isOutOfSync && (
             <CircleSlash
               className="h-4 w-4 text-orange-500 flex-shrink-0"
-              title="Modified: This context differs from its original in the library."
             />
           )}
           <span className="font-medium truncate" title={selectedCopy.title}>
