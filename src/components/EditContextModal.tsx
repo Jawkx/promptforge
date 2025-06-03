@@ -59,7 +59,8 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
         .filter(Boolean) as GlobalLabel[];
       labelManager.initializeLabels(resolvedInitialLabels, allGlobalLabels);
     }
-  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]); // CORRECTED: Use .initializeLabels
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]);
 
   if (!isOpen || !context) return null;
 
@@ -105,11 +106,8 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 
           <LabelManagerUI
             currentContextLabels={labelManager.currentContextLabels}
-            onUpdateLabelDetails={labelManager.handleUpdateLabelDetailsInContext}
-            onRemoveLabelFromContext={labelManager.handleRemoveLabelFromContext}
-            newLabelColor={labelManager.newLabelColor}
-            setNewLabelColor={labelManager.setNewLabelColor}
-            availableGlobalLabels={labelManager.availableGlobalLabelsToSelect}
+            // onUpdateLabelDetails and onRemoveLabelFromContext are handled by InputTags via replaceAll...
+            // newLabelColor and setNewLabelColor removed
             createTemporaryLabel={labelManager.createTemporaryLabel}
             replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
             allGlobalLabels={allGlobalLabels}
@@ -137,3 +135,4 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 };
 
 export default EditContextModal;
+

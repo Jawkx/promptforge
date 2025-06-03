@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, ContextFormData, GlobalLabel, LabelColorValue } from "../types";
+import { Context, ContextFormData, GlobalLabel } from "../types";
 import { useToast, ToastOptions } from "./use-toast";
 import { Content } from "@tiptap/react";
 
@@ -117,7 +117,9 @@ export const useContexts = () => {
   const [globalLabels, setGlobalLabels] = useState<GlobalLabel[]>(() => {
     try {
       const storedGlobalLabels = localStorage.getItem(LOCAL_STORAGE_KEYS.GLOBAL_LABELS);
-      return storedGlobalLabels ? JSON.parse(storedGlobalLabels) : initialGlobalLabels;
+      // Ensure loaded labels conform to the new structure (no color)
+      const parsedLabels = storedGlobalLabels ? JSON.parse(storedGlobalLabels) : initialGlobalLabels;
+      return parsedLabels.map((label: any) => ({ id: label.id, text: label.text }));
     } catch (error) {
       console.error("Error loading global labels from local storage:", error);
       return initialGlobalLabels;
@@ -179,33 +181,22 @@ export const useContexts = () => {
 
   const getGlobalLabelById = useCallback((id: string) => globalLabels.find(gl => gl.id === id), [globalLabels]);
 
-  // Changed to accept labelIds directly
   const getResolvedLabelsByIds = useCallback((labelIds: string[] | undefined): GlobalLabel[] => {
     if (!labelIds || !Array.isArray(labelIds)) return [];
     return labelIds.map(labelId => getGlobalLabelById(labelId)).filter(Boolean) as GlobalLabel[];
   }, [getGlobalLabelById]);
 
 
-  const findOrCreateGlobalLabel = useCallback((labelText: string, labelColor: LabelColorValue): GlobalLabel => {
+  const findOrCreateGlobalLabel = useCallback((labelText: string): GlobalLabel => {
     const normalizedText = labelText.trim().toLowerCase();
     const existingLabel = globalLabels.find(gl => gl.text.toLowerCase() === normalizedText);
 
     if (existingLabel) {
-      if (existingLabel.color !== labelColor) {
-        setGlobalLabels(prevGlobalLabels =>
-          prevGlobalLabels.map(gl =>
-            gl.id === existingLabel!.id ? { ...gl, color: labelColor } : gl
-          )
-        );
-        showContextOperationNotification(toast, "LabelUpdated", existingLabel.text, "default", `Label "${existingLabel.text}" color updated.`);
-        return { ...existingLabel, color: labelColor };
-      }
       return existingLabel;
     } else {
       const newGlobalLabel: GlobalLabel = {
         id: generateId(),
         text: labelText.trim(),
-        color: labelColor,
       };
       setGlobalLabels(prevGlobalLabels => [...prevGlobalLabels, newGlobalLabel]);
       showContextOperationNotification(toast, "LabelAdded", newGlobalLabel.text);
@@ -217,20 +208,26 @@ export const useContexts = () => {
     const existingLabelById = globalLabels.find(gl => gl.id === updatedLabel.id);
     if (!existingLabelById) {
       console.error("Attempted to update non-existent global label by ID:", updatedLabel.id);
-      return findOrCreateGlobalLabel(updatedLabel.text, updatedLabel.color);
+      return findOrCreateGlobalLabel(updatedLabel.text);
     }
 
-    const conflictingLabelByText = globalLabels.find(gl => gl.text.toLowerCase() === updatedLabel.text.trim().toLowerCase() && gl.id !== updatedLabel.id);
+    const trimmedText = updatedLabel.text.trim();
+    const conflictingLabelByText = globalLabels.find(gl => gl.text.toLowerCase() === trimmedText.toLowerCase() && gl.id !== updatedLabel.id);
     if (conflictingLabelByText) {
-      toast({ title: "Label Exists", description: `A label with text "${updatedLabel.text.trim()}" already exists. Choose a different name.`, variant: "destructive" });
+      toast({ title: "Label Exists", description: `A label with text "${trimmedText}" already exists. Choose a different name.`, variant: "destructive" });
+      return existingLabelById; // Return original if conflict
+    }
+
+    // Only update if text actually changed
+    if (existingLabelById.text === trimmedText) {
       return existingLabelById;
     }
 
     const newGlobalLabels = globalLabels.map(gl =>
-      gl.id === updatedLabel.id ? { ...gl, text: updatedLabel.text.trim(), color: updatedLabel.color } : gl
+      gl.id === updatedLabel.id ? { ...gl, text: trimmedText } : gl
     );
     setGlobalLabels(newGlobalLabels);
-    showContextOperationNotification(toast, "LabelUpdated", updatedLabel.text.trim());
+    showContextOperationNotification(toast, "LabelUpdated", trimmedText);
     return newGlobalLabels.find(gl => gl.id === updatedLabel.id)!;
 
   }, [globalLabels, toast, findOrCreateGlobalLabel]);
@@ -253,12 +250,16 @@ export const useContexts = () => {
       }
 
       const labelIdsForContext: string[] = formData.labels.map(labelInput => {
+        // labelInput is { id: string, text: string }
         const existingGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
         if (existingGlobalLabel) {
-          const updatedGlobal = updateGlobalLabelDefinition(labelInput);
+          // If text differs, updateGlobalLabelDefinition will handle it.
+          // It now expects a GlobalLabel {id, text}.
+          const updatedGlobal = updateGlobalLabelDefinition({ id: labelInput.id, text: labelInput.text });
           return updatedGlobal!.id;
         }
-        const globalLabel = findOrCreateGlobalLabel(labelInput.text, labelInput.color);
+        // If not existing by ID (e.g. client-temp ID), create or find by text.
+        const globalLabel = findOrCreateGlobalLabel(labelInput.text);
         return globalLabel.id;
       }).filter((id, index, self) => self.indexOf(id) === index);
 
@@ -267,7 +268,7 @@ export const useContexts = () => {
         id: generateId(),
         title: titleToUse,
         content: formData.content.trim(),
-        labels: labelIdsForContext || [], // Ensure labels is an array
+        labels: labelIdsForContext || [],
       };
       setContexts((prevContexts) => [...prevContexts, newContext]);
       showContextOperationNotification(toast, "Added", newContext.title);
@@ -309,12 +310,15 @@ export const useContexts = () => {
       }
 
       const labelIdsForContext: string[] = formData.labels.map(labelInput => {
+        // labelInput is { id: string, text: string }
         const knownGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
         if (knownGlobalLabel) {
-          const updatedGlobalLabel = updateGlobalLabelDefinition(labelInput);
+          // If text differs, updateGlobalLabelDefinition will handle it.
+          const updatedGlobalLabel = updateGlobalLabelDefinition({ id: labelInput.id, text: labelInput.text });
           return updatedGlobalLabel!.id;
         } else {
-          const globalLabel = findOrCreateGlobalLabel(labelInput.text, labelInput.color);
+          // New label (client-temp ID) or text not matching existing ID's text
+          const globalLabel = findOrCreateGlobalLabel(labelInput.text);
           return globalLabel.id;
         }
       }).filter((id, index, self) => self.indexOf(id) === index);
@@ -324,7 +328,7 @@ export const useContexts = () => {
         id: contextId,
         title: formData.title.trim(),
         content: formData.content.trim(),
-        labels: labelIdsForContext || [], // Ensure labels is an array
+        labels: labelIdsForContext || [],
       };
 
       setContexts((prevContexts) =>
@@ -443,7 +447,7 @@ export const useContexts = () => {
 
   const addContextToPrompt = useCallback(
     (context: Context) => {
-      const contextWithStrId = { ...context, id: String(context.id), labels: context.labels || [] }; // Ensure labels is array
+      const contextWithStrId = { ...context, id: String(context.id), labels: context.labels || [] };
       if (!selectedContexts.some((c) => c.id === contextWithStrId.id)) {
         setSelectedContexts((prevSelectedContexts) => [
           ...prevSelectedContexts,
@@ -462,7 +466,7 @@ export const useContexts = () => {
   );
 
   const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {
-    setSelectedContexts(reorderedContexts.map(c => ({ ...c, id: String(c.id), labels: c.labels || [] }))); // Ensure labels is array
+    setSelectedContexts(reorderedContexts.map(c => ({ ...c, id: String(c.id), labels: c.labels || [] })));
   }, []);
 
   return {
@@ -482,6 +486,6 @@ export const useContexts = () => {
     deleteMultipleContexts,
     getAllGlobalLabels,
     getGlobalLabelById,
-    getResolvedLabelsByIds, // Changed name for clarity
+    getResolvedLabelsByIds,
   };
 };

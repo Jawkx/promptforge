@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types"; // Added PREDEFINED_LABEL_COLORS
+import { Context, GlobalLabel } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LucideMoreVertical, LucideEdit3, LucideTrash2 } from "lucide-react"; // Updated Lucide imports
-import { Badge } from "@/components/ui/badge"; // Added Badge import
-import { cn } from "@/lib/utils";
+import { LucideMoreVertical, LucideEdit3, LucideTrash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -31,7 +30,6 @@ const formatCharCount = (count: number): string => {
   return `${num}M`;
 };
 
-// Modified to accept getResolvedLabelsFunc as a parameter
 export const getContextsTableColumns = (
   getResolvedLabelsFunc: (labelIds: string[] | undefined) => GlobalLabel[]
 ): ColumnDef<Context>[] => [
@@ -77,8 +75,7 @@ export const getContextsTableColumns = (
     {
       accessorKey: "labels",
       header: "Labels",
-      // Updated accessorFn to use the passed getResolvedLabelsFunc
-      accessorFn: (context: Context) => { // context is the original row data (type Context)
+      accessorFn: (context: Context) => {
         if (getResolvedLabelsFunc) {
           const resolvedLabels = getResolvedLabelsFunc(context.labels);
           return resolvedLabels.map(l => l.text).join(" ");
@@ -95,13 +92,12 @@ export const getContextsTableColumns = (
         return (
           <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-hidden">
             {resolvedLabels.map((label) => {
-              const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
               return (
                 <Badge
                   key={label.id}
                   title={label.text}
                   variant="outline"
-                  className={cn(colorInfo?.twChipClass, "truncate")}
+                  className="truncate"
                 >
                   {label.text}
                 </Badge>
@@ -112,7 +108,7 @@ export const getContextsTableColumns = (
       },
       minSize: 150,
       maxSize: 300,
-      enableSorting: false, // Note: Sorting will be on the string of joined label texts
+      enableSorting: false,
     },
     {
       accessorFn: (row) => row.content.length,
@@ -168,3 +164,4 @@ export const getContextsTableColumns = (
       enableSorting: false,
     },
   ];
+

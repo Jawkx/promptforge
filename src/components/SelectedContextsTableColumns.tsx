@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel, PREDEFINED_LABEL_COLORS } from "../types";
+import { Context, GlobalLabel } from "../types"; // Removed PREDEFINED_LABEL_COLORS
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
@@ -68,7 +68,6 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     header: "Labels",
     cell: ({ row, table }) => {
       const meta = table.options.meta as SelectedContextsTableMeta | undefined;
-      // Pass row.original.labels (which is string[] | undefined)
       const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original.labels) : [];
 
       if (!resolvedLabels || resolvedLabels.length === 0) {
@@ -77,13 +76,13 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
       return (
         <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
           {resolvedLabels.slice(0, 3).map((label) => {
-            const colorInfo = PREDEFINED_LABEL_COLORS.find(c => c.value === label.color);
+            // Removed colorInfo and twChipClass logic
             return (
               <Badge
                 key={label.id}
                 title={label.text}
-                variant="outline"
-                className={cn(colorInfo?.twChipClass, "truncate")}
+                variant="outline" // Using default outline variant
+                className="truncate"
               >
                 {label.text}
               </Badge>
@@ -126,3 +125,4 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     maxSize: 60,
   },
 ];
+

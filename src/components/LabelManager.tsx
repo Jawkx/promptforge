@@ -1,18 +1,17 @@
 import React from "react";
-import { GlobalLabel, LabelColorValue } from "../types";
+import { GlobalLabel } from "../types";
 import { InputTags } from "@/components/ui/input-tags";
 
 interface LabelManagerUIProps {
   currentContextLabels: GlobalLabel[];
-  newLabelColor: LabelColorValue;
-  createTemporaryLabel: (text: string, color: LabelColorValue) => GlobalLabel;
+  createTemporaryLabel: (text: string) => GlobalLabel;
   replaceAllCurrentContextLabels: (newLabels: GlobalLabel[]) => void;
   allGlobalLabels: GlobalLabel[];
 }
 
 const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
   currentContextLabels,
-  newLabelColor,
+  // newLabelColor removed
   createTemporaryLabel,
   replaceAllCurrentContextLabels,
   allGlobalLabels,
@@ -25,28 +24,31 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
 
   const handleInputTagsChange = (updater: React.SetStateAction<string[]>) => {
     const newTagTexts = typeof updater === 'function'
-      ? updater(tagTextsForInput) // Pass current derived string[] as prevState
+      ? updater(tagTextsForInput)
       : updater;
 
     const updatedGlobalLabels: GlobalLabel[] = [];
     const addedTexts = new Set<string>();
 
     newTagTexts.forEach(text => {
-      if (addedTexts.has(text)) return;
+      if (addedTexts.has(text.trim().toLowerCase())) return;
+      const normalizedText = text.trim();
+      if (!normalizedText) return;
 
-      let labelToAdd: GlobalLabel | undefined = currentContextLabels.find(gl => gl.text === text);
+      let labelToAdd: GlobalLabel | undefined = currentContextLabels.find(gl => gl.text.toLowerCase() === normalizedText.toLowerCase());
 
       if (!labelToAdd) {
-        labelToAdd = allGlobalLabels.find(gl => gl.text.toLowerCase() === text.toLowerCase());
+        labelToAdd = allGlobalLabels.find(gl => gl.text.toLowerCase() === normalizedText.toLowerCase());
       }
 
       if (labelToAdd) {
-        updatedGlobalLabels.push(labelToAdd);
+        updatedGlobalLabels.push({ id: labelToAdd.id, text: labelToAdd.text });
       } else {
-        const tempLabel = createTemporaryLabel(text, newLabelColor);
+        // createTemporaryLabel no longer takes color
+        const tempLabel = createTemporaryLabel(normalizedText);
         updatedGlobalLabels.push(tempLabel);
       }
-      addedTexts.add(text);
+      addedTexts.add(normalizedText.toLowerCase());
     });
     replaceAllCurrentContextLabels(updatedGlobalLabels);
   };
@@ -55,9 +57,10 @@ const LabelManagerUI: React.FC<LabelManagerUIProps> = ({
     <InputTags
       value={tagTextsForInput}
       onChange={handleInputTagsChange}
-      placeholder="Add or create labels..."
+      placeholder="Add or create labels (e.g. bug, feature)"
     />
   );
 };
 
 export default LabelManagerUI;
+

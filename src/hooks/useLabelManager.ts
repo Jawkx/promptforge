@@ -1,20 +1,19 @@
 import { useState, useCallback, useEffect } from "react";
-import { GlobalLabel, LabelColorValue, PREDEFINED_LABEL_COLORS } from "../types";
+import { GlobalLabel } from "../types";
 import { useToast } from "./use-toast";
 
 const generateClientLabelId = () => `client-temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 interface UseLabelManagerArgs {
-  initialLabelsForContext: GlobalLabel[]; // Labels currently associated with the context
-  allGlobalLabels: GlobalLabel[]; // All available global labels
+  initialLabelsForContext: GlobalLabel[];
+  allGlobalLabels: GlobalLabel[];
 }
 
 export const useLabelManager = (args: UseLabelManagerArgs) => {
   const [currentContextLabels, setCurrentContextLabels] = useState<GlobalLabel[]>(args.initialLabelsForContext);
   const [availableGlobalLabelsToSelect, setAvailableGlobalLabelsToSelect] = useState<GlobalLabel[]>([]);
 
-  const [newLabelText, setNewLabelText] = useState(""); // Will be less used, Emblor handles input
-  const [newLabelColor, setNewLabelColor] = useState<LabelColorValue>(PREDEFINED_LABEL_COLORS[0].value);
+  const [newLabelText, setNewLabelText] = useState(""); // Maintained for potential direct use, though Emblor/InputTags is primary
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,17 +28,13 @@ export const useLabelManager = (args: UseLabelManagerArgs) => {
   }, [args.allGlobalLabels, currentContextLabels]);
 
 
-  const initializeLabels = useCallback((initialCtxLabels: GlobalLabel[], allGlbLabels: GlobalLabel[]) => {
+  const initializeLabels = useCallback((initialCtxLabels: GlobalLabel[]) => {
     setCurrentContextLabels(initialCtxLabels);
-    setNewLabelText(""); // Reset as Emblor will handle input
-    setNewLabelColor(PREDEFINED_LABEL_COLORS[0].value);
+    setNewLabelText("");
   }, []);
 
 
   const handleAddNewLabelToContext = useCallback(() => {
-    // This function is primarily for the old UI.
-    // With Emblor, new tags are typically created via its input and `setTags` or `onTagAdd`.
-    // We might adapt parts of this logic if needed, or rely on Emblor's callbacks.
     const text = newLabelText.trim();
     if (!text) {
       toast({ title: "Label text cannot be empty.", variant: "destructive" });
@@ -54,25 +49,19 @@ export const useLabelManager = (args: UseLabelManagerArgs) => {
 
     let labelToAdd: GlobalLabel;
     if (existingGlobalLabel) {
-      // If it exists globally, use its properties but potentially update color for this context's instance
-      // The global definition's color update should happen on save if this is a new color choice
-      labelToAdd = { ...existingGlobalLabel, color: newLabelColor };
-      if (existingGlobalLabel.color !== newLabelColor) {
-        toast({ title: "Info", description: `Label "${text}" exists globally. Color will be ${newLabelColor === existingGlobalLabel.color ? 'kept as global' : 'set to ' + newLabelColor + ' for this context (and potentially globally upon save)'}.` });
-      }
+      labelToAdd = { ...existingGlobalLabel }; // Use existing global label (id and text)
     } else {
       // New label text, create with a temporary client ID
-      labelToAdd = { id: generateClientLabelId(), text, color: newLabelColor };
+      labelToAdd = { id: generateClientLabelId(), text };
     }
 
     setCurrentContextLabels(prev => [...prev, labelToAdd]);
     setNewLabelText(""); // Clear input
-  }, [newLabelText, newLabelColor, currentContextLabels, args.allGlobalLabels, toast]);
+  }, [newLabelText, currentContextLabels, args.allGlobalLabels, toast]);
 
   const handleSelectGlobalLabelForContext = useCallback((globalLabel: GlobalLabel) => {
     if (!currentContextLabels.some(l => l.id === globalLabel.id || l.text.toLowerCase() === globalLabel.text.toLowerCase())) {
-      // Ensure the selected global label uses its defined color, not necessarily newLabelColor
-      setCurrentContextLabels(prev => [...prev, { ...globalLabel }]);
+      setCurrentContextLabels(prev => [...prev, { ...globalLabel }]); // globalLabel is now {id, text}
     } else {
       toast({ title: "Label already selected", description: `Label "${globalLabel.text}" is already part of this context.`, variant: "default" });
     }
@@ -84,58 +73,55 @@ export const useLabelManager = (args: UseLabelManagerArgs) => {
   }, []);
 
   const handleUpdateLabelDetailsInContext = useCallback((updatedLabel: GlobalLabel) => {
+    // updatedLabel is {id, text}
     const otherLabels = currentContextLabels.filter(l => l.id !== updatedLabel.id);
     if (otherLabels.some(l => l.text.toLowerCase() === updatedLabel.text.trim().toLowerCase())) {
       toast({ title: "Duplicate Label Text", description: `Another label in this context already has the text "${updatedLabel.text.trim()}".`, variant: "destructive" });
-      // Revert to original text if possible, or prevent update
       const originalLabel = currentContextLabels.find(l => l.id === updatedLabel.id) || args.allGlobalLabels.find(l => l.id === updatedLabel.id);
       if (originalLabel && originalLabel.text !== updatedLabel.text.trim()) {
         setCurrentContextLabels(prev => prev.map(label =>
-          label.id === updatedLabel.id ? { ...label, text: originalLabel.text } : label // Revert text
+          label.id === updatedLabel.id ? { ...label, text: originalLabel.text } : label
         ));
       }
       return;
     }
 
     setCurrentContextLabels(prev => prev.map(label =>
-      label.id === updatedLabel.id ? { ...label, text: updatedLabel.text.trim(), color: updatedLabel.color } : label
+      label.id === updatedLabel.id ? { ...label, text: updatedLabel.text.trim() } : label
     ));
   }, [currentContextLabels, toast, args.allGlobalLabels]);
 
 
   const getLabelsForSave = useCallback((): GlobalLabel[] => {
-    return currentContextLabels.filter(label => label.text.trim() !== "");
+    return currentContextLabels.filter(label => label.text.trim() !== "").map(label => ({ id: label.id, text: label.text }));
   }, [currentContextLabels]);
 
-  // New functions for Emblor integration
-  const createTemporaryLabel = useCallback((text: string, color: LabelColorValue): GlobalLabel => {
+  const createTemporaryLabel = useCallback((text: string): GlobalLabel => {
     return {
       id: generateClientLabelId(),
       text: text.trim(),
-      color: color,
     };
   }, []);
 
   const replaceAllCurrentContextLabels = useCallback((newLabels: GlobalLabel[]) => {
-    setCurrentContextLabels(newLabels);
+    setCurrentContextLabels(newLabels.map(label => ({ id: label.id, text: label.text })));
   }, []);
 
 
   return {
     currentContextLabels,
     availableGlobalLabelsToSelect,
-    newLabelText, // Still needed if some part of UI uses it, but Emblor will be main input
+    newLabelText,
     setNewLabelText,
-    newLabelColor, // Crucial for new tags created via Emblor
-    setNewLabelColor,
+    // newLabelColor and setNewLabelColor removed
     initializeLabels,
-    handleAddNewLabelToContext, // May become less used directly
-    handleSelectGlobalLabelForContext, // May be triggered by Emblor's autocomplete selection
+    handleAddNewLabelToContext,
+    handleSelectGlobalLabelForContext,
     handleRemoveLabelFromContext,
     handleUpdateLabelDetailsInContext,
     getLabelsForSave,
-    // Exposed for Emblor
     createTemporaryLabel,
     replaceAllCurrentContextLabels,
   };
 };
+

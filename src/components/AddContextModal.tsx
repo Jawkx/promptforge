@@ -46,6 +46,7 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
       setContent("");
       labelManager.initializeLabels([], allGlobalLabels);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, allGlobalLabels, labelManager.initializeLabels]);
 
 
@@ -103,11 +104,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 
           <LabelManagerUI
             currentContextLabels={labelManager.currentContextLabels}
-            onUpdateLabelDetails={labelManager.handleUpdateLabelDetailsInContext}
-            onRemoveLabelFromContext={labelManager.handleRemoveLabelFromContext}
-            newLabelColor={labelManager.newLabelColor}
-            setNewLabelColor={labelManager.setNewLabelColor}
-            availableGlobalLabels={labelManager.availableGlobalLabelsToSelect}
+            // onUpdateLabelDetails and onRemoveLabelFromContext are handled by InputTags via replaceAll...
+            // newLabelColor and setNewLabelColor removed
             createTemporaryLabel={labelManager.createTemporaryLabel}
             replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
             allGlobalLabels={allGlobalLabels}
@@ -135,3 +133,4 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 };
 
 export default AddContextModal;
+
