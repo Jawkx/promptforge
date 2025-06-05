@@ -40,7 +40,7 @@ const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
     return (
       <div
         className={cn(
-          "border-input focus-within:border-white flex min-h-10 w-full flex-wrap items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50",
+          "border-input focus-within:border-foreground flex min-h-10 w-full flex-wrap items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
