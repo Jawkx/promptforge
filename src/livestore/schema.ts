@@ -1,4 +1,4 @@
-import { getRandomUntitledPlaceholder } from '@/constants/titlePlacholders';
+import { getRandomUntitledPlaceholder } from '@/constants/titlePlaceholders';
 import { Events, makeSchema, Schema, SessionIdSymbol, State } from '@livestore/livestore'
 import { v4 as uuid } from 'uuid';
 
