@@ -160,140 +160,142 @@ const PromptEditor: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full max-w-screen-2xl">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel
-          defaultSize={60}
-          minSize={30}
-          className="flex flex-col p-4"
-        >
-          <div className="flex flex-row mb-4">
-            <LucideAnvil className="h-9 w-9 mr-3" />
-            <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
-          </div>
+    <div className="flex justify-center h-screen w-screen">
+      <div className="h-full w-full max-w-screen-2xl">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel
+            defaultSize={60}
+            minSize={30}
+            className="flex flex-col p-4"
+          >
+            <div className="flex flex-row mb-4">
+              <LucideAnvil className="h-9 w-9 mr-3" />
+              <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
+            </div>
 
-          <div className="flex-grow  relative">
-            <PromptInput
-              value={prompt}
-              onChange={setPrompt}
-              selectedContexts={selectedContexts}
-              libraryContexts={contexts} // Pass library contexts for sync check
-              onRemoveContext={removeContextFromPrompt}
-              onEditSelectedContext={handleEditSelectedContext} // Pass handler for editing selected
-              onCopyPromptAndContextsClick={handleCopy}
-              onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
-              onReorderContexts={reorderSelectedContexts}
-              onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
-              getResolvedLabelsByIds={getResolvedLabelsByIds}
+            <div className="flex-grow  relative">
+              <PromptInput
+                value={prompt}
+                onChange={setPrompt}
+                selectedContexts={selectedContexts}
+                libraryContexts={contexts} // Pass library contexts for sync check
+                onRemoveContext={removeContextFromPrompt}
+                onEditSelectedContext={handleEditSelectedContext} // Pass handler for editing selected
+                onCopyPromptAndContextsClick={handleCopy}
+                onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
+                onReorderContexts={reorderSelectedContexts}
+                onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
+                getResolvedLabelsByIds={getResolvedLabelsByIds}
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel
+            defaultSize={40}
+            minSize={25}
+            className="flex flex-col"
+          >
+            <ContextsLibrary
+              contexts={contexts}
+              onAddContextButtonClick={handleAddContextButtonClick}
+              onEditContext={handleEditLibraryContext} // This edits library contexts
+              onDeleteContext={handleDeleteContextRequest}
+              onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
+              onPasteToAdd={handlePasteToLibrary}
+              isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
+              onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
+              onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
+              getResolvedLabels={getResolvedLabelsByIds}
             />
-          </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel
-          defaultSize={40}
-          minSize={25}
-          className="flex flex-col"
-        >
-          <ContextsLibrary
-            contexts={contexts}
-            onAddContextButtonClick={handleAddContextButtonClick}
-            onEditContext={handleEditLibraryContext} // This edits library contexts
-            onDeleteContext={handleDeleteContextRequest}
-            onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
-            onPasteToAdd={handlePasteToLibrary}
-            isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
-            onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
-            onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-            getResolvedLabels={getResolvedLabelsByIds}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
 
-      <AddContextModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleSaveNewContext}
-        allGlobalLabels={getAllGlobalLabels()}
-      />
-      {/* Edit Modal for Library Contexts */}
-      {editingLibraryContext && (
-        <EditContextModal
-          isOpen={editLibraryModalOpen}
-          onClose={() => {
-            setEditLibraryModalOpen(false);
-            setEditingLibraryContext(null);
-          }}
-          onSave={handleSaveLibraryEdit}
-          context={editingLibraryContext}
+        <AddContextModal
+          isOpen={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onSave={handleSaveNewContext}
           allGlobalLabels={getAllGlobalLabels()}
-          getGlobalLabelById={getGlobalLabelById}
         />
-      )}
-      {/* Edit Modal for Selected Context Copies */}
-      {editingSelectedContext && (
-        <EditContextModal
-          isOpen={editSelectedModalOpen}
-          onClose={() => {
-            setEditSelectedModalOpen(false);
-            setEditingSelectedContext(null);
-          }}
-          onSave={handleSaveSelectedEdit}
-          context={editingSelectedContext}
-          allGlobalLabels={getAllGlobalLabels()}
-          getGlobalLabelById={getGlobalLabelById}
-        />
-      )}
-      <AlertDialog
-        open={deleteConfirmationOpen}
-        onOpenChange={setDeleteConfirmationOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-primary">
-              Are you sure?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              context "
-              {contexts.find((c) => c.id === contextToDeleteId)?.title ||
-                "this context"}
-              " from the library. Copies in the selected list will remain but become orphaned.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteContext}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog
-        open={deleteMultipleConfirmationOpen}
-        onOpenChange={setDeleteMultipleConfirmationOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-primary">
-              Are you sure?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete{" "}
-              {contextsToDeleteIds.length} context(s) from the library. Copies in the selected list will remain but become orphaned.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setContextsToDeleteIds([])}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteMultipleContexts}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Edit Modal for Library Contexts */}
+        {editingLibraryContext && (
+          <EditContextModal
+            isOpen={editLibraryModalOpen}
+            onClose={() => {
+              setEditLibraryModalOpen(false);
+              setEditingLibraryContext(null);
+            }}
+            onSave={handleSaveLibraryEdit}
+            context={editingLibraryContext}
+            allGlobalLabels={getAllGlobalLabels()}
+            getGlobalLabelById={getGlobalLabelById}
+          />
+        )}
+        {/* Edit Modal for Selected Context Copies */}
+        {editingSelectedContext && (
+          <EditContextModal
+            isOpen={editSelectedModalOpen}
+            onClose={() => {
+              setEditSelectedModalOpen(false);
+              setEditingSelectedContext(null);
+            }}
+            onSave={handleSaveSelectedEdit}
+            context={editingSelectedContext}
+            allGlobalLabels={getAllGlobalLabels()}
+            getGlobalLabelById={getGlobalLabelById}
+          />
+        )}
+        <AlertDialog
+          open={deleteConfirmationOpen}
+          onOpenChange={setDeleteConfirmationOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-primary">
+                Are you sure?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                context "
+                {contexts.find((c) => c.id === contextToDeleteId)?.title ||
+                  "this context"}
+                " from the library. Copies in the selected list will remain but become orphaned.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteContext}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <AlertDialog
+          open={deleteMultipleConfirmationOpen}
+          onOpenChange={setDeleteMultipleConfirmationOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-primary">
+                Are you sure?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete{" "}
+                {contextsToDeleteIds.length} context(s) from the library. Copies in the selected list will remain but become orphaned.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setContextsToDeleteIds([])}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteMultipleContexts}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 };
