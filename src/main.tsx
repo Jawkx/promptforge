@@ -10,6 +10,7 @@ import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import LiveStoreSharedWorker from '@livestore/adapter-web/shared-worker?sharedworker'
 import { makePersistedAdapter } from '@livestore/adapter-web'
 import { schema } from "./livestore/schema.ts";
+import { LoadingScreen } from "./components/LoadingScreen.tsx";
 
 const adapter = makePersistedAdapter({
   storage: { type: 'opfs' },
@@ -22,6 +23,7 @@ createRoot(document.getElementById("root")!).render(
     <LiveStoreProvider
       schema={schema}
       adapter={adapter}
+      renderLoading={() => <LoadingScreen />}
       batchUpdates={batchUpdates}
     >
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
