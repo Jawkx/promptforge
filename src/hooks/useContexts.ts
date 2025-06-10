@@ -530,7 +530,7 @@ export const useContexts = () => {
       ]);
       showContextOperationNotification(toast, "Selected", newSelectedContextCopy.title);
     },
-    [selectedContexts, toast],
+    [toast],
   );
 
   const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {

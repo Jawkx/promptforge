@@ -29,15 +29,11 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const { store } = useStore()
 
-  const [preferences, updatePreferences] = store.useClientDocument(tables.preferences)
-
-  const theme = preferences.theme
+  const [{ theme }, updatePreferences] = store.useClientDocument(tables.preferences)
 
   useEffect(() => {
     const root = window.document.documentElement;
-
     root.classList.remove("light", "dark");
-
     root.classList.add(theme);
   }, [theme]);
 
