@@ -143,7 +143,7 @@ export function ContextsDataTable({
       <div className="flex items-center mb-3">
         <LucideSearch className="text-primary mr-4" />
         <Input
-          placeholder="Filter contexts by title, content, or labels..."
+          placeholder="Filter contexts by title or content..."
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           className="h-9 "

@@ -43,8 +43,6 @@ const PromptEditor: React.FC = () => {
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
-    getAllGlobalLabels,
-    getGlobalLabelById,
     getResolvedLabelsByIds,
   } = useContexts();
 
@@ -214,7 +212,6 @@ const PromptEditor: React.FC = () => {
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
           onSave={handleSaveNewContext}
-          allGlobalLabels={getAllGlobalLabels()}
         />
         {/* Edit Modal for Library Contexts */}
         {editingLibraryContext && (
@@ -226,8 +223,6 @@ const PromptEditor: React.FC = () => {
             }}
             onSave={handleSaveLibraryEdit}
             context={editingLibraryContext}
-            allGlobalLabels={getAllGlobalLabels()}
-            getGlobalLabelById={getGlobalLabelById}
           />
         )}
         {/* Edit Modal for Selected Context Copies */}
@@ -240,8 +235,6 @@ const PromptEditor: React.FC = () => {
             }}
             onSave={handleSaveSelectedEdit}
             context={editingSelectedContext}
-            allGlobalLabels={getAllGlobalLabels()}
-            getGlobalLabelById={getGlobalLabelById}
           />
         )}
         <AlertDialog

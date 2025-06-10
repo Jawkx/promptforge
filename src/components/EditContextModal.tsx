@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Context, ContextFormData, GlobalLabel } from "../types";
+import { Context, ContextFormData } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,16 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useLabelManager } from "@/hooks/useLabelManager";
-import LabelManagerUI from "./LabelManager";
 
 interface EditContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedContextData: ContextFormData) => void;
   context: Context | null;
-  allGlobalLabels: GlobalLabel[];
-  getGlobalLabelById: (id: string) => GlobalLabel | undefined;
 }
 
 const EditContextModal: React.FC<EditContextModalProps> = ({
@@ -30,37 +26,17 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
   onClose,
   onSave,
   context,
-  allGlobalLabels,
-  getGlobalLabelById,
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
-  const initialLabelsForThisContext = React.useMemo(() => {
-    if (!context) return [];
-    return context.labels
-      .map(id => getGlobalLabelById(id))
-      .filter(Boolean) as GlobalLabel[];
-  }, [context, getGlobalLabelById]);
-
-  const labelManager = useLabelManager({
-    initialLabelsForContext: initialLabelsForThisContext,
-    allGlobalLabels: allGlobalLabels,
-  });
-
   const { toast } = useToast();
 
   useEffect(() => {
     if (context && isOpen) {
       setTitle(context.title);
       setContent(context.content);
-      const resolvedInitialLabels = context.labels
-        .map(id => getGlobalLabelById(id))
-        .filter(Boolean) as GlobalLabel[];
-      labelManager.initializeLabels(resolvedInitialLabels, allGlobalLabels);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context, isOpen, allGlobalLabels, getGlobalLabelById, labelManager.initializeLabels]);
+  }, [context, isOpen]);
 
   if (!isOpen || !context) return null;
 
@@ -70,11 +46,19 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
     const trimmedContent = content.trim();
 
     if (!trimmedTitle) {
-      toast({ title: "Title Required", description: "Title cannot be empty.", variant: "destructive" });
+      toast({
+        title: "Title Required",
+        description: "Title cannot be empty.",
+        variant: "destructive",
+      });
       return;
     }
     if (!trimmedContent) {
-      toast({ title: "Content Required", description: "Content cannot be empty.", variant: "destructive" });
+      toast({
+        title: "Content Required",
+        description: "Content cannot be empty.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -82,7 +66,7 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
       id: context.id,
       title: trimmedTitle,
       content: trimmedContent,
-      labels: labelManager.getLabelsForSave(),
+      labels: [],
     });
     onClose();
   };
@@ -102,15 +86,6 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
-          />
-
-          <LabelManagerUI
-            currentContextLabels={labelManager.currentContextLabels}
-            // onUpdateLabelDetails and onRemoveLabelFromContext are handled by InputTags via replaceAll...
-            // newLabelColor and setNewLabelColor removed
-            createTemporaryLabel={labelManager.createTemporaryLabel}
-            replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
-            allGlobalLabels={allGlobalLabels}
           />
 
           <Textarea
@@ -135,4 +110,3 @@ const EditContextModal: React.FC<EditContextModalProps> = ({
 };
 
 export default EditContextModal;
-

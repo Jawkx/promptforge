@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ContextFormData, GlobalLabel } from "../types";
+import { ContextFormData } from "../types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,30 +13,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useLabelManager } from "@/hooks/useLabelManager";
-import LabelManagerUI from "./LabelManager";
-
 
 interface AddContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (newContextData: ContextFormData) => void;
-  allGlobalLabels: GlobalLabel[];
 }
 
 const AddContextModal: React.FC<AddContextModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  allGlobalLabels,
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
-  const labelManager = useLabelManager({
-    initialLabelsForContext: [],
-    allGlobalLabels: allGlobalLabels,
-  });
 
   const { toast } = useToast();
 
@@ -44,11 +34,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     if (isOpen) {
       setTitle("");
       setContent("");
-      labelManager.initializeLabels([], allGlobalLabels);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, allGlobalLabels, labelManager.initializeLabels]);
-
+  }, [isOpen]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -58,7 +45,8 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     if (!finalTitle && !finalContent) {
       toast({
         title: "Empty Context",
-        description: "Both title and content are empty. Please add some content or a title.",
+        description:
+          "Both title and content are empty. Please add some content or a title.",
         variant: "destructive",
       });
       return;
@@ -68,17 +56,17 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
     } else if (!finalContent) {
       toast({
         title: "Empty Content",
-        description: "Content cannot be empty if title is also blank or nearly blank.",
+        description:
+          "Content cannot be empty if title is also blank or nearly blank.",
         variant: "destructive",
       });
       return;
     }
 
-
     onSave({
       title: finalTitle,
       content: finalContent,
-      labels: labelManager.getLabelsForSave(),
+      labels: [],
     });
     onClose();
   };
@@ -100,15 +88,6 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title (optional, will be auto-generated if blank)"
-          />
-
-          <LabelManagerUI
-            currentContextLabels={labelManager.currentContextLabels}
-            // onUpdateLabelDetails and onRemoveLabelFromContext are handled by InputTags via replaceAll...
-            // newLabelColor and setNewLabelColor removed
-            createTemporaryLabel={labelManager.createTemporaryLabel}
-            replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
-            allGlobalLabels={allGlobalLabels}
           />
 
           <Textarea
@@ -133,4 +112,3 @@ const AddContextModal: React.FC<AddContextModalProps> = ({
 };
 
 export default AddContextModal;
-
