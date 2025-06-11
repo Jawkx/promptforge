@@ -41,10 +41,6 @@ const Editor: React.FC = () => {
     prompt,
     setPrompt,
     selectedContexts,
-    // addContextFromPaste,
-    // updateSelectedContext is now called from EditContext screen
-    // deleteContext,
-    // deleteMultipleContexts,
     removeContextFromPrompt,
     removeMultipleSelectedContextsFromPrompt,
     copyPromptWithContexts,

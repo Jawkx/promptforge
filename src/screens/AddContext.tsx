@@ -8,10 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import LabelManagerUI from "@/components/LabelManager";
 import { LucideArrowLeft, LucideSave } from "lucide-react";
+import { useStore } from "@livestore/react";
+import { events } from "@/livestore/events";
+import { v4 as uuid } from "uuid"
+import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
-  const { addContext, getAllGlobalLabels } = useContexts();
+  const { store } = useStore()
+  const { getAllGlobalLabels } = useContexts();
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
@@ -28,7 +33,7 @@ const AddContext: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const finalTitle = title.trim();
+    const finalTitle = title.length !== 0 ? title.trim() : getRandomUntitledPlaceholder();
     const finalContent = content.trim();
 
     if (!finalTitle && !finalContent) {
@@ -50,15 +55,10 @@ const AddContext: React.FC = () => {
       return;
     }
 
-    const success = addContext({
-      title: finalTitle,
-      content: finalContent,
-      labels: labelManager.getLabelsForSave(),
-    });
+    const id = uuid()
+    store.commit(events.contextCreated({ id, title: finalTitle, content: finalContent }))
 
-    if (success) {
-      navigate("/");
-    }
+    navigate("/");
   };
 
   return (

@@ -9,20 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import LabelManagerUI from "@/components/LabelManager";
 import { LucideArrowLeft, LucideSave, LucideFrown } from "lucide-react";
+import { useQuery, useStore } from "@livestore/react";
+import { events } from "@/livestore/events";
+import { contexts$ } from "@/livestore/queries";
 
 const EditContext: React.FC = () => {
   const [, navigate] = useLocation();
   const params = useParams() as { type?: 'library' | 'selected', id?: string };
+  const { store } = useStore()
   const { type, id: contextId } = params;
 
   const {
-    contexts,
     selectedContexts,
-    updateContextInLibrary,
     updateSelectedContext,
     getAllGlobalLabels,
     getGlobalLabelById
   } = useContexts();
+
+  const contexts = useQuery(contexts$)
 
   const { toast } = useToast();
 
@@ -110,7 +114,8 @@ const EditContext: React.FC = () => {
 
     let success = false;
     if (type === 'library') {
-      success = updateContextInLibrary(formData);
+      store.commit(events.contextUpdated({ id: contextId, title: trimmedTitle, content: trimmedContent }))
+      navigate("/");
     } else if (type === 'selected') {
       success = updateSelectedContext(formData);
     }
