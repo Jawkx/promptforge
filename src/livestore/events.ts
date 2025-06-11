@@ -13,7 +13,7 @@ export const events = {
     schema: Schema.Struct({ id: Schema.String, title: Schema.String, content: Schema.String }),
   }),
   contextDeleted: Events.synced({
-    name: 'v1.ContextDeleted',
-    schema: Schema.Struct({ id: Schema.String }),
+    name: 'v1.ContextsDeleted',
+    schema: Schema.Struct({ ids: Schema.Array(Schema.String) }),
   }),
 }

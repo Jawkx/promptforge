@@ -18,8 +18,8 @@ export const materializers = State.SQLite.materializers(events, {
     const charCount = content.length
     return tables.contexts.update({ title, content, charCount, hash: contextHash }).where({ id })
   },
-  "v1.ContextDeleted": ({ id }) => {
-    return tables.contexts.delete().where({ id })
+  "v1.ContextsDeleted": ({ ids }) => {
+    return ids.map((id) => tables.contexts.delete().where({ id }))
   }
 })
 
