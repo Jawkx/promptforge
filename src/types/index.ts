@@ -3,13 +3,12 @@ export interface GlobalLabel {
   text: string;
 }
 
-export interface Context {
-  id: string;
-  originalId?: string;
-  title: string;
-  content: string;
-  labels: string[];
-  contentHash?: string;
+export type Context = {
+  readonly id: string;
+  readonly title: string;
+  readonly content: string;
+  readonly charCount: number;
+  readonly hash: string;
 }
 
 export type ContextFormData = {

@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
-  ColumnDef,
   SortingState,
   VisibilityState,
   flexRender,
@@ -26,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Context } from "../types";
-import { ContextsTableMeta } from "./ContextsDataTableColumns";
+import { contextsTableColumn, ContextsTableMeta } from "./ContextsDataTableColumns";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -37,13 +36,12 @@ import {
 } from "@/components/ui/context-menu";
 import { LucideEdit3, LucideListPlus, LucideSearch, LucideTrash, LucideTrash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
+import { useQuery, useStore } from "@livestore/react";
+import { contexts$ } from "@/livestore/queries";
+import { events } from "@/livestore/events";
 
 interface ContextsDataTableProps {
-  columns: ColumnDef<Context>[];
-  data: Context[];
-  tableMeta: ContextsTableMeta; // Added to pass getResolvedLabels
-  onEditContext: (context: Context) => void;
-  onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   searchQuery: string;
@@ -51,33 +49,41 @@ interface ContextsDataTableProps {
 }
 
 export function ContextsDataTable({
-  columns,
-  data,
-  tableMeta: providedTableMeta, // Renamed to avoid conflict
-  onEditContext,
-  onDeleteContext,
   onDeleteSelectedContexts,
   onAddSelectedToPrompt,
   searchQuery,
   setSearchQuery,
 }: ContextsDataTableProps) {
+
+  const [, navigate] = useLocation();
+  const { store } = useStore()
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
+  const handleEditContext = (context: Context) => {
+    navigate(`/edit/library/${context.id}`);
+  }
 
-  // Combine providedTableMeta with other meta properties if needed
-  // For now, it seems providedTableMeta is complete for what columns need.
+  const handleDeleteContext = (contextId: string) => {
+    store.commit(events.contextDeleted({ ids: [contextId] }))
+  }
+
   const tableMeta: ContextsTableMeta = {
-    ...providedTableMeta, // Includes getResolvedLabels
-    onEditContext,       // Still needed by column actions
-    onDeleteContext,     // Still needed by column actions
+    onEditContext: handleEditContext,
+    onDeleteContext: handleDeleteContext,
   };
 
+  const contexts = useQuery(contexts$)
+
+  // useReactTable for some reason expect mutatable data type
+  const mutatableContext = useMemo(() => [...contexts], [contexts])
+
   const table = useReactTable({
-    data,
-    columns,
+    data: mutatableContext,
+    columns: contextsTableColumn,
     meta: tableMeta,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -127,7 +133,7 @@ export function ContextsDataTable({
   };
 
   const displayedDataCount = table.getRowModel().rows.length;
-  const totalDataCount = data.length;
+  const totalDataCount = contexts.length;
 
 
   return (
@@ -253,7 +259,7 @@ export function ContextsDataTable({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={contextsTableColumn.length}
                   className="h-24 text-center"
                 >
                   No contexts found.

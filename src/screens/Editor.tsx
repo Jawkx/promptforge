@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useLocation } from "wouter";
 import { useContexts } from "../hooks/useContexts";
 import { Context } from "../types";
 import PromptInput from "../components/PromptInput";
@@ -23,16 +22,12 @@ import { LucideAnvil } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
-import { v4 as uuid } from "uuid"
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 
 
 const Editor: React.FC = () => {
-  const [, navigate] = useLocation();
-
   const { store } = useStore()
 
   const contexts = useQuery(contexts$)
@@ -64,23 +59,6 @@ const Editor: React.FC = () => {
     copyPromptWithContexts();
   };
 
-  const handleAddContextButtonClick = () => {
-    navigate("/add");
-  };
-
-  const handleEditLibraryContext = (context: Context) => {
-    navigate(`/edit/library/${context.id}`);
-  };
-
-  const handleEditSelectedContext = (context: Context) => {
-    navigate(`/edit/selected/${context.id}`);
-  };
-
-  const handleDeleteContextRequest = (id: string) => {
-    setContextToDeleteId(id);
-    setDeleteConfirmationOpen(true);
-  };
-
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
       store.commit(events.contextDeleted({ ids: [contextToDeleteId] }))
@@ -101,12 +79,6 @@ const Editor: React.FC = () => {
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
-  };
-
-  const handlePasteToLibrary = (pastedText: string) => {
-    const placeholderTitle = getRandomUntitledPlaceholder()
-    const id = uuid()
-    store.commit(events.contextCreated({ id, title: placeholderTitle, content: pastedText }))
   };
 
   const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
@@ -139,9 +111,7 @@ const Editor: React.FC = () => {
                 value={prompt}
                 onChange={setPrompt}
                 selectedContexts={selectedContexts}
-                libraryContexts={contexts}
                 onRemoveContext={removeContextFromPrompt}
-                onEditSelectedContext={handleEditSelectedContext} // Pass handler for editing selected
                 onCopyPromptAndContextsClick={handleCopy}
                 onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
                 onReorderContexts={reorderSelectedContexts}
@@ -157,16 +127,10 @@ const Editor: React.FC = () => {
             className="flex flex-col"
           >
             <ContextsLibrary
-              contexts={contexts}
-              onAddContextButtonClick={handleAddContextButtonClick}
-              onEditContext={handleEditLibraryContext} // This edits library contexts
-              onDeleteContext={handleDeleteContextRequest}
-              onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
-              onPasteToAdd={handlePasteToLibrary}
               isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
               onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
               onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
-              getResolvedLabels={getResolvedLabelsByIds}
+              onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

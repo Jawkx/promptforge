@@ -14,9 +14,8 @@ const initialGlobalLabels: GlobalLabel[] = [];
 
 const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-const generateContextHash = (title: string, content: string, labelIds: string[]): string => {
-  const sortedLabelsString = [...(labelIds || [])].sort().join(',');
-  const dataString = JSON.stringify({ title, content, labels: sortedLabelsString });
+const generateContextHash = (title: string, content: string): string => {
+  const dataString = JSON.stringify({ title, content });
 
   let hash = 5381;
   for (let i = 0; i < dataString.length; i++) {
@@ -242,11 +241,10 @@ export const useContexts = () => {
     (libraryContext: Context) => {
       const newSelectedContextCopy: Context = {
         id: generateId(),
-        originalId: libraryContext.id,
         title: libraryContext.title,
         content: libraryContext.content,
-        labels: [...libraryContext.labels],
-        contentHash: libraryContext.contentHash || generateContextHash(libraryContext.title, libraryContext.content, libraryContext.labels), // Use original's hash or recompute
+        charCount: libraryContext.content.length,
+        hash: libraryContext.hash || generateContextHash(libraryContext.title, libraryContext.content),
       };
 
       setSelectedContexts((prevSelectedContexts) => [
@@ -262,7 +260,6 @@ export const useContexts = () => {
     setSelectedContexts(reorderedContexts.map(c => ({
       ...c,
       id: String(c.id),
-      labels: c.labels || [],
       // contentHash should already be part of 'c'
     })));
   }, []);

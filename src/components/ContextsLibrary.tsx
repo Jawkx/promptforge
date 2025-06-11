@@ -1,48 +1,39 @@
 import React, { useState, useCallback } from "react";
-import { Context, GlobalLabel } from "../types";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import { LucidePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggler } from "./ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
-import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableColumns";
+import { useLocation } from "wouter";
+import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { v4 as uuid } from "uuid"
+import { useStore } from "@livestore/react";
+import { events } from "@/livestore/events";
 
 interface ContextsLibraryProps {
-  contexts: Context[];
-  onAddContextButtonClick: () => void;
-  onEditContext: (context: Context) => void;
-  onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
-  onPasteToAdd: (pastedText: string) => void;
   isFocused: boolean;
   onFocus: () => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
-  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
-  contexts,
-  onAddContextButtonClick,
-  onEditContext,
-  onDeleteContext,
   onDeleteSelectedContexts,
-  onPasteToAdd,
   isFocused,
   onFocus,
   onAddSelectedToPrompt,
-  getResolvedLabels,
 }) => {
+  const [, navigate] = useLocation();
+
+  const { store } = useStore()
+
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  const tableMeta: ContextsTableMeta = {
-    onEditContext, // This callback is for editing library contexts
-    onDeleteContext,
-    getResolvedLabels,
-  };
-
-  const columns = React.useMemo(() => getContextsTableColumns(getResolvedLabels), [getResolvedLabels]);
-
+  const handleAddContext = () => {
+    navigate("/add");
+  }
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {
@@ -55,7 +46,9 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
-          onPasteToAdd(pastedText);
+          const placeholderTitle = getRandomUntitledPlaceholder()
+          const id = uuid()
+          store.commit(events.contextCreated({ id, title: placeholderTitle, content: pastedText }))
         } else {
           toast({
             title: "Paste Error",
@@ -65,7 +58,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         }
       }
     },
-    [isFocused, onPasteToAdd, toast],
+    [isFocused, store, toast],
   );
 
   return (
@@ -81,18 +74,13 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       </div>
 
       <ContextsDataTable
-        columns={columns}
-        data={contexts}
-        tableMeta={tableMeta}
-        onEditContext={onEditContext}
-        onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt} // To add copies to selected list
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
       />
 
-      <Button variant="default" onClick={onAddContextButtonClick}>
+      <Button variant="default" onClick={handleAddContext}>
         <LucidePlus className="mr-2 h-4 w-4" />
         Add Context
       </Button>
