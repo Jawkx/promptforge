@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, ContextFormData, GlobalLabel } from "../types";
+import { Context, GlobalLabel } from "../types";
 import { useToast, ToastOptions } from "./use-toast";
 import { Content } from "@tiptap/react";
 
@@ -10,7 +10,6 @@ const LOCAL_STORAGE_KEYS = {
   SELECTED_CONTEXTS: "promptForge_selectedContexts",
 };
 
-const initialContexts: Context[] = [];
 const initialGlobalLabels: GlobalLabel[] = [];
 
 const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -26,17 +25,6 @@ const generateContextHash = (title: string, content: string, labelIds: string[])
     hash = hash & hash; // Convert to 32bit integer
   }
   return String(hash >>> 0); // Ensure positive integer string
-};
-
-const getNextUntitledTitle = (existingContexts: Context[]): string => {
-  let title: string;
-  let counter =
-    existingContexts.filter((c) => c.title.startsWith("Untitled (")).length + 1;
-  do {
-    title = `Untitled (${counter})`;
-    counter++;
-  } while (existingContexts.some((c) => c.title === title));
-  return title;
 };
 
 type ContextOperation =
@@ -122,21 +110,6 @@ const showContextOperationNotification = (
 
 
 export const useContexts = () => {
-  const [contexts, setContexts] = useState<Context[]>(() => {
-    try {
-      const storedContexts = localStorage.getItem(LOCAL_STORAGE_KEYS.CONTEXTS);
-      const parsed = storedContexts ? JSON.parse(storedContexts) : initialContexts;
-      return parsed.map((c: any) => ({
-        ...c,
-        originalId: undefined,
-        labels: c.labels || [],
-        contentHash: c.contentHash || generateContextHash(c.title, c.content, c.labels || [])
-      }));
-    } catch (error) {
-      console.error("Error loading contexts from local storage:", error);
-      return initialContexts;
-    }
-  });
 
   const [globalLabels, setGlobalLabels] = useState<GlobalLabel[]>(() => {
     try {
@@ -172,19 +145,6 @@ export const useContexts = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.CONTEXTS, JSON.stringify(contexts));
-    } catch (error) {
-      console.error("Error saving contexts to local storage:", error);
-      toast({
-        title: "Storage Error",
-        description: "Could not save your context library. Changes might not persist.",
-        variant: "destructive",
-      });
-    }
-  }, [contexts, toast]);
-
-  useEffect(() => {
-    try {
       localStorage.setItem(LOCAL_STORAGE_KEYS.GLOBAL_LABELS, JSON.stringify(globalLabels));
     } catch (error) {
       console.error("Error saving global labels to local storage:", error);
@@ -213,241 +173,6 @@ export const useContexts = () => {
     if (!labelIds || !Array.isArray(labelIds)) return [];
     return labelIds.map(labelId => getGlobalLabelById(labelId)).filter(Boolean) as GlobalLabel[];
   }, [getGlobalLabelById]);
-
-
-  const findOrCreateGlobalLabel = useCallback((labelText: string): GlobalLabel => {
-    const normalizedText = labelText.trim().toLowerCase();
-    const existingLabel = globalLabels.find(gl => gl.text.toLowerCase() === normalizedText);
-
-    if (existingLabel) {
-      return existingLabel;
-    } else {
-      const newGlobalLabel: GlobalLabel = {
-        id: generateId(),
-        text: labelText.trim(),
-      };
-      setGlobalLabels(prevGlobalLabels => [...prevGlobalLabels, newGlobalLabel]);
-      showContextOperationNotification(toast, "LabelAdded", newGlobalLabel.text);
-      return newGlobalLabel;
-    }
-  }, [globalLabels, toast]);
-
-  const updateGlobalLabelDefinition = useCallback((updatedLabel: GlobalLabel): GlobalLabel | null => {
-    const existingLabelById = globalLabels.find(gl => gl.id === updatedLabel.id);
-    if (!existingLabelById) {
-      console.error("Attempted to update non-existent global label by ID:", updatedLabel.id);
-      return findOrCreateGlobalLabel(updatedLabel.text);
-    }
-
-    const trimmedText = updatedLabel.text.trim();
-    const conflictingLabelByText = globalLabels.find(gl => gl.text.toLowerCase() === trimmedText.toLowerCase() && gl.id !== updatedLabel.id);
-    if (conflictingLabelByText) {
-      toast({ title: "Label Exists", description: `A label with text "${trimmedText}" already exists. Choose a different name.`, variant: "destructive" });
-      return existingLabelById;
-    }
-
-    if (existingLabelById.text === trimmedText) {
-      return existingLabelById;
-    }
-
-    const newGlobalLabels = globalLabels.map(gl =>
-      gl.id === updatedLabel.id ? { ...gl, text: trimmedText } : gl
-    );
-    setGlobalLabels(newGlobalLabels);
-    showContextOperationNotification(toast, "LabelUpdated", trimmedText);
-    // Note: Updating a global label's text does not automatically update contentHashes of contexts using it.
-    // The hash is based on label IDs. The visual display will change, but sync status for this specific change won't trigger via hash.
-    // This is a design choice for simplicity of the hash.
-    return newGlobalLabels.find(gl => gl.id === updatedLabel.id)!;
-
-  }, [globalLabels, toast, findOrCreateGlobalLabel]);
-
-
-  const addContext = useCallback(
-    (formData: ContextFormData) => {
-      let titleToUse = formData.title.trim();
-      if (!titleToUse) {
-        titleToUse = getNextUntitledTitle(contexts);
-      }
-
-      if (contexts.some((c) => c.title === titleToUse)) {
-        toast({
-          title: "Duplicate Title",
-          description: `A context with the title "${titleToUse}" already exists. Please choose a unique title.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      const labelIdsForContext: string[] = formData.labels.map(labelInput => {
-        const existingGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
-        if (existingGlobalLabel) {
-          const updatedGlobal = updateGlobalLabelDefinition({ id: labelInput.id, text: labelInput.text });
-          return updatedGlobal!.id;
-        }
-        const globalLabel = findOrCreateGlobalLabel(labelInput.text);
-        return globalLabel.id;
-      }).filter((id, index, self) => self.indexOf(id) === index);
-
-      const content = formData.content.trim();
-      const newContext: Context = {
-        id: generateId(),
-        title: titleToUse,
-        content: content,
-        labels: labelIdsForContext || [],
-        contentHash: generateContextHash(titleToUse, content, labelIdsForContext || []),
-      };
-      setContexts((prevContexts) => [...prevContexts, newContext]);
-      showContextOperationNotification(toast, "Added", newContext.title);
-      return true;
-    },
-    [contexts, toast, findOrCreateGlobalLabel, globalLabels, updateGlobalLabelDefinition],
-  );
-
-  const addContextFromPaste = useCallback(
-    (content: string) => {
-      const title = getNextUntitledTitle(contexts);
-      const newContext: Context = {
-        id: generateId(),
-        title,
-        content,
-        labels: [],
-        contentHash: generateContextHash(title, content, []),
-      };
-      setContexts((prevContexts) => [...prevContexts, newContext]);
-      showContextOperationNotification(toast, "Added", newContext.title, "default", `Context "${newContext.title}" (from paste) has been added.`);
-    },
-    [contexts, toast],
-  );
-
-  const updateContextInLibrary = useCallback(
-    (formData: ContextFormData) => {
-      const contextId = formData.id;
-      if (!contextId) {
-        toast({ title: "Error", description: "Context ID missing for library update.", variant: "destructive" });
-        return false;
-      }
-
-      const libraryContextToUpdate = contexts.find(c => c.id === contextId);
-      if (!libraryContextToUpdate) {
-        toast({ title: "Error", description: "Context not found in library for update.", variant: "destructive" });
-        return false;
-      }
-
-      const newTitle = formData.title.trim();
-      if (contexts.some(c => c.id !== contextId && c.title === newTitle)) {
-        toast({
-          title: "Duplicate Title",
-          description: `A context with the title "${newTitle}" already exists in the library. Please choose a unique title.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      const labelIdsForContext: string[] = formData.labels.map(labelInput => {
-        const knownGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
-        if (knownGlobalLabel) {
-          const updatedGlobalLabel = updateGlobalLabelDefinition({ id: labelInput.id, text: labelInput.text });
-          return updatedGlobalLabel!.id;
-        } else {
-          const globalLabel = findOrCreateGlobalLabel(labelInput.text);
-          return globalLabel.id;
-        }
-      }).filter((id, index, self) => self.indexOf(id) === index);
-
-      const newContent = formData.content.trim();
-      const updatedContext: Context = {
-        ...libraryContextToUpdate,
-        id: contextId,
-        title: newTitle,
-        content: newContent,
-        labels: labelIdsForContext || [],
-        contentHash: generateContextHash(newTitle, newContent, labelIdsForContext || []),
-      };
-
-      setContexts((prevContexts) =>
-        prevContexts.map((context) =>
-          context.id === updatedContext.id ? updatedContext : context,
-        ),
-      );
-      showContextOperationNotification(toast, "Updated", updatedContext.title);
-      return true;
-    },
-    [contexts, globalLabels, toast, findOrCreateGlobalLabel, updateGlobalLabelDefinition],
-  );
-
-  const updateSelectedContext = useCallback(
-    (formData: ContextFormData) => {
-      const selectedContextId = formData.id;
-      if (!selectedContextId) {
-        toast({ title: "Error", description: "Selected context ID missing for update.", variant: "destructive" });
-        return false;
-      }
-
-      const selectedContextToUpdate = selectedContexts.find(sc => sc.id === selectedContextId);
-      if (!selectedContextToUpdate) {
-        toast({ title: "Error", description: "Selected context not found for update.", variant: "destructive" });
-        return false;
-      }
-      const newTitle = formData.title.trim();
-      const labelIdsForContext: string[] = formData.labels.map(labelInput => {
-        const knownGlobalLabel = globalLabels.find(gl => gl.id === labelInput.id);
-        if (knownGlobalLabel) {
-          const updatedGlobalLabel = updateGlobalLabelDefinition({ id: labelInput.id, text: labelInput.text });
-          return updatedGlobalLabel!.id;
-        } else {
-          const globalLabel = findOrCreateGlobalLabel(labelInput.text);
-          return globalLabel.id;
-        }
-      }).filter((id, index, self) => self.indexOf(id) === index);
-
-      const newContent = formData.content.trim();
-      const updatedSelectedCopy: Context = {
-        ...selectedContextToUpdate,
-        title: newTitle,
-        content: newContent,
-        labels: labelIdsForContext || [],
-        contentHash: generateContextHash(newTitle, newContent, labelIdsForContext || []),
-      };
-
-      setSelectedContexts((prevSelectedContexts) =>
-        prevSelectedContexts.map((sc) =>
-          sc.id === updatedSelectedCopy.id ? updatedSelectedCopy : sc,
-        ),
-      );
-      showContextOperationNotification(toast, "SelectedContextUpdated", updatedSelectedCopy.title);
-      return true;
-    },
-    [selectedContexts, globalLabels, toast, findOrCreateGlobalLabel, updateGlobalLabelDefinition],
-  );
-
-
-  const deleteContext = useCallback(
-    (id: string) => {
-      const contextToDelete = contexts.find((c) => c.id === id);
-      if (contextToDelete) {
-        setContexts((prevContexts) =>
-          prevContexts.filter((context) => context.id !== id),
-        );
-        showContextOperationNotification(toast, "Deleted", contextToDelete.title, "destructive");
-      }
-    },
-    [contexts, toast],
-  );
-
-
-  const deleteMultipleContexts = useCallback(
-    (ids: string[]) => {
-      const contextsToDelete = contexts.filter((c) => ids.includes(c.id));
-      if (contextsToDelete.length > 0) {
-        setContexts((prevContexts) =>
-          prevContexts.filter((context) => !ids.includes(context.id)),
-        );
-        showContextOperationNotification(toast, "MultipleDeleted", String(contextsToDelete.length), "destructive");
-      }
-    },
-    [contexts, toast],
-  );
 
 
   const removeContextFromPrompt = useCallback(
@@ -543,21 +268,14 @@ export const useContexts = () => {
   }, []);
 
   return {
-    contexts,
     prompt,
     setPrompt,
     selectedContexts,
-    addContext,
-    addContextFromPaste,
-    updateContextInLibrary,
-    updateSelectedContext,
-    deleteContext,
     removeContextFromPrompt,
     removeMultipleSelectedContextsFromPrompt,
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
-    deleteMultipleContexts,
     getAllGlobalLabels,
     getGlobalLabelById,
     getResolvedLabelsByIds,
