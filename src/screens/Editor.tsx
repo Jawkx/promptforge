@@ -20,6 +20,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { LucideAnvil } from "lucide-react";
+import { useQuery, useStore } from "@livestore/react";
+import { contexts$ } from "@/livestore/queries";
+import { events } from "@/livestore/events";
+import { v4 as uuid } from "uuid"
+import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
@@ -28,15 +33,18 @@ const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 const Editor: React.FC = () => {
   const [, navigate] = useLocation();
 
+  const { store } = useStore()
+
+  const contexts = useQuery(contexts$)
+
   const {
-    contexts, // Library contexts
     prompt,
     setPrompt,
-    selectedContexts, // Selected context copies
-    addContextFromPaste,
+    selectedContexts,
+    // addContextFromPaste,
     // updateSelectedContext is now called from EditContext screen
-    deleteContext,
-    deleteMultipleContexts,
+    // deleteContext,
+    // deleteMultipleContexts,
     removeContextFromPrompt,
     removeMultipleSelectedContextsFromPrompt,
     copyPromptWithContexts,
@@ -79,7 +87,7 @@ const Editor: React.FC = () => {
 
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
-      deleteContext(contextToDeleteId); // Deletes from library only
+      store.commit(events.contextDeleted({ ids: [contextToDeleteId] }))
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
@@ -93,14 +101,16 @@ const Editor: React.FC = () => {
 
   const confirmDeleteMultipleContexts = () => {
     if (contextsToDeleteIds.length > 0) {
-      deleteMultipleContexts(contextsToDeleteIds); // Deletes from library only
+      store.commit(events.contextDeleted({ ids: contextsToDeleteIds }))
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
   };
 
   const handlePasteToLibrary = (pastedText: string) => {
-    addContextFromPaste(pastedText); // Adds to library
+    const placeholderTitle = getRandomUntitledPlaceholder()
+    const id = uuid()
+    store.commit(events.contextCreated({ id, title: placeholderTitle, content: pastedText }))
   };
 
   const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
@@ -133,7 +143,7 @@ const Editor: React.FC = () => {
                 value={prompt}
                 onChange={setPrompt}
                 selectedContexts={selectedContexts}
-                libraryContexts={contexts} // Pass library contexts for sync check
+                libraryContexts={contexts}
                 onRemoveContext={removeContextFromPrompt}
                 onEditSelectedContext={handleEditSelectedContext} // Pass handler for editing selected
                 onCopyPromptAndContextsClick={handleCopy}

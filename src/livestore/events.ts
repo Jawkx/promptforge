@@ -4,7 +4,8 @@ export const events = {
   contextCreated: Events.synced({
     name: 'v1.ContextCreated',
     schema: Schema.Struct({
-      title: Schema.String.pipe(Schema.optional),
+      id: Schema.String,
+      title: Schema.String,
       content: Schema.String
     }),
   }),

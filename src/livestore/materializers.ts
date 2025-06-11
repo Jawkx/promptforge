@@ -1,17 +1,12 @@
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders"
 import { events } from "./events"
 import { State } from "@livestore/livestore"
-import { v4 as uuid } from 'uuid';
 import { tables } from "./schema";
 
 export const materializers = State.SQLite.materializers(events, {
-  "v1.ContextCreated": ({ title: inputTitle, content }) => {
-    const title = inputTitle ?? getRandomUntitledPlaceholder()
+  "v1.ContextCreated": ({ id, title, content }) => {
     const contextHash = generateContextHash(title, content, [])
-    const id = uuid()
     const charCount = content.length
-    return tables.contexts.insert({ id: id, title, content, charCount, hash: contextHash })
-
+    return tables.contexts.insert({ id, title, content, charCount, hash: contextHash })
   },
   "v1.ContextUpdated": ({ id, title, content }) => {
     const contextHash = generateContextHash(title, content, [])
