@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { useContexts } from "@/hooks/useContexts";
-import { useLabelManager } from "@/hooks/useLabelManager";
-import { Context, ContextFormData, GlobalLabel } from "@/types";
+import { Context } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import LabelManagerUI from "@/components/LabelManager";
 import { LucideArrowLeft, LucideSave, LucideFrown } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
@@ -21,9 +19,6 @@ const EditContext: React.FC = () => {
 
   const {
     selectedContexts,
-    updateSelectedContext,
-    getAllGlobalLabels,
-    getGlobalLabelById
   } = useContexts();
 
   const contexts = useQuery(contexts$)
@@ -43,31 +38,6 @@ const EditContext: React.FC = () => {
     }
     setContextToEdit(foundContext || null);
   }, [contextId, type, contexts, selectedContexts]);
-
-  const initialLabelsForThisContext = React.useMemo(() => {
-    if (!contextToEdit) return [];
-    return (contextToEdit.labels || [])
-      .map(id => getGlobalLabelById(id))
-      .filter(Boolean) as GlobalLabel[];
-  }, [contextToEdit, getGlobalLabelById]);
-
-  const labelManager = useLabelManager({
-    initialLabelsForContext: initialLabelsForThisContext,
-    allGlobalLabels: getAllGlobalLabels(),
-  });
-
-  useEffect(() => {
-    if (contextToEdit) {
-      setTitle(contextToEdit.title);
-      setContent(contextToEdit.content);
-      const resolvedInitialLabels = (contextToEdit.labels || [])
-        .map(id => getGlobalLabelById(id))
-        .filter(Boolean) as GlobalLabel[];
-      labelManager.initializeLabels(resolvedInitialLabels);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contextToEdit, getGlobalLabelById]);
-
 
   if (!contextToEdit) {
     return (
@@ -105,24 +75,13 @@ const EditContext: React.FC = () => {
       return;
     }
 
-    const formData: ContextFormData = {
-      id: contextId,
-      title: trimmedTitle,
-      content: trimmedContent,
-      labels: labelManager.getLabelsForSave(),
-    };
-
-    let success = false;
     if (type === 'library') {
       store.commit(events.contextUpdated({ id: contextId, title: trimmedTitle, content: trimmedContent }))
       navigate("/");
     } else if (type === 'selected') {
-      success = updateSelectedContext(formData);
+      // success = updateSelectedContext(formData);
     }
 
-    if (success) {
-      navigate("/");
-    }
   };
 
   const screenTitle = type === 'library' ? "Edit Library Context" : "Edit Selected Context";
@@ -148,14 +107,6 @@ const EditContext: React.FC = () => {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title"
         />
-
-        <LabelManagerUI
-          currentContextLabels={labelManager.currentContextLabels}
-          createTemporaryLabel={labelManager.createTemporaryLabel}
-          replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
-          allGlobalLabels={getAllGlobalLabels()}
-        />
-
         <Textarea
           id="content"
           value={content}

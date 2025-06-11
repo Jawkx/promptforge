@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import { useContexts } from "@/hooks/useContexts";
-import { useLabelManager } from "@/hooks/useLabelManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import LabelManagerUI from "@/components/LabelManager";
 import { LucideArrowLeft, LucideSave } from "lucide-react";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
@@ -16,16 +13,10 @@ import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { store } = useStore()
-  const { getAllGlobalLabels } = useContexts();
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
-  const labelManager = useLabelManager({
-    initialLabelsForContext: [],
-    allGlobalLabels: getAllGlobalLabels(),
-  });
 
   const handleCancel = () => {
     navigate("/");
@@ -82,14 +73,6 @@ const AddContext: React.FC = () => {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title (optional, will be auto-generated if blank)"
         />
-
-        <LabelManagerUI
-          currentContextLabels={labelManager.currentContextLabels}
-          createTemporaryLabel={labelManager.createTemporaryLabel}
-          replaceAllCurrentContextLabels={labelManager.replaceAllCurrentContextLabels}
-          allGlobalLabels={getAllGlobalLabels()}
-        />
-
         <Textarea
           id="content"
           value={content}
