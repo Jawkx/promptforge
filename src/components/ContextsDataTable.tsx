@@ -108,14 +108,6 @@ export function ContextsDataTable({
     table.setGlobalFilter(searchQuery);
   }, [searchQuery, table]);
 
-  // const handleAddSelectedButtonClick = () => { // This was unused
-  //   const selectedRowsData = table.getFilteredSelectedRowModel().rows.map(row => row.original);
-  //   if (selectedRowsData.length > 0) {
-  //     onAddSelectedToPrompt(selectedRowsData);
-  //     table.resetRowSelection();
-  //   }
-  // };
-
   const handleAddSelectedFromContextMenu = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     const selectedContexts = selectedRows.map(r => r.original);
