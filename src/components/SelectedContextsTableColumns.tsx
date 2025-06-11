@@ -2,9 +2,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Context, GlobalLabel } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, CircleSlash } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
@@ -55,34 +54,10 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const selectedCopy = row.original;
-      const meta = table.options.meta as SelectedContextsTableMeta | undefined;
-      let isOutOfSync = false;
-
-      if (selectedCopy.originalId && meta?.libraryContexts) {
-        const originalLibraryContext = meta.libraryContexts.find(
-          (libCtx) => libCtx.id === selectedCopy.originalId
-        );
-
-        if (originalLibraryContext) {
-          if (selectedCopy.contentHash && originalLibraryContext.contentHash) {
-            if (selectedCopy.contentHash !== originalLibraryContext.contentHash) {
-              isOutOfSync = true;
-            }
-          } else if (selectedCopy.contentHash && !originalLibraryContext.contentHash) {
-            isOutOfSync = true;
-          }
-        }
-      }
-
       return (
         <div className="flex items-center gap-2">
-          {isOutOfSync && (
-            <CircleSlash
-              className="h-4 w-4 text-orange-500 flex-shrink-0"
-            />
-          )}
           <span className="font-medium truncate" title={selectedCopy.title}>
             {selectedCopy.title}
           </span>
@@ -91,38 +66,38 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     },
     minSize: 200,
   },
-  {
-    accessorKey: "labels",
-    header: "Labels",
-    cell: ({ row, table }) => {
-      const meta = table.options.meta as SelectedContextsTableMeta | undefined;
-      const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original.labels) : [];
-
-      if (!resolvedLabels || resolvedLabels.length === 0) {
-        return <span className="text-xs text-muted-foreground italic">No labels</span>;
-      }
-      return (
-        <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
-          {resolvedLabels.slice(0, 3).map((label) => {
-            return (
-              <Badge
-                key={label.id}
-                title={label.text}
-                variant="outline"
-                className="truncate"
-              >
-                {label.text}
-              </Badge>
-            );
-          })}
-          {resolvedLabels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
-        </div>
-      );
-    },
-    minSize: 120,
-    maxSize: 250,
-    enableSorting: false,
-  },
+  // {
+  //   accessorKey: "labels",
+  //   header: "Labels",
+  //   cell: ({ row, table }) => {
+  //     const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+  //     const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original.labels) : [];
+  //
+  //     if (!resolvedLabels || resolvedLabels.length === 0) {
+  //       return <span className="text-xs text-muted-foreground italic">No labels</span>;
+  //     }
+  //     return (
+  //       <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
+  //         {resolvedLabels.slice(0, 3).map((label) => {
+  //           return (
+  //             <Badge
+  //               key={label.id}
+  //               title={label.text}
+  //               variant="outline" 
+  //               className="truncate"
+  //             >
+  //               {label.text}
+  //             </Badge>
+  //           );
+  //         })}
+  //         {resolvedLabels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
+  //       </div>
+  //     );
+  //   },
+  //   minSize: 120,
+  //   maxSize: 250,
+  //   enableSorting: false,
+  // },
   {
     id: "actions",
     header: () => <div className="text-right w-full pr-2"></div>,

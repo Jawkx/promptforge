@@ -11,14 +11,14 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resiz
 export interface PromptInputProps {
   value: Content;
   onChange: (value: Content) => void;
-  selectedContexts: Context[]; // These are copies with unique IDs and originalId
-  libraryContexts: Context[]; // Full library for sync checks
-  onRemoveContext: (id: string) => void; // id is unique ID of selected copy
-  onEditSelectedContext: (context: Context) => void; // To edit a selected copy
+  selectedContexts: Context[];
+  libraryContexts: Context[];
+  onRemoveContext: (id: string) => void;
+  onEditSelectedContext: (context: Context) => void;
   onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
   onReorderContexts: (reorderedContexts: Context[]) => void;
-  onDeleteMultipleFromPrompt: (ids: string[]) => void; // ids are unique IDs of selected copies
+  onDeleteMultipleFromPrompt: (ids: string[]) => void;
   getResolvedLabelsByIds: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
@@ -26,9 +26,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
   value,
   onChange,
   selectedContexts,
-  libraryContexts, // Received prop
+  libraryContexts,
   onRemoveContext,
-  onEditSelectedContext, // Received prop
+  onEditSelectedContext,
   onCopyPromptAndContextsClick,
   onFocus,
   onReorderContexts,

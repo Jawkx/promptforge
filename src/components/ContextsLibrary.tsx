@@ -10,26 +10,26 @@ import { getContextsTableColumns, ContextsTableMeta } from "./ContextsDataTableC
 interface ContextsLibraryProps {
   contexts: Context[];
   onAddContextButtonClick: () => void;
-  onEditContext: (context: Context) => void; // For editing library contexts
+  onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   onPasteToAdd: (pastedText: string) => void;
   isFocused: boolean;
   onFocus: () => void;
-  onAddSelectedToPrompt: (selectedContexts: Context[]) => void; // Contexts from library to be copied
+  onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   contexts,
   onAddContextButtonClick,
-  onEditContext, // This is for library contexts
+  onEditContext,
   onDeleteContext,
   onDeleteSelectedContexts,
   onPasteToAdd,
   isFocused,
   onFocus,
-  onAddSelectedToPrompt, // Contexts passed here are from the library
+  onAddSelectedToPrompt,
   getResolvedLabels,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,8 +83,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       <ContextsDataTable
         columns={columns}
         data={contexts}
-        tableMeta={tableMeta} // Meta for library context table
-        onEditContext={onEditContext} // Propagated for library context edits
+        tableMeta={tableMeta}
+        onEditContext={onEditContext}
         onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt} // To add copies to selected list
