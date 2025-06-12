@@ -28,7 +28,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, LucideTrash, LucideListX, LucideEdit3 } from "lucide-react"; // Added LucideEdit3
+import {
+  GripVertical,
+  LucideTrash,
+  LucideListX,
+  LucideEdit3,
+} from "lucide-react"; // Added LucideEdit3
 
 import {
   Table,
@@ -61,7 +66,13 @@ interface SelectedContextsDataTableProps {
 }
 
 // DraggableRow component
-function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typeof useReactTable<Context>> }) {
+function DraggableRow({
+  row,
+  table,
+}: {
+  row: Row<Context>;
+  table: ReturnType<typeof useReactTable<Context>>;
+}) {
   const {
     attributes,
     listeners,
@@ -78,10 +89,14 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
     transition,
     opacity: isDragging ? 0.8 : 1,
     zIndex: isDragging ? 10 : 0,
-    position: 'relative',
+    position: "relative",
   };
 
-  const meta = table.options.meta as SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } | undefined;
+  const meta = table.options.meta as
+    | (SelectedContextsTableMeta & {
+        onDeleteMultipleFromPrompt?: (ids: string[]) => void;
+      })
+    | undefined;
   const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
 
   const handleRemoveFromPrompt = () => {
@@ -96,11 +111,12 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
   };
 
   const handleDeleteMultiple = () => {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map(r => r.original.id);
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((r) => r.original.id);
     meta?.onDeleteMultipleFromPrompt?.(selectedIds);
     table.resetRowSelection();
-  }
-
+  };
 
   return (
     <ContextMenu>
@@ -129,10 +145,18 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
           {row.getVisibleCells().map((cell) => (
             <TableCell
               key={cell.id}
-              className={cn("py-2",
-                cell.column.id === 'drag' || cell.column.id === 'select' ? "px-2" : "px-3"
+              className={cn(
+                "py-2",
+                cell.column.id === "drag" || cell.column.id === "select"
+                  ? "px-2"
+                  : "px-3",
               )}
-              style={{ width: cell.column.getSize() !== 150 ? cell.column.getSize() : undefined }}
+              style={{
+                width:
+                  cell.column.getSize() !== 150
+                    ? cell.column.getSize()
+                    : undefined,
+              }}
             >
               {cell.column.id === "drag" ? (
                 <Button
@@ -155,7 +179,9 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
       <ContextMenuContent className="border-secondary">
         {currentSelectedCount > 1 && row.getIsSelected() ? (
           <>
-            <ContextMenuLabel>{currentSelectedCount} items selected</ContextMenuLabel>
+            <ContextMenuLabel>
+              {currentSelectedCount} items selected
+            </ContextMenuLabel>
             <ContextMenuItem
               onClick={handleDeleteMultiple}
               className="text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -191,7 +217,6 @@ function DraggableRow({ row, table }: { row: Row<Context>; table: ReturnType<typ
   );
 }
 
-
 export function SelectedContextsDataTable({
   columns: initialColumns,
   data,
@@ -202,13 +227,17 @@ export function SelectedContextsDataTable({
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   // Extend tableMeta passed down to rows/cells if needed for additional actions like delete multiple
-  const extendedTableMeta: SelectedContextsTableMeta & { onDeleteMultipleFromPrompt?: (ids: string[]) => void } = {
+  const extendedTableMeta: SelectedContextsTableMeta & {
+    onDeleteMultipleFromPrompt?: (ids: string[]) => void;
+  } = {
     ...tableMeta,
     onDeleteMultipleFromPrompt,
   };
 
-
-  const dataIds = React.useMemo<UniqueIdentifier[]>(() => data.map(({ id }) => id), [data]);
+  const dataIds = React.useMemo<UniqueIdentifier[]>(
+    () => data.map(({ id }) => id),
+    [data],
+  );
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -217,7 +246,7 @@ export function SelectedContextsDataTable({
     useSensor(TouchSensor, {
       activationConstraint: { delay: 250, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor, {})
+    useSensor(KeyboardSensor, {}),
   );
 
   const table = useReactTable({
@@ -239,8 +268,8 @@ export function SelectedContextsDataTable({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      const oldIndex = data.findIndex(item => item.id === active.id);
-      const newIndex = data.findIndex(item => item.id === over.id);
+      const oldIndex = data.findIndex((item) => item.id === active.id);
+      const newIndex = data.findIndex((item) => item.id === over.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         onReorderContexts(arrayMove(data, oldIndex, newIndex));
       }
@@ -262,19 +291,23 @@ export function SelectedContextsDataTable({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
-                    className={cn("py-2 bg-background sticky top-0 z-[1]",
-                      header.id === 'drag' || header.id === 'select' ? "px-2" : "px-3"
+                    className={cn(
+                      "py-2 bg-background sticky top-0 z-[1]",
+                      header.id === "drag" || header.id === "select"
+                        ? "px-2"
+                        : "px-3",
                     )}
                     style={{
-                      width: header.getSize() !== 150 ? header.getSize() : undefined,
+                      width:
+                        header.getSize() !== 150 ? header.getSize() : undefined,
                     }}
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -282,7 +315,10 @@ export function SelectedContextsDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
+              <SortableContext
+                items={dataIds}
+                strategy={verticalListSortingStrategy}
+              >
                 {table.getRowModel().rows.map((row) => (
                   <DraggableRow key={row.id} row={row} table={table} />
                 ))}

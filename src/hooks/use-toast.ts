@@ -34,7 +34,7 @@ function toast(props: OldToastProps) {
   } else {
     // Heuristic to determine if it's a success toast based on title
     // For "default" variant or when no variant is specified.
-    const titleString = typeof title === 'string' ? title.toLowerCase() : '';
+    const titleString = typeof title === "string" ? title.toLowerCase() : "";
     if (
       titleString.includes("success") ||
       titleString.includes("added") ||

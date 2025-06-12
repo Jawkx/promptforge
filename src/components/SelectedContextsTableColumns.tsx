@@ -12,7 +12,6 @@ export type SelectedContextsTableMeta = {
   onEditSelectedContext: (context: Context) => void;
 };
 
-
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
     id: "drag",
@@ -83,7 +82,7 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   //             <Badge
   //               key={label.id}
   //               title={label.text}
-  //               variant="outline" 
+  //               variant="outline"
   //               className="truncate"
   //             >
   //               {label.text}

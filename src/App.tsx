@@ -5,7 +5,6 @@ import AddContext from "./screens/AddContext";
 import EditContext from "./screens/EditContext";
 
 function App() {
-
   return (
     <>
       <Switch>

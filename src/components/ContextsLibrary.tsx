@@ -7,7 +7,7 @@ import { ThemeToggler } from "./ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { v4 as uuid } from "uuid"
+import { v4 as uuid } from "uuid";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 
@@ -26,14 +26,14 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 }) => {
   const [, navigate] = useLocation();
 
-  const { store } = useStore()
+  const { store } = useStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const handleAddContext = () => {
     navigate("/add");
-  }
+  };
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {
@@ -46,9 +46,15 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
-          const placeholderTitle = getRandomUntitledPlaceholder()
-          const id = uuid()
-          store.commit(events.contextCreated({ id, title: placeholderTitle, content: pastedText }))
+          const placeholderTitle = getRandomUntitledPlaceholder();
+          const id = uuid();
+          store.commit(
+            events.contextCreated({
+              id,
+              title: placeholderTitle,
+              content: pastedText,
+            }),
+          );
         } else {
           toast({
             title: "Paste Error",

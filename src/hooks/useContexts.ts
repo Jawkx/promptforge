@@ -12,7 +12,8 @@ const LOCAL_STORAGE_KEYS = {
 
 const initialGlobalLabels: GlobalLabel[] = [];
 
-const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+const generateId = () =>
+  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 const generateContextHash = (title: string, content: string): string => {
   const dataString = JSON.stringify({ title, content });
@@ -20,7 +21,7 @@ const generateContextHash = (title: string, content: string): string => {
   let hash = 5381;
   for (let i = 0; i < dataString.length; i++) {
     const char = dataString.charCodeAt(i);
-    hash = ((hash << 5) + hash) + char; /* hash * 33 + char */
+    hash = (hash << 5) + hash + char; /* hash * 33 + char */
     hash = hash & hash; // Convert to 32bit integer
   }
   return String(hash >>> 0); // Ensure positive integer string
@@ -53,47 +54,61 @@ const showContextOperationNotification = (
   switch (operation) {
     case "Added":
       title = "Context Added";
-      description = customDescription || `Context "${itemName}" has been added.`;
+      description =
+        customDescription || `Context "${itemName}" has been added.`;
       break;
     case "Updated":
       title = "Context Updated";
-      description = customDescription || `Context "${itemName}" has been updated.`;
+      description =
+        customDescription || `Context "${itemName}" has been updated.`;
       break;
     case "SelectedContextUpdated":
       title = "Selected Context Updated";
-      description = customDescription || `Selected context "${itemName}" has been updated.`;
+      description =
+        customDescription || `Selected context "${itemName}" has been updated.`;
       break;
     case "Deleted":
       title = "Context Deleted";
-      description = customDescription || `Context "${itemName}" has been deleted from library.`;
+      description =
+        customDescription ||
+        `Context "${itemName}" has been deleted from library.`;
       break;
     case "RemovedFromPrompt":
       title = "Context Removed";
-      description = customDescription || `Context "${itemName}" removed from prompt.`;
+      description =
+        customDescription || `Context "${itemName}" removed from prompt.`;
       break;
     case "Selected":
       title = "Context Selected";
-      description = customDescription || `Context "${itemName}" copied to prompt.`;
+      description =
+        customDescription || `Context "${itemName}" copied to prompt.`;
       break;
     case "Copied":
       title = "Copied to Clipboard!";
-      description = customDescription || "The prompt and contexts have been copied.";
+      description =
+        customDescription || "The prompt and contexts have been copied.";
       break;
     case "MultipleDeleted":
       title = `${itemName} Contexts Deleted`;
-      description = customDescription || `Successfully deleted ${itemName} context(s) from the library.`;
+      description =
+        customDescription ||
+        `Successfully deleted ${itemName} context(s) from the library.`;
       break;
     case "MultipleRemovedFromPrompt":
       title = `${itemName} Context(s) Removed`;
-      description = customDescription || `${itemName} context(s) have been removed from the prompt.`;
+      description =
+        customDescription ||
+        `${itemName} context(s) have been removed from the prompt.`;
       break;
     case "LabelAdded":
       title = "Label Added";
-      description = customDescription || `Label "${itemName}" has been added globally.`;
+      description =
+        customDescription || `Label "${itemName}" has been added globally.`;
       break;
     case "LabelUpdated":
       title = "Label Updated";
-      description = customDescription || `Label "${itemName}" has been updated globally.`;
+      description =
+        customDescription || `Label "${itemName}" has been updated globally.`;
       break;
     default:
       title = `Operation Successful`;
@@ -103,39 +118,34 @@ const showContextOperationNotification = (
   toastFn({
     title,
     description,
-    variant: variant || (operation.includes("Delete") || operation.includes("Removed") ? "destructive" : "default"),
+    variant:
+      variant ||
+      (operation.includes("Delete") || operation.includes("Removed")
+        ? "destructive"
+        : "default"),
   });
 };
 
-
 export const useContexts = () => {
-
-  const [globalLabels, setGlobalLabels] = useState<GlobalLabel[]>(() => {
-    try {
-      const storedGlobalLabels = localStorage.getItem(LOCAL_STORAGE_KEYS.GLOBAL_LABELS);
-      const parsedLabels = storedGlobalLabels ? JSON.parse(storedGlobalLabels) : initialGlobalLabels;
-      return parsedLabels.map((label: any) => ({ id: label.id, text: label.text }));
-    } catch (error) {
-      console.error("Error loading global labels from local storage:", error);
-      return initialGlobalLabels;
-    }
-  });
-
   const [prompt, setPrompt] = useState<Content>("");
   const [selectedContexts, setSelectedContexts] = useState<Context[]>(() => {
     try {
       const storedSelectedContexts = localStorage.getItem(
         LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
       );
-      const parsed = storedSelectedContexts ? JSON.parse(storedSelectedContexts) : [];
+      const parsed = storedSelectedContexts
+        ? JSON.parse(storedSelectedContexts)
+        : [];
       return parsed.map((c: Context) => ({
         ...c,
         id: c.id || generateId(),
-        labels: c.labels || [],
-        contentHash: c.contentHash || generateContextHash(c.title, c.content, c.labels || [])
+        hash: c.hash || generateContextHash(c.title, c.content),
       }));
     } catch (error) {
-      console.error("Error loading selected contexts from local storage:", error);
+      console.error(
+        "Error loading selected contexts from local storage:",
+        error,
+      );
       return [];
     }
   });
@@ -144,65 +154,53 @@ export const useContexts = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.GLOBAL_LABELS, JSON.stringify(globalLabels));
-    } catch (error) {
-      console.error("Error saving global labels to local storage:", error);
-      toast({
-        title: "Storage Error",
-        description: "Could not save global labels. Changes might not persist.",
-        variant: "destructive",
-      });
-    }
-  }, [globalLabels, toast]);
-
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS, JSON.stringify(selectedContexts));
+      localStorage.setItem(
+        LOCAL_STORAGE_KEYS.SELECTED_CONTEXTS,
+        JSON.stringify(selectedContexts),
+      );
     } catch (error) {
       console.error("Error saving selected contexts to local storage:", error);
     }
   }, [selectedContexts]);
 
-  const getAllGlobalLabels = useCallback(() => globalLabels, [globalLabels]);
-
-  const getGlobalLabelById = useCallback((id: string) => globalLabels.find(gl => gl.id === id), [globalLabels]);
-
-  const getResolvedLabelsByIds = useCallback((labelIds: string[] | undefined): GlobalLabel[] => {
-    if (!labelIds || !Array.isArray(labelIds)) return [];
-    return labelIds.map(labelId => getGlobalLabelById(labelId)).filter(Boolean) as GlobalLabel[];
-  }, [getGlobalLabelById]);
-
-
-  const removeContextFromPrompt = useCallback(
-    (id: string) => {
-      const removedContext = selectedContexts.find((c) => c.id === id);
-      setSelectedContexts((prevSelectedContexts) =>
-        prevSelectedContexts.filter((context) => context.id !== id),
+  const removeContextFromPrompt = useCallback((id: string) => {
+    return;
+    const removedContext = selectedContexts.find((c) => c.id === id);
+    setSelectedContexts((prevSelectedContexts) =>
+      prevSelectedContexts.filter((context) => context.id !== id),
+    );
+    if (removedContext) {
+      const firstLabelText = getResolvedLabelsByIds(removedContext.labels)[0]
+        ?.text;
+      showContextOperationNotification(
+        toast,
+        "RemovedFromPrompt",
+        firstLabelText || removedContext.title,
       );
-      if (removedContext) {
-        const firstLabelText = getResolvedLabelsByIds(removedContext.labels)[0]?.text;
-        showContextOperationNotification(toast, "RemovedFromPrompt", firstLabelText || removedContext.title);
-      }
-    },
-    [selectedContexts, toast, getResolvedLabelsByIds],
-  );
+    }
+  }, []);
 
   const removeMultipleSelectedContextsFromPrompt = useCallback(
     (ids: string[]) => {
       const currentSelectedCount = selectedContexts.length;
-      const updatedSelectedContexts = selectedContexts.filter((context) => !ids.includes(context.id));
+      const updatedSelectedContexts = selectedContexts.filter(
+        (context) => !ids.includes(context.id),
+      );
       setSelectedContexts(updatedSelectedContexts);
 
-      const removedCount = currentSelectedCount - updatedSelectedContexts.length;
+      const removedCount =
+        currentSelectedCount - updatedSelectedContexts.length;
 
       if (removedCount > 0) {
-        showContextOperationNotification(toast, "MultipleRemovedFromPrompt", String(removedCount));
+        showContextOperationNotification(
+          toast,
+          "MultipleRemovedFromPrompt",
+          String(removedCount),
+        );
       }
     },
     [selectedContexts, toast],
   );
-
 
   const copyPromptWithContexts = useCallback(() => {
     const contextsText = selectedContexts
@@ -244,25 +242,36 @@ export const useContexts = () => {
         title: libraryContext.title,
         content: libraryContext.content,
         charCount: libraryContext.content.length,
-        hash: libraryContext.hash || generateContextHash(libraryContext.title, libraryContext.content),
+        hash:
+          libraryContext.hash ||
+          generateContextHash(libraryContext.title, libraryContext.content),
       };
 
       setSelectedContexts((prevSelectedContexts) => [
         ...prevSelectedContexts,
         newSelectedContextCopy,
       ]);
-      showContextOperationNotification(toast, "Selected", newSelectedContextCopy.title);
+      showContextOperationNotification(
+        toast,
+        "Selected",
+        newSelectedContextCopy.title,
+      );
     },
     [toast],
   );
 
-  const reorderSelectedContexts = useCallback((reorderedContexts: Context[]) => {
-    setSelectedContexts(reorderedContexts.map(c => ({
-      ...c,
-      id: String(c.id),
-      // contentHash should already be part of 'c'
-    })));
-  }, []);
+  const reorderSelectedContexts = useCallback(
+    (reorderedContexts: Context[]) => {
+      setSelectedContexts(
+        reorderedContexts.map((c) => ({
+          ...c,
+          id: String(c.id),
+          // contentHash should already be part of 'c'
+        })),
+      );
+    },
+    [],
+  );
 
   return {
     prompt,
@@ -273,8 +282,5 @@ export const useContexts = () => {
     copyPromptWithContexts,
     addContextToPrompt,
     reorderSelectedContexts,
-    getAllGlobalLabels,
-    getGlobalLabelById,
-    getResolvedLabelsByIds,
   };
 };

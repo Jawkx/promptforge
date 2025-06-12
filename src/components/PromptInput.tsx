@@ -5,8 +5,15 @@ import { Copy as CopyIcon } from "lucide-react";
 import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
-import { getSelectedContextsTableColumns, SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import {
+  getSelectedContextsTableColumns,
+  SelectedContextsTableMeta,
+} from "./SelectedContextsTableColumns";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "./ui/resizable";
 
 export interface PromptInputProps {
   value: Content;
@@ -28,14 +35,13 @@ const PromptInput: React.FC<PromptInputProps> = ({
   selectedContexts,
   libraryContexts,
   onRemoveContext,
-  onEditSelectedContext,
+  onEditSelectedContext, // Received prop
   onCopyPromptAndContextsClick,
   onFocus,
   onReorderContexts,
   onDeleteMultipleFromPrompt,
   getResolvedLabelsByIds,
 }) => {
-
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
     getResolvedLabels: getResolvedLabelsByIds,
@@ -47,7 +53,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
     () => getSelectedContextsTableColumns(),
     [],
   );
-
 
   return (
     <ResizablePanelGroup onClick={onFocus} direction="vertical">

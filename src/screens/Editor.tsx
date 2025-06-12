@@ -26,11 +26,10 @@ import { events } from "@/livestore/events";
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 
-
 const Editor: React.FC = () => {
-  const { store } = useStore()
+  const { store } = useStore();
 
-  const contexts = useQuery(contexts$)
+  const contexts = useQuery(contexts$);
 
   const {
     prompt,
@@ -48,7 +47,8 @@ const Editor: React.FC = () => {
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
     null,
   );
-  const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] = useState(false);
+  const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
+    useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
 
   const [focusedArea, setFocusedArea] = useState<string>(
@@ -61,7 +61,7 @@ const Editor: React.FC = () => {
 
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
-      store.commit(events.contextDeleted({ ids: [contextToDeleteId] }))
+      store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
@@ -75,7 +75,7 @@ const Editor: React.FC = () => {
 
   const confirmDeleteMultipleContexts = () => {
     if (contextsToDeleteIds.length > 0) {
-      store.commit(events.contextDeleted({ ids: contextsToDeleteIds }))
+      store.commit(events.contextDeleted({ ids: contextsToDeleteIds }));
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
@@ -83,7 +83,7 @@ const Editor: React.FC = () => {
 
   const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
     // `contextsToAdd` are from the library. `addContextToPrompt` creates copies.
-    contextsToAdd.forEach(context => {
+    contextsToAdd.forEach((context) => {
       addContextToPrompt(context);
     });
   };
@@ -115,7 +115,9 @@ const Editor: React.FC = () => {
                 onCopyPromptAndContextsClick={handleCopy}
                 onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
                 onReorderContexts={reorderSelectedContexts}
-                onDeleteMultipleFromPrompt={handleDeleteMultipleSelectedFromPrompt}
+                onDeleteMultipleFromPrompt={
+                  handleDeleteMultipleSelectedFromPrompt
+                }
                 getResolvedLabelsByIds={getResolvedLabelsByIds}
               />
             </div>
@@ -149,7 +151,8 @@ const Editor: React.FC = () => {
                 context "
                 {contexts.find((c) => c.id === contextToDeleteId)?.title ||
                   "this context"}
-                " from the library. Copies in the selected list will remain but become orphaned.
+                " from the library. Copies in the selected list will remain but
+                become orphaned.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -173,7 +176,8 @@ const Editor: React.FC = () => {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete{" "}
-                {contextsToDeleteIds.length} context(s) from the library. Copies in the selected list will remain but become orphaned.
+                {contextsToDeleteIds.length} context(s) from the library. Copies
+                in the selected list will remain but become orphaned.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

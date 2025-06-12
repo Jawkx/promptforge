@@ -7,12 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import { LucideArrowLeft, LucideSave } from "lucide-react";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
-import { v4 as uuid } from "uuid"
+import { v4 as uuid } from "uuid";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
-  const { store } = useStore()
+  const { store } = useStore();
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
@@ -24,13 +24,15 @@ const AddContext: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const finalTitle = title.length !== 0 ? title.trim() : getRandomUntitledPlaceholder();
+    const finalTitle =
+      title.length !== 0 ? title.trim() : getRandomUntitledPlaceholder();
     const finalContent = content.trim();
 
     if (!finalTitle && !finalContent) {
       toast({
         title: "Empty Context",
-        description: "Both title and content are empty. Please add some content or a title.",
+        description:
+          "Both title and content are empty. Please add some content or a title.",
         variant: "destructive",
       });
       return;
@@ -40,14 +42,17 @@ const AddContext: React.FC = () => {
     } else if (!finalContent) {
       toast({
         title: "Empty Content",
-        description: "Content cannot be empty if title is also blank or nearly blank.",
+        description:
+          "Content cannot be empty if title is also blank or nearly blank.",
         variant: "destructive",
       });
       return;
     }
 
-    const id = uuid()
-    store.commit(events.contextCreated({ id, title: finalTitle, content: finalContent }))
+    const id = uuid();
+    store.commit(
+      events.contextCreated({ id, title: finalTitle, content: finalContent }),
+    );
 
     navigate("/");
   };

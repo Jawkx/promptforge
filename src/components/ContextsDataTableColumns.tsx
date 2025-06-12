@@ -122,4 +122,3 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
     enableSorting: false,
   },
 ];
-

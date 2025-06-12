@@ -13,15 +13,13 @@ import { contexts$ } from "@/livestore/queries";
 
 const EditContext: React.FC = () => {
   const [, navigate] = useLocation();
-  const params = useParams() as { type?: 'library' | 'selected', id?: string };
-  const { store } = useStore()
+  const params = useParams() as { type?: "library" | "selected"; id?: string };
+  const { store } = useStore();
   const { type, id: contextId } = params;
 
-  const {
-    selectedContexts,
-  } = useContexts();
+  const { selectedContexts } = useContexts();
 
-  const contexts = useQuery(contexts$)
+  const contexts = useQuery(contexts$);
 
   const { toast } = useToast();
 
@@ -31,10 +29,10 @@ const EditContext: React.FC = () => {
 
   useEffect(() => {
     let foundContext: Context | undefined;
-    if (type === 'library') {
-      foundContext = contexts.find(c => c.id === contextId);
-    } else if (type === 'selected') {
-      foundContext = selectedContexts.find(c => c.id === contextId);
+    if (type === "library") {
+      foundContext = contexts.find((c) => c.id === contextId);
+    } else if (type === "selected") {
+      foundContext = selectedContexts.find((c) => c.id === contextId);
     }
     setContextToEdit(foundContext || null);
   }, [contextId, type, contexts, selectedContexts]);
@@ -45,7 +43,8 @@ const EditContext: React.FC = () => {
         <LucideFrown className="h-16 w-16 text-destructive mb-4" />
         <h1 className="text-2xl font-bold text-primary">Context Not Found</h1>
         <p className="text-muted-foreground mb-4">
-          The context you are trying to edit does not exist or could not be found.
+          The context you are trying to edit does not exist or could not be
+          found.
         </p>
         <Button variant="outline" onClick={() => navigate("/")}>
           <LucideArrowLeft className="mr-2" />
@@ -67,24 +66,38 @@ const EditContext: React.FC = () => {
     const trimmedContent = content.trim();
 
     if (!trimmedTitle) {
-      toast({ title: "Title Required", description: "Title cannot be empty.", variant: "destructive" });
+      toast({
+        title: "Title Required",
+        description: "Title cannot be empty.",
+        variant: "destructive",
+      });
       return;
     }
     if (!trimmedContent) {
-      toast({ title: "Content Required", description: "Content cannot be empty.", variant: "destructive" });
+      toast({
+        title: "Content Required",
+        description: "Content cannot be empty.",
+        variant: "destructive",
+      });
       return;
     }
 
-    if (type === 'library') {
-      store.commit(events.contextUpdated({ id: contextId, title: trimmedTitle, content: trimmedContent }))
+    if (type === "library") {
+      store.commit(
+        events.contextUpdated({
+          id: contextId,
+          title: trimmedTitle,
+          content: trimmedContent,
+        }),
+      );
       navigate("/");
-    } else if (type === 'selected') {
+    } else if (type === "selected") {
       // success = updateSelectedContext(formData);
     }
-
   };
 
-  const screenTitle = type === 'library' ? "Edit Library Context" : "Edit Selected Context";
+  const screenTitle =
+    type === "library" ? "Edit Library Context" : "Edit Selected Context";
 
   return (
     <div className="p-6 h-screen flex flex-col max-w-screen-lg mx-auto">
