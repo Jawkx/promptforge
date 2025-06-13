@@ -14,16 +14,6 @@ export type SelectedContextsTableMeta = {
 
 export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
   {
-    id: "drag",
-    header: () => null,
-    cell: () => null,
-    size: 30,
-    minSize: 30,
-    maxSize: 30,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: "select",
     header: ({ table }) => (
       <Checkbox
@@ -65,38 +55,6 @@ export const getSelectedContextsTableColumns = (): ColumnDef<Context>[] => [
     },
     minSize: 200,
   },
-  // {
-  //   accessorKey: "labels",
-  //   header: "Labels",
-  //   cell: ({ row, table }) => {
-  //     const meta = table.options.meta as SelectedContextsTableMeta | undefined;
-  //     const resolvedLabels = meta?.getResolvedLabels ? meta.getResolvedLabels(row.original.labels) : [];
-  //
-  //     if (!resolvedLabels || resolvedLabels.length === 0) {
-  //       return <span className="text-xs text-muted-foreground italic">No labels</span>;
-  //     }
-  //     return (
-  //       <div className="flex flex-wrap gap-1 items-center max-w-[200px] overflow-hidden">
-  //         {resolvedLabels.slice(0, 3).map((label) => {
-  //           return (
-  //             <Badge
-  //               key={label.id}
-  //               title={label.text}
-  //               variant="outline"
-  //               className="truncate"
-  //             >
-  //               {label.text}
-  //             </Badge>
-  //           );
-  //         })}
-  //         {resolvedLabels.length > 3 && <span className="text-xs text-muted-foreground">...</span>}
-  //       </div>
-  //     );
-  //   },
-  //   minSize: 120,
-  //   maxSize: 250,
-  //   enableSorting: false,
-  // },
   {
     id: "actions",
     header: () => <div className="text-right w-full pr-2"></div>,
