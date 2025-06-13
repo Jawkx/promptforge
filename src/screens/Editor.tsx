@@ -41,6 +41,11 @@ const Editor: React.FC = () => {
     FOCUSED_PANE_PROMPT_INPUT,
   );
 
+  const handleDeleteContextRequest = (id: string) => {
+    setContextToDeleteId(id);
+    setDeleteConfirmationOpen(true);
+  };
+
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
       store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
@@ -104,6 +109,7 @@ const Editor: React.FC = () => {
             <ContextsLibrary
               isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
               onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
+              onDeleteContext={handleDeleteContextRequest}
               onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
             />
           </ResizablePanel>

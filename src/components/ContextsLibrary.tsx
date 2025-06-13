@@ -13,6 +13,7 @@ import { events } from "@/livestore/events";
 import { useLocalStore } from "@/localStore";
 
 interface ContextsLibraryProps {
+  onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   isFocused: boolean;
   onFocus: () => void;
@@ -33,6 +34,7 @@ const generateContextHash = (title: string, content: string): string => {
 };
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
+  onDeleteContext,
   onDeleteSelectedContexts,
   isFocused,
   onFocus,
@@ -115,6 +117,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       </div>
 
       <ContextsDataTable
+        onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}

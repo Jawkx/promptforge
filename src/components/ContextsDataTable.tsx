@@ -51,6 +51,7 @@ import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 
 interface ContextsDataTableProps {
+  onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   searchQuery: string;
@@ -58,6 +59,7 @@ interface ContextsDataTableProps {
 }
 
 export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
+  onDeleteContext,
   onDeleteSelectedContexts,
   onAddSelectedToPrompt,
   searchQuery,
@@ -78,13 +80,9 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
     navigate(`/edit/library/${context.id}`);
   };
 
-  const handleDeleteContext = (contextId: string) => {
-    store.commit(events.contextDeleted({ ids: [contextId] }));
-  };
-
   const tableMeta: ContextsTableMeta = {
     onEditContext: handleEditContext,
-    onDeleteContext: handleDeleteContext,
+    onDeleteContext: onDeleteContext,
   };
 
   const contexts = useQuery(contexts$);
