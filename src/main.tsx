@@ -11,6 +11,9 @@ import LiveStoreSharedWorker from "@livestore/adapter-web/shared-worker?sharedwo
 import { makePersistedAdapter } from "@livestore/adapter-web";
 import { schema } from "./livestore/schema.ts";
 import { LoadingScreen } from "./components/LoadingScreen.tsx";
+import { scan } from "react-scan";
+
+scan({ enabled: import.meta.env.VITE_REACT_SCAN === "true" });
 
 const adapter = makePersistedAdapter({
   storage: { type: "opfs" },

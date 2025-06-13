@@ -21,6 +21,7 @@ import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 import { useToast } from "@/hooks/use-toast";
+import { SelectedContexts } from "@/components/SelectedContexts";
 
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
@@ -94,11 +95,24 @@ const Editor: React.FC = () => {
               <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
             </div>
 
-            <div className="flex-grow relative">
-              <PromptInput
-                onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
-              />
-            </div>
+            <ResizablePanelGroup
+              direction="vertical"
+              onClick={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
+              className="flex-grow"
+            >
+              <ResizablePanel className="flex-1">
+                <PromptInput />
+              </ResizablePanel>
+              <ResizableHandle withHandle className="my-4" />
+              <ResizablePanel
+                defaultSize={40}
+                minSize={20}
+                maxSize={80}
+                className="flex flex-col"
+              >
+                <SelectedContexts />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel

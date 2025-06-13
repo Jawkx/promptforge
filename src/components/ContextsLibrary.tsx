@@ -42,7 +42,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const [, navigate] = useLocation();
   const { store } = useStore();
   const { toast } = useToast();
-  const { addContextToPrompt } = useLocalStore();
+  const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleAddContext = () => {

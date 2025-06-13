@@ -17,7 +17,10 @@ const EditContext: React.FC = () => {
   const { store } = useStore();
   const { type, id: contextId } = params;
 
-  const { selectedContexts, updateSelectedContext } = useLocalStore();
+  const selectedContexts = useLocalStore((state) => state.selectedContexts);
+  const updateSelectedContext = useLocalStore(
+    (state) => state.updateSelectedContext,
+  );
   const contexts = useQuery(contexts$);
   const { toast } = useToast();
 
