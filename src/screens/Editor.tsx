@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Context } from "../types";
 import PromptInput from "../components/PromptInput";
 import ContextsLibrary from "../components/ContextsLibrary";
 import {
@@ -41,11 +40,6 @@ const Editor: React.FC = () => {
   const [focusedArea, setFocusedArea] = useState<string>(
     FOCUSED_PANE_PROMPT_INPUT,
   );
-
-  const handleDeleteContextRequest = (id: string) => {
-    setContextToDeleteId(id);
-    setDeleteConfirmationOpen(true);
-  };
 
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
