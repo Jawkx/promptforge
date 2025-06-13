@@ -1,8 +1,7 @@
 import React from "react";
-import { Context, GlobalLabel } from "../types";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
-import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
 import {
@@ -14,39 +13,86 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "./ui/resizable";
+import { useLocalStore } from "@/localStore";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export interface PromptInputProps {
-  value: Content;
-  onChange: (value: Content) => void;
-  selectedContexts: Context[];
-  libraryContexts: Context[];
-  onRemoveContext: (id: string) => void;
-  onEditSelectedContext: (context: Context) => void;
-  onCopyPromptAndContextsClick: () => void;
   onFocus: () => void;
-  onReorderContexts: (reorderedContexts: Context[]) => void;
-  onDeleteMultipleFromPrompt: (ids: string[]) => void;
-  getResolvedLabelsByIds: (labelIds: string[] | undefined) => GlobalLabel[];
 }
 
-const PromptInput: React.FC<PromptInputProps> = ({
-  value,
-  onChange,
-  selectedContexts,
-  libraryContexts,
-  onRemoveContext,
-  onEditSelectedContext, // Received prop
-  onCopyPromptAndContextsClick,
-  onFocus,
-  onReorderContexts,
-  onDeleteMultipleFromPrompt,
-  getResolvedLabelsByIds,
-}) => {
+const PromptInput: React.FC<PromptInputProps> = ({ onFocus }) => {
+  const {
+    prompt,
+    setPrompt,
+    selectedContexts,
+    removeMultipleSelectedContextsFromPrompt,
+  } = useLocalStore();
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+
+  const onCopyPromptAndContextsClick = () => {
+    const contextsText = selectedContexts
+      .map((context) => `# ${context.title}\n${context.content}`)
+      .join("\n\n");
+
+    const fullText = prompt ? `${prompt}\n\n${contextsText}` : contextsText;
+
+    if (!fullText.trim()) {
+      toast({
+        title: "Nothing to Copy",
+        description: "The prompt and selected contexts are empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(fullText)
+      .then(() => {
+        toast({
+          title: "Copied to Clipboard!",
+          description: "The prompt and contexts have been copied.",
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+        toast({
+          title: "Copy Failed",
+          description: "Could not copy text to clipboard.",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const onRemoveContext = (id: string) => {
+    const context = selectedContexts.find((c) => c.id === id);
+    if (context) {
+      removeMultipleSelectedContextsFromPrompt([id]);
+      toast({
+        title: "Context Removed",
+        description: `Context "${context.title}" removed from prompt.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onEditSelectedContext = (context: Context) => {
+    navigate(`/edit/selected/${context.id}`);
+  };
+
+  const onDeleteMultipleFromPrompt = (ids: string[]) => {
+    removeMultipleSelectedContextsFromPrompt(ids);
+    toast({
+      title: `${ids.length} Context(s) Removed`,
+      description: `${ids.length} context(s) have been removed from the prompt.`,
+      variant: "destructive",
+    });
+  };
+
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
-    getResolvedLabels: getResolvedLabelsByIds,
-    libraryContexts, // Pass library contexts for sync checks
-    onEditSelectedContext, // Pass handler for editing selected contexts
+    onEditSelectedContext,
   };
 
   const selectedContextsColumns = React.useMemo(
@@ -58,8 +104,8 @@ const PromptInput: React.FC<PromptInputProps> = ({
     <ResizablePanelGroup onClick={onFocus} direction="vertical">
       <ResizablePanel className="flex-1">
         <MinimalTiptapEditor
-          value={value}
-          onChange={onChange}
+          value={prompt}
+          onChange={setPrompt}
           className="w-full h-full"
           editorContentClassName="p-5 overflow-y-auto flex-1"
           output="text"
@@ -81,7 +127,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
             columns={selectedContextsColumns}
             data={selectedContexts}
             tableMeta={selectedContextsTableMeta}
-            onReorderContexts={onReorderContexts}
             onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
           />
         ) : (

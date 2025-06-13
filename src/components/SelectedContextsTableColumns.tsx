@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Context, GlobalLabel } from "../types";
+import { Context } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
-  getResolvedLabels: (labelIds: string[] | undefined) => GlobalLabel[];
-  libraryContexts: Context[];
   onEditSelectedContext: (context: Context) => void;
 };
 

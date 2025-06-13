@@ -57,12 +57,12 @@ interface ContextsDataTableProps {
   setSearchQuery: (query: string) => void;
 }
 
-export function ContextsDataTable({
+export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   onDeleteSelectedContexts,
   onAddSelectedToPrompt,
   searchQuery,
   setSearchQuery,
-}: ContextsDataTableProps) {
+}) => {
   const [, navigate] = useLocation();
   const { store } = useStore();
 
@@ -358,4 +358,4 @@ export function ContextsDataTable({
       </div>
     </div>
   );
-}
+};

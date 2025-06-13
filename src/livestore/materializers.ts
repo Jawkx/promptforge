@@ -4,7 +4,7 @@ import { tables } from "./schema";
 
 export const materializers = State.SQLite.materializers(events, {
   "v1.ContextCreated": ({ id, title, content }) => {
-    const contextHash = generateContextHash(title, content, []);
+    const contextHash = generateContextHash(title, content);
     const charCount = content.length;
     return tables.contexts.insert({
       id,
@@ -15,7 +15,7 @@ export const materializers = State.SQLite.materializers(events, {
     });
   },
   "v1.ContextUpdated": ({ id, title, content }) => {
-    const contextHash = generateContextHash(title, content, []);
+    const contextHash = generateContextHash(title, content);
     const charCount = content.length;
     return tables.contexts
       .update({ title, content, charCount, hash: contextHash })
@@ -26,16 +26,10 @@ export const materializers = State.SQLite.materializers(events, {
   },
 });
 
-const generateContextHash = (
-  title: string,
-  content: string,
-  labelIds: string[],
-): string => {
-  const sortedLabelsString = [...(labelIds || [])].sort().join(",");
+const generateContextHash = (title: string, content: string): string => {
   const dataString = JSON.stringify({
     title,
     content,
-    labels: sortedLabelsString,
   });
 
   let hash = 5381;

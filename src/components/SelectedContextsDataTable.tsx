@@ -10,7 +10,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
-import { LucideTrash, LucideListX, LucideEdit3 } from "lucide-react"; // Removed GripVertical
+import { LucideTrash, LucideListX, LucideEdit3 } from "lucide-react";
 
 import {
   Table,
@@ -149,12 +149,14 @@ const DataTableRow = ({
   );
 };
 
-export const SelectedContextsDataTable = ({
+export const SelectedContextsDataTable: React.FC<
+  SelectedContextsDataTableProps
+> = ({
   columns: initialColumns,
   data,
   tableMeta,
   onDeleteMultipleFromPrompt,
-}: SelectedContextsDataTableProps) => {
+}) => {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const extendedTableMeta: SelectedContextsTableMeta & {

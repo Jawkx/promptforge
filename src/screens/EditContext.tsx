@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
-import { useContexts } from "@/hooks/useContexts";
 import { Context } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { LucideArrowLeft, LucideSave, LucideFrown } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { contexts$ } from "@/livestore/queries";
+import { useLocalStore } from "@/localStore";
 
 const EditContext: React.FC = () => {
   const [, navigate] = useLocation();
@@ -17,10 +17,8 @@ const EditContext: React.FC = () => {
   const { store } = useStore();
   const { type, id: contextId } = params;
 
-  const { selectedContexts } = useContexts();
-
+  const { selectedContexts, updateSelectedContext } = useLocalStore();
   const contexts = useQuery(contexts$);
-
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
@@ -35,9 +33,13 @@ const EditContext: React.FC = () => {
       foundContext = selectedContexts.find((c) => c.id === contextId);
     }
     setContextToEdit(foundContext || null);
+    if (foundContext) {
+      setTitle(foundContext.title);
+      setContent(foundContext.content);
+    }
   }, [contextId, type, contexts, selectedContexts]);
 
-  if (!contextToEdit) {
+  if (!contextToEdit && contextId) {
     return (
       <div className="p-6 h-screen flex flex-col items-center justify-center max-w-screen-lg mx-auto text-center">
         <LucideFrown className="h-16 w-16 text-destructive mb-4" />
@@ -60,7 +62,7 @@ const EditContext: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!contextId) return;
+    if (!contextId || !contextToEdit) return;
 
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
@@ -90,9 +92,24 @@ const EditContext: React.FC = () => {
           content: trimmedContent,
         }),
       );
+      toast({
+        title: "Context Updated",
+        description: `Context "${trimmedTitle}" has been updated.`,
+      });
       navigate("/");
     } else if (type === "selected") {
-      // success = updateSelectedContext(formData);
+      const updatedContext = {
+        ...contextToEdit,
+        title: trimmedTitle,
+        content: trimmedContent,
+        charCount: trimmedContent.length,
+      };
+      updateSelectedContext(updatedContext);
+      toast({
+        title: "Selected Context Updated",
+        description: `Selected context "${trimmedTitle}" has been updated.`,
+      });
+      navigate("/");
     }
   };
 
@@ -105,7 +122,7 @@ const EditContext: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-primary">{screenTitle}</h1>
           <p className="text-muted-foreground">
-            Modify the title, content, or labels of your context snippet.
+            Modify the title or content of your context snippet.
           </p>
         </div>
         <Button variant="outline" onClick={handleCancel}>

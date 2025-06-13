@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useContexts } from "../hooks/useContexts";
 import { Context } from "../types";
 import PromptInput from "../components/PromptInput";
 import ContextsLibrary from "../components/ContextsLibrary";
@@ -22,26 +21,15 @@ import { LucideAnvil } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
+import { useToast } from "@/hooks/use-toast";
 
 const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
 const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
 
 const Editor: React.FC = () => {
   const { store } = useStore();
-
   const contexts = useQuery(contexts$);
-
-  const {
-    prompt,
-    setPrompt,
-    selectedContexts,
-    removeContextFromPrompt,
-    removeMultipleSelectedContextsFromPrompt,
-    copyPromptWithContexts,
-    addContextToPrompt,
-    reorderSelectedContexts,
-    getResolvedLabelsByIds,
-  } = useContexts();
+  const { toast } = useToast();
 
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
@@ -50,18 +38,25 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
-
   const [focusedArea, setFocusedArea] = useState<string>(
     FOCUSED_PANE_PROMPT_INPUT,
   );
 
-  const handleCopy = () => {
-    copyPromptWithContexts();
+  const handleDeleteContextRequest = (id: string) => {
+    setContextToDeleteId(id);
+    setDeleteConfirmationOpen(true);
   };
 
   const confirmDeleteContext = () => {
     if (contextToDeleteId) {
       store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
+      toast({
+        title: "Context Deleted",
+        description: `Context "${
+          contexts.find((c) => c.id === contextToDeleteId)?.title
+        }" has been deleted from library.`,
+        variant: "destructive",
+      });
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
@@ -76,20 +71,14 @@ const Editor: React.FC = () => {
   const confirmDeleteMultipleContexts = () => {
     if (contextsToDeleteIds.length > 0) {
       store.commit(events.contextDeleted({ ids: contextsToDeleteIds }));
+      toast({
+        title: `${contextsToDeleteIds.length} Contexts Deleted`,
+        description: `Successfully deleted ${contextsToDeleteIds.length} context(s) from the library.`,
+        variant: "destructive",
+      });
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
-  };
-
-  const handleAddSelectedContextsToPrompt = (contextsToAdd: Context[]) => {
-    // `contextsToAdd` are from the library. `addContextToPrompt` creates copies.
-    contextsToAdd.forEach((context) => {
-      addContextToPrompt(context);
-    });
-  };
-
-  const handleDeleteMultipleSelectedFromPrompt = (ids: string[]) => {
-    removeMultipleSelectedContextsFromPrompt(ids);
   };
 
   return (
@@ -106,19 +95,9 @@ const Editor: React.FC = () => {
               <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
             </div>
 
-            <div className="flex-grow  relative">
+            <div className="flex-grow relative">
               <PromptInput
-                value={prompt}
-                onChange={setPrompt}
-                selectedContexts={selectedContexts}
-                onRemoveContext={removeContextFromPrompt}
-                onCopyPromptAndContextsClick={handleCopy}
                 onFocus={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
-                onReorderContexts={reorderSelectedContexts}
-                onDeleteMultipleFromPrompt={
-                  handleDeleteMultipleSelectedFromPrompt
-                }
-                getResolvedLabelsByIds={getResolvedLabelsByIds}
               />
             </div>
           </ResizablePanel>
@@ -131,7 +110,6 @@ const Editor: React.FC = () => {
             <ContextsLibrary
               isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
               onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
-              onAddSelectedToPrompt={handleAddSelectedContextsToPrompt}
               onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
             />
           </ResizablePanel>
@@ -151,15 +129,17 @@ const Editor: React.FC = () => {
                 context "
                 {contexts.find((c) => c.id === contextToDeleteId)?.title ||
                   "this context"}
-                " from the library. Copies in the selected list will remain but
-                become orphaned.
+                " from the library.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteContext}>
+              <AlertDialogAction
+                onClick={confirmDeleteContext}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -176,15 +156,17 @@ const Editor: React.FC = () => {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete{" "}
-                {contextsToDeleteIds.length} context(s) from the library. Copies
-                in the selected list will remain but become orphaned.
+                {contextsToDeleteIds.length} context(s) from the library.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setContextsToDeleteIds([])}>
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteMultipleContexts}>
+              <AlertDialogAction
+                onClick={confirmDeleteMultipleContexts}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

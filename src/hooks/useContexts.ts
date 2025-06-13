@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Context, GlobalLabel } from "../types";
+import { Context } from "../types";
 import { useToast, ToastOptions } from "./use-toast";
 import { Content } from "@tiptap/react";
 
@@ -9,8 +9,6 @@ const LOCAL_STORAGE_KEYS = {
   PROMPT: "promptForge_prompt",
   SELECTED_CONTEXTS: "promptForge_selectedContexts",
 };
-
-const initialGlobalLabels: GlobalLabel[] = [];
 
 const generateId = () =>
   `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -165,19 +163,6 @@ export const useContexts = () => {
 
   const removeContextFromPrompt = useCallback((id: string) => {
     return;
-    const removedContext = selectedContexts.find((c) => c.id === id);
-    setSelectedContexts((prevSelectedContexts) =>
-      prevSelectedContexts.filter((context) => context.id !== id),
-    );
-    if (removedContext) {
-      const firstLabelText = getResolvedLabelsByIds(removedContext.labels)[0]
-        ?.text;
-      showContextOperationNotification(
-        toast,
-        "RemovedFromPrompt",
-        firstLabelText || removedContext.title,
-      );
-    }
   }, []);
 
   const removeMultipleSelectedContextsFromPrompt = useCallback(

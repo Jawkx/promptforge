@@ -1,39 +1,35 @@
 import { Context } from "@/types";
 import { create } from "zustand";
+import { Content } from "@tiptap/react";
 
 interface LocalStoreState {
-  promptInput: string;
-  setPromptInput: (promptInput: string) => void;
+  prompt: Content;
+  setPrompt: (prompt: Content) => void;
 
-  selectedContext: Context[];
-  addSelectedContext: (context: Context) => void;
-  removeSelectedContexts: (contextIds: string[]) => void;
+  selectedContexts: Context[];
+  addContextToPrompt: (context: Context) => void;
+  removeMultipleSelectedContextsFromPrompt: (contextIds: string[]) => void;
   updateSelectedContext: (context: Context) => void;
 }
 
 export const useLocalStore = create<LocalStoreState>((set) => ({
-  // Prompt Input
-  promptInput: "",
-  setPromptInput: (promptInput) => set({ promptInput }),
+  prompt: "",
+  setPrompt: (prompt) => set({ prompt }),
 
-  // Selected Contexts
-  selectedContext: [],
-  addSelectedContext: (context: Context) =>
+  selectedContexts: [],
+  addContextToPrompt: (context) =>
     set((state) => ({
-      ...state,
-      selectedContext: [...state.selectedContext, context],
+      selectedContexts: [...state.selectedContexts, context],
     })),
-  removeSelectedContexts: (contextIds: string[]) =>
+  removeMultipleSelectedContextsFromPrompt: (contextIds) =>
     set((state) => ({
-      ...state,
-      selectedContext: state.selectedContext.filter(
+      selectedContexts: state.selectedContexts.filter(
         (c) => !contextIds.includes(c.id),
       ),
     })),
-  updateSelectedContext: (context: Context) =>
+  updateSelectedContext: (context) =>
     set((state) => ({
-      ...state,
-      selectedContext: state.selectedContext.map((c) =>
+      selectedContexts: state.selectedContexts.map((c) =>
         c.id === context.id ? context : c,
       ),
     })),
