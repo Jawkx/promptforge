@@ -17,6 +17,8 @@ export const SelectedContexts: React.FC = () => {
     (state) => state.removeMultipleSelectedContextsFromPrompt,
   );
 
+  const prompt = useLocalStore((state) => state.prompt);
+
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
