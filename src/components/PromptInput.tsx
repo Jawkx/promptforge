@@ -1,5 +1,6 @@
 import React from "react";
 import { Context } from "../types";
+import { Content } from "@tiptap/react";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
@@ -16,6 +17,9 @@ import {
 import { useLocalStore } from "@/localStore";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import TurnDownService from "turndown";
+
+const turndownService = new TurnDownService();
 
 export interface PromptInputProps {
   onFocus: () => void;
@@ -100,15 +104,19 @@ const PromptInput: React.FC<PromptInputProps> = ({ onFocus }) => {
     [],
   );
 
+  const handleSetPrompt = (inputContent: Content) => {
+    setPrompt(turndownService.turndown(inputContent as string));
+  };
+
   return (
     <ResizablePanelGroup onClick={onFocus} direction="vertical">
       <ResizablePanel className="flex-1">
         <MinimalTiptapEditor
           value={prompt}
-          onChange={setPrompt}
+          onChange={handleSetPrompt}
           className="w-full h-full"
           editorContentClassName="p-5 overflow-y-auto flex-1"
-          output="text"
+          output="html"
           placeholder="Enter your prompt here..."
           autofocus={true}
           editable={true}
