@@ -1,10 +1,16 @@
-import { useTheme } from "@/hooks/useTheme";
 import { Button } from "./ui/button"; // Ensure this path is correct
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useStore } from "@livestore/react";
+import { tables } from "@/livestore/schema";
 
 export const ThemeToggler = () => {
-  const { setTheme, theme } = useTheme();
+  const { store } = useStore();
+
+  const [{ theme }, updatePreferences] = store.useClientDocument(
+    tables.preferences,
+  );
+
   const [currentIcon, setCurrentIcon] = useState(
     theme === "dark" ? "moon" : "sun",
   );
@@ -12,16 +18,14 @@ export const ThemeToggler = () => {
   useEffect(() => {
     const newIcon = theme === "dark" ? "moon" : "sun";
     setCurrentIcon(newIcon);
+
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
   }, [theme]);
 
   const handleToggleTheme = () => {
-    const newTheme =
-      currentIcon === "sun"
-        ? "dark"
-        : currentIcon === "moon" && theme === "dark"
-          ? "light"
-          : "dark";
-    setTheme(newTheme);
+    updatePreferences({ theme: theme === "dark" ? "light" : "dark" });
   };
 
   return (

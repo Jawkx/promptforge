@@ -1,10 +1,16 @@
-import { useTheme } from "@/hooks/useTheme";
+import { tables } from "@/livestore/schema";
+import { useStore } from "@livestore/react";
 import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { store } = useStore();
+
+  const [{ theme }] = store.useClientDocument(
+    tables.preferences,
+  );
+
 
   return (
     <Sonner

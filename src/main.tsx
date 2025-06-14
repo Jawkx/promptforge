@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import App from "./App.tsx";
 import "./index.css";
-import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import { LiveStoreProvider } from "@livestore/react";
 import LiveStoreWorker from "./livestore/livestore.worker.ts?worker";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
@@ -29,11 +28,9 @@ createRoot(document.getElementById("root")!).render(
       renderLoading={() => <LoadingScreen />}
       batchUpdates={batchUpdates}
     >
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <TooltipProvider>
-          <App />
-        </TooltipProvider>
-      </ThemeProvider>
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
     </LiveStoreProvider>
   </StrictMode>,
 );
