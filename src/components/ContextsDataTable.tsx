@@ -46,9 +46,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
-import { useQuery, useStore } from "@livestore/react";
+import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
-import { events } from "@/livestore/events";
 
 interface ContextsDataTableProps {
   onDeleteContext: (id: string) => void;
@@ -66,7 +65,6 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   setSearchQuery,
 }) => {
   const [, navigate] = useLocation();
-  const { store } = useStore();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
