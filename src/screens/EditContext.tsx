@@ -1,21 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useParams } from "wouter";
+import React, { useState, useEffect, useCallback } from "react";
+import { useLocation } from "wouter";
 import { Context } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { LucideArrowLeft, LucideSave, LucideFrown } from "lucide-react";
+import { LucideSave } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { contexts$ } from "@/livestore/queries";
 import { useLocalStore } from "@/localStore";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const EditContext: React.FC = () => {
+interface EditContextProps {
+  type: "library" | "selected";
+  id: string;
+}
+
+const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const [, navigate] = useLocation();
-  const params = useParams() as { type?: "library" | "selected"; id?: string };
   const { store } = useStore();
-  const { type, id: contextId } = params;
 
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(
@@ -28,6 +39,10 @@ const EditContext: React.FC = () => {
   const [content, setContent] = useState("");
   const [contextToEdit, setContextToEdit] = useState<Context | null>(null);
 
+  const handleClose = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
   useEffect(() => {
     let foundContext: Context | undefined;
     if (type === "library") {
@@ -35,33 +50,22 @@ const EditContext: React.FC = () => {
     } else if (type === "selected") {
       foundContext = selectedContexts.find((c) => c.id === contextId);
     }
-    setContextToEdit(foundContext || null);
+
     if (foundContext) {
+      setContextToEdit(foundContext);
       setTitle(foundContext.title);
       setContent(foundContext.content);
+    } else {
+      // If context is not found, show a toast and close the modal.
+      toast({
+        title: "Context Not Found",
+        description:
+          "The context you are trying to edit does not exist or could not be found.",
+        variant: "destructive",
+      });
+      handleClose();
     }
-  }, [contextId, type, contexts, selectedContexts]);
-
-  if (!contextToEdit && contextId) {
-    return (
-      <div className="p-6 h-screen flex flex-col items-center justify-center max-w-screen-lg mx-auto text-center">
-        <LucideFrown className="h-16 w-16 text-destructive mb-4" />
-        <h1 className="text-2xl font-bold text-primary">Context Not Found</h1>
-        <p className="text-muted-foreground mb-4">
-          The context you are trying to edit does not exist or could not be
-          found.
-        </p>
-        <Button variant="outline" onClick={() => navigate("/")}>
-          <LucideArrowLeft className="mr-2" />
-          Back to Editor
-        </Button>
-      </div>
-    );
-  }
-
-  const handleCancel = () => {
-    navigate("/");
-  };
+  }, [contextId, type, contexts, selectedContexts, toast, handleClose]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -99,7 +103,6 @@ const EditContext: React.FC = () => {
         title: "Context Updated",
         description: `Context "${trimmedTitle}" has been updated.`,
       });
-      navigate("/");
     } else if (type === "selected") {
       const updatedContext = {
         ...contextToEdit,
@@ -112,52 +115,57 @@ const EditContext: React.FC = () => {
         title: "Selected Context Updated",
         description: `Selected context "${trimmedTitle}" has been updated.`,
       });
-      navigate("/");
     }
+    handleClose();
   };
+
+  if (!contextToEdit) {
+    // Render nothing while context is being found or if it's not found (it will be closed by useEffect)
+    return null;
+  }
 
   const screenTitle =
     type === "library" ? "Edit Library Context" : "Edit Selected Context";
 
   return (
-    <div className="p-6 h-screen flex flex-col max-w-screen-lg mx-auto">
-      <header className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-primary">{screenTitle}</h1>
-          <p className="text-muted-foreground">
+    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent className="sm:max-w-2xl ">
+        <DialogHeader>
+          <DialogTitle>{screenTitle}</DialogTitle>
+          <DialogDescription>
             Modify the title or content of your context snippet.
-          </p>
-        </div>
-        <Button variant="outline" onClick={handleCancel}>
-          <LucideArrowLeft className="mr-2" />
-          Back to Editor
-        </Button>
-      </header>
-      <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-        />
-        <Textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="flex-1 min-h-[250px] resize-y"
-          placeholder="Paste your context content here."
-        />
-        <footer className="flex justify-end gap-2 mt-4">
-          <Button type="button" variant="secondary" onClick={handleCancel}>
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          id="edit-context-form"
+          onSubmit={handleSubmit}
+          className="grid gap-4 py-4"
+        >
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+          />
+          <Textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="flex-1 min-h-[250px] resize-y"
+            placeholder="Paste your context content here."
+          />
+        </form>
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit">
-            <LucideSave className="mr-2" />
+          <Button type="submit" form="edit-context-form">
+            <LucideSave />
             Save Changes
           </Button>
-        </footer>
-      </form>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
