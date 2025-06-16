@@ -2,13 +2,14 @@ import { ColumnDef } from "@tanstack/react-table";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, ArrowLeftRight } from "lucide-react";
+import { X, ArrowLeftRight, LucideLink2Off } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateContextHash } from "@/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -82,10 +83,10 @@ export const getSelectedContextsTableColumns =
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                    <ArrowLeftRight className="h-3 w-3 text-primary" />
+                    <LucideLink2Off className="h-3 w-3 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent className="border-secondary">
                   <DropdownMenuItem
                     onClick={() => meta?.onSyncToLibrary(context)}
                   >
