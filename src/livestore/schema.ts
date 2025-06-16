@@ -12,7 +12,7 @@ const contextLivewireColumns = {
   title: State.SQLite.text({ default: "" }),
   content: State.SQLite.text({ default: "" }),
   charCount: State.SQLite.integer({ nullable: false, default: 0 }),
-  hash: State.SQLite.text({ nullable: false }),
+  originalHash: State.SQLite.text({ nullable: false }),
 };
 
 export const tables = {

@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Context } from "../types";
+import { SelectedContext } from "../types";
 import { SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
 import {
   ContextMenu,
@@ -34,8 +34,8 @@ import {
 import { cn } from "@/lib/utils";
 
 interface SelectedContextsDataTableProps {
-  columns: ColumnDef<Context>[];
-  data: Context[];
+  columns: ColumnDef<SelectedContext>[];
+  data: SelectedContext[];
   tableMeta: SelectedContextsTableMeta;
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
 }
@@ -44,8 +44,8 @@ const DataTableRow = ({
   row,
   table,
 }: {
-  row: Row<Context>;
-  table: ReturnType<typeof useReactTable<Context>>;
+  row: Row<SelectedContext>;
+  table: ReturnType<typeof useReactTable<SelectedContext>>;
 }) => {
   const meta = table.options.meta as
     | (SelectedContextsTableMeta & {

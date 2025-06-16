@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Context } from "../types";
+import { Context, SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { LucidePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import { v4 as uuid } from "uuid";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { useLocalStore } from "@/localStore";
+import { generateContextHash } from "@/utils";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -21,17 +22,6 @@ interface ContextsLibraryProps {
 
 const generateId = () =>
   `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-const generateContextHash = (title: string, content: string): string => {
-  const dataString = JSON.stringify({ title, content });
-  let hash = 5381;
-  for (let i = 0; i < dataString.length; i++) {
-    const char = dataString.charCodeAt(i);
-    hash = (hash << 5) + hash + char; /* hash * 33 + char */
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return String(hash >>> 0); // Ensure positive integer string
-};
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   onDeleteContext,
@@ -51,14 +41,15 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   const onAddSelectedToPrompt = (libraryContexts: Context[]) => {
     libraryContexts.forEach((libraryContext) => {
-      const newSelectedContextCopy: Context = {
+      const newSelectedContextCopy: SelectedContext = {
         id: generateId(),
         title: libraryContext.title,
         content: libraryContext.content,
         charCount: libraryContext.content.length,
-        hash:
-          libraryContext.hash ||
+        originalHash:
+          libraryContext.originalHash ||
           generateContextHash(libraryContext.title, libraryContext.content),
+        originalContextId: libraryContext.id,
       };
       addContextToPrompt(newSelectedContextCopy);
       toast({

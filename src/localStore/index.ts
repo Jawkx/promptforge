@@ -1,4 +1,4 @@
-import { Context } from "@/types";
+import { SelectedContext } from "@/types";
 import { create } from "zustand";
 import { Content } from "@tiptap/react";
 
@@ -6,10 +6,10 @@ interface LocalStoreState {
   prompt: Content;
   setPrompt: (prompt: Content) => void;
 
-  selectedContexts: Context[];
-  addContextToPrompt: (context: Context) => void;
+  selectedContexts: SelectedContext[];
+  addContextToPrompt: (context: SelectedContext) => void;
   removeMultipleSelectedContextsFromPrompt: (contextIds: string[]) => void;
-  updateSelectedContext: (context: Context) => void;
+  updateSelectedContext: (context: SelectedContext) => void;
 }
 
 export const useLocalStore = create<LocalStoreState>((set) => ({

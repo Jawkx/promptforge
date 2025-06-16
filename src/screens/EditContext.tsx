@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Context } from "@/types";
+import { Context, SelectedContext } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,14 +37,16 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [contextToEdit, setContextToEdit] = useState<Context | null>(null);
+  const [contextToEdit, setContextToEdit] = useState<
+    Context | SelectedContext | null
+  >(null);
 
   const handleClose = useCallback(() => {
     navigate("/");
   }, [navigate]);
 
   useEffect(() => {
-    let foundContext: Context | undefined;
+    let foundContext: Context | SelectedContext | undefined;
     if (type === "library") {
       foundContext = contexts.find((c) => c.id === contextId);
     } else if (type === "selected") {
@@ -104,8 +106,8 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         description: `Context "${trimmedTitle}" has been updated.`,
       });
     } else if (type === "selected") {
-      const updatedContext = {
-        ...contextToEdit,
+      const updatedContext: SelectedContext = {
+        ...(contextToEdit as SelectedContext),
         title: trimmedTitle,
         content: trimmedContent,
         charCount: trimmedContent.length,

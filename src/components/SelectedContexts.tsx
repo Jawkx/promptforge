@@ -1,5 +1,5 @@
 import React from "react";
-import { Context } from "../types";
+import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
@@ -10,14 +10,23 @@ import {
 import { useLocalStore } from "@/localStore";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery, useStore } from "@livestore/react";
+import { contexts$ } from "@/livestore/queries";
+import { events } from "@/livestore/events";
+import { generateContextHash } from "@/utils";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const removeMultipleSelectedContextsFromPrompt = useLocalStore(
     (state) => state.removeMultipleSelectedContextsFromPrompt,
   );
+  const updateSelectedContext = useLocalStore(
+    (state) => state.updateSelectedContext,
+  );
 
   const prompt = useLocalStore((state) => state.prompt);
+  const { store } = useStore();
+  const libraryContexts = useQuery(contexts$);
 
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -68,7 +77,7 @@ export const SelectedContexts: React.FC = () => {
     }
   };
 
-  const onEditSelectedContext = (context: Context) => {
+  const onEditSelectedContext = (context: SelectedContext) => {
     navigate(`/edit/selected/${context.id}`);
   };
 
@@ -81,9 +90,61 @@ export const SelectedContexts: React.FC = () => {
     });
   };
 
+  const onSyncToLibrary = (selectedContext: SelectedContext) => {
+    store.commit(
+      events.contextUpdated({
+        id: selectedContext.originalContextId,
+        title: selectedContext.title,
+        content: selectedContext.content,
+      }),
+    );
+
+    const newHash = generateContextHash(
+      selectedContext.title,
+      selectedContext.content,
+    );
+    updateSelectedContext({
+      ...selectedContext,
+      originalHash: newHash,
+    });
+
+    toast({
+      title: "Synced to Library",
+      description: `Context in library has been updated.`,
+    });
+  };
+
+  const onSyncFromLibrary = (selectedContext: SelectedContext) => {
+    const originalContext = libraryContexts.find(
+      (c) => c.id === selectedContext.originalContextId,
+    );
+
+    if (originalContext) {
+      updateSelectedContext({
+        ...selectedContext,
+        title: originalContext.title,
+        content: originalContext.content,
+        charCount: originalContext.charCount,
+        originalHash: originalContext.originalHash,
+      });
+      toast({
+        title: "Synced from Library",
+        description: `Selected context has been reverted to library version.`,
+      });
+    } else {
+      toast({
+        title: "Sync Error",
+        description: `Original context not found in library.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
     onEditSelectedContext,
+    onSyncToLibrary,
+    onSyncFromLibrary,
   };
 
   const selectedContextsColumns = React.useMemo(
