@@ -2,14 +2,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, ArrowLeftRight, LucideLink2Off } from "lucide-react";
+import { X, LucideLink2Off } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateContextHash } from "@/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
