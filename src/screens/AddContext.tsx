@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
@@ -25,6 +26,7 @@ const AddContext: React.FC = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isMaximized, setIsMaximized] = useState(false);
 
   const handleClose = () => {
     navigate("/");
@@ -72,7 +74,11 @@ const AddContext: React.FC = () => {
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent
+        className="sm:max-w-2xl"
+        onMaximizeToggle={() => setIsMaximized((p) => !p)}
+        isMaximized={isMaximized}
+      >
         <DialogHeader>
           <DialogTitle>Add New Context</DialogTitle>
           <DialogDescription>
@@ -82,7 +88,10 @@ const AddContext: React.FC = () => {
         <form
           id="add-context-form"
           onSubmit={handleSubmit}
-          className="grid gap-4 py-4"
+          className={cn(
+            "grid gap-4 py-4",
+            isMaximized && "flex flex-1 flex-col",
+          )}
         >
           <Input
             id="title"
@@ -94,7 +103,7 @@ const AddContext: React.FC = () => {
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[250px] resize-y"
+            className={cn("min-h-[250px] resize-none", isMaximized && "flex-1")}
             placeholder="Paste your context content here."
           />
         </form>

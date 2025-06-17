@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface EditContextProps {
   type: "library" | "selected";
@@ -37,6 +38,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isMaximized, setIsMaximized] = useState(false);
   const [contextToEdit, setContextToEdit] = useState<
     Context | SelectedContext | null
   >(null);
@@ -131,7 +133,11 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="sm:max-w-2xl ">
+      <DialogContent
+        className="sm:max-w-2xl "
+        onMaximizeToggle={() => setIsMaximized((p) => !p)}
+        isMaximized={isMaximized}
+      >
         <DialogHeader>
           <DialogTitle>{screenTitle}</DialogTitle>
           <DialogDescription>
@@ -141,7 +147,10 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         <form
           id="edit-context-form"
           onSubmit={handleSubmit}
-          className="grid gap-4 py-4"
+          className={cn(
+            "grid gap-4 py-4",
+            isMaximized && "flex flex-1 flex-col",
+          )}
         >
           <Input
             id="title"
@@ -153,7 +162,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 min-h-[250px] resize-y"
+            className={cn("min-h-[250px] resize-none", isMaximized && "flex-1")}
             placeholder="Paste your context content here."
           />
         </form>
