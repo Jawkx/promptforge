@@ -89,12 +89,12 @@ export const getSelectedContextsTableColumns =
                   <DropdownMenuItem
                     onClick={() => meta?.onSyncToLibrary(context)}
                   >
-                    Sync to Library
+                    Update Library
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => meta?.onSyncFromLibrary(context)}
                   >
-                    Sync from Library (revert)
+                    Revert Changes
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
