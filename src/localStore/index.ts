@@ -2,6 +2,12 @@ import { SelectedContext } from "@/types";
 import { create } from "zustand";
 import { Content } from "@tiptap/react";
 
+export enum FocusArea {
+  PROMPT_INPUT = "PROMPT_INPUT",
+  SELECTED_CONTEXTS = "SELECTED_CONTEXTS",
+  CONTEXT_LIBRARY = "CONTEXT_LIBRARY",
+}
+
 interface LocalStoreState {
   prompt: Content;
   setPrompt: (prompt: Content) => void;
@@ -10,6 +16,9 @@ interface LocalStoreState {
   addContextToPrompt: (context: SelectedContext) => void;
   removeMultipleSelectedContextsFromPrompt: (contextIds: string[]) => void;
   updateSelectedContext: (context: SelectedContext) => void;
+
+  focusedArea: FocusArea;
+  setFocusedArea: (area: FocusArea) => void;
 }
 
 export const useLocalStore = create<LocalStoreState>((set) => ({
@@ -33,4 +42,7 @@ export const useLocalStore = create<LocalStoreState>((set) => ({
         c.id === context.id ? context : c,
       ),
     })),
+
+  focusedArea: FocusArea.PROMPT_INPUT,
+  setFocusedArea: (area) => set({ focusedArea: area }),
 }));

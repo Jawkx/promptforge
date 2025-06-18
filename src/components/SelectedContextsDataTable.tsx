@@ -32,6 +32,7 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
+import { FocusArea, useLocalStore } from "@/localStore";
 
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<SelectedContext>[];
@@ -157,6 +158,10 @@ export const SelectedContextsDataTable: React.FC<
   tableMeta,
   onDeleteMultipleFromPrompt,
 }) => {
+  const isFocused = useLocalStore(
+    (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
+  );
+
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const extendedTableMeta: SelectedContextsTableMeta & {
@@ -182,9 +187,29 @@ export const SelectedContextsDataTable: React.FC<
     enableRowSelection: true,
   });
 
+  if (data.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex-grow flex items-center justify-center border rounded-md",
+          isFocused ? "border-primary" : "border-muted",
+        )}
+      >
+        <p className="text-sm text-muted-foreground text-center py-10">
+          No contexts selected. Add from the library.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <ScrollArea className="flex rounded-md border border-muted flex-grow relative ">
+      <ScrollArea
+        className={cn(
+          "flex rounded-md border flex-grow relative",
+          isFocused ? "border-primary" : "border-muted",
+        )}
+      >
         <Table className="h-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

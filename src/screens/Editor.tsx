@@ -25,9 +25,7 @@ import { SelectedContexts } from "@/components/SelectedContexts";
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
-
-const FOCUSED_PANE_PROMPT_INPUT = "promptInputArea";
-const FOCUSED_PANE_CONTEXT_LIBRARY = "contextLibraryArea";
+import { useLocalStore, FocusArea } from "@/localStore";
 
 const Editor: React.FC = () => {
   const { store } = useStore();
@@ -47,9 +45,11 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
-  const [focusedArea, setFocusedArea] = useState<string>(
-    FOCUSED_PANE_PROMPT_INPUT,
-  );
+  const { setFocusedArea } = useLocalStore();
+
+  const handleFocusSelectedContexts = () => {
+    setFocusedArea(FocusArea.SELECTED_CONTEXTS);
+  };
 
   const handleDeleteContextRequest = (id: string) => {
     setContextToDeleteId(id);
@@ -105,11 +105,7 @@ const Editor: React.FC = () => {
                 <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
               </div>
 
-              <ResizablePanelGroup
-                direction="vertical"
-                onClick={() => setFocusedArea(FOCUSED_PANE_PROMPT_INPUT)}
-                className="flex-grow"
-              >
+              <ResizablePanelGroup direction="vertical" className="flex-grow">
                 <ResizablePanel className="flex-1">
                   <PromptInput />
                 </ResizablePanel>
@@ -119,6 +115,7 @@ const Editor: React.FC = () => {
                   minSize={20}
                   maxSize={80}
                   className="flex flex-col"
+                  onClick={handleFocusSelectedContexts}
                 >
                   <SelectedContexts />
                 </ResizablePanel>
@@ -131,8 +128,6 @@ const Editor: React.FC = () => {
               className="flex flex-col"
             >
               <ContextsLibrary
-                isFocused={focusedArea === FOCUSED_PANE_CONTEXT_LIBRARY}
-                onFocus={() => setFocusedArea(FOCUSED_PANE_CONTEXT_LIBRARY)}
                 onDeleteContext={handleDeleteContextRequest}
                 onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
               />

@@ -1,13 +1,19 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { Content } from "@tiptap/react";
 import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
-import { useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/localStore";
 import TurnDownService from "turndown";
 
 const turndownService = new TurnDownService();
 
 const PromptInput: React.FC = () => {
   const { prompt, setPrompt } = useLocalStore();
+
+  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
+
+  const handleOnFocus = useCallback(() => {
+    setFocusedArea(FocusArea.PROMPT_INPUT);
+  }, [setFocusedArea]);
 
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +37,7 @@ const PromptInput: React.FC = () => {
       <MinimalTiptapEditor
         ref={editorContainerRef}
         value={prompt}
+        onFocus={handleOnFocus}
         onChange={handleSetPrompt}
         className="w-full h-full"
         editorContentClassName="p-5 overflow-y-auto flex-1"

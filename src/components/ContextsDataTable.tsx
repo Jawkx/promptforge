@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
+import { FocusArea, useLocalStore } from "@/localStore";
 
 interface ContextsDataTableProps {
   onDeleteContext: (id: string) => void;
@@ -65,6 +66,10 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   setSearchQuery,
 }) => {
   const [, navigate] = useLocation();
+
+  const isFocused = useLocalStore(
+    (state) => state.focusedArea === FocusArea.CONTEXT_LIBRARY,
+  );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
@@ -153,7 +158,12 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
           className="h-9 "
         />
       </div>
-      <ScrollArea className="rounded-md border border-muted flex-grow relative">
+      <ScrollArea
+        className={cn(
+          "rounded-md border flex-grow relative",
+          isFocused ? "border-primary" : "border-muted",
+        )}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

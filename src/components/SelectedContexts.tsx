@@ -157,20 +157,12 @@ export const SelectedContexts: React.FC = () => {
       <h2 className="font-medium text-muted-foreground mb-3 text-xl">
         Selected Contexts
       </h2>
-      {selectedContexts.length > 0 ? (
-        <SelectedContextsDataTable
-          columns={selectedContextsColumns}
-          data={selectedContexts}
-          tableMeta={selectedContextsTableMeta}
-          onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
-        />
-      ) : (
-        <div className="flex-grow flex items-center justify-center border border-muted rounded-md">
-          <p className="text-sm text-muted-foreground text-center py-10">
-            No contexts selected. Add from the library.
-          </p>
-        </div>
-      )}
+      <SelectedContextsDataTable
+        columns={selectedContextsColumns}
+        data={selectedContexts}
+        tableMeta={selectedContextsTableMeta}
+        onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
+      />
 
       <div className="h-5" />
 

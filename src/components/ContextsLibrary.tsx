@@ -10,14 +10,12 @@ import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { v4 as uuid } from "uuid";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
-import { useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/localStore";
 import { generateContextHash } from "@/utils";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
-  isFocused: boolean;
-  onFocus: () => void;
 }
 
 const generateId = () =>
@@ -26,14 +24,21 @@ const generateId = () =>
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   onDeleteContext,
   onDeleteSelectedContexts,
-  isFocused,
-  onFocus,
 }) => {
+  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
+  const focusedArea = useLocalStore((state) => state.focusedArea);
+
   const [, navigate] = useLocation();
   const { store } = useStore();
   const { toast } = useToast();
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isFocused = focusedArea === FocusArea.CONTEXT_LIBRARY;
+
+  const handleOnFocus = () => {
+    setFocusedArea(FocusArea.CONTEXT_LIBRARY);
+  };
 
   const handleAddContext = () => {
     navigate("/add");
@@ -98,7 +103,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   return (
     <div
       className="h-full flex flex-col py-5 px-4 gap-4 focus:outline-none"
-      onClick={onFocus}
+      onClick={handleOnFocus}
       onPaste={handlePaste}
       tabIndex={-1}
     >
