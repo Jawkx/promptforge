@@ -1,4 +1,5 @@
-import { ColumnDef } from "@tanstack/react-table";
+import React, { useEffect, useRef, useState } from "react";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,12 +12,95 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { useLocalStore } from "@/localStore";
+import { useToast } from "@/hooks/use-toast";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
   onEditSelectedContext: (context: SelectedContext) => void;
   onSyncToLibrary: (context: SelectedContext) => void;
   onSyncFromLibrary: (context: SelectedContext) => void;
+};
+
+const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
+  row,
+}) => {
+  const updateSelectedContext = useLocalStore(
+    (state) => state.updateSelectedContext,
+  );
+  const { toast } = useToast();
+  const context = row.original;
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(context.title);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setTitle(context.title);
+  }, [context.title]);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    const trimmedTitle = title.trim();
+    if (trimmedTitle && trimmedTitle !== context.title) {
+      updateSelectedContext({
+        ...context,
+        title: trimmedTitle,
+      });
+      toast({
+        title: "Title Updated",
+        description: `Selected context title updated to "${trimmedTitle}".`,
+      });
+    } else if (!trimmedTitle) {
+      setTitle(context.title);
+      toast({
+        title: "Title cannot be empty",
+        description: "The selected context title has been reverted.",
+        variant: "destructive",
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      setTitle(context.title);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        className="h-8"
+      />
+    );
+  }
+
+  return (
+    <div
+      onDoubleClick={() => setIsEditing(true)}
+      className="flex items-center gap-2 cursor-pointer h-full"
+    >
+      <span className="font-medium truncate" title={context.title}>
+        {context.title}
+      </span>
+    </div>
+  );
 };
 
 export const getSelectedContextsTableColumns =
@@ -51,16 +135,7 @@ export const getSelectedContextsTableColumns =
     {
       accessorKey: "title",
       header: "Title",
-      cell: ({ row }) => {
-        const selectedCopy = row.original;
-        return (
-          <div className="flex items-center gap-2">
-            <span className="font-medium truncate" title={selectedCopy.title}>
-              {selectedCopy.title}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => <SelectedTitleCell row={row} />,
       minSize: 200,
     },
     {

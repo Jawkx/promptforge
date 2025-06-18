@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { Context } from "../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LucideMoreVertical, LucideEdit3, LucideTrash2 } from "lucide-react";
+import { useStore } from "@livestore/react";
+import { events } from "@/livestore/events";
+import { Input } from "@/components/ui/input";
+import React, { useEffect, useRef, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -26,6 +31,85 @@ const formatCharCount = (count: number): string => {
   }
   const num = Math.floor(count / 1_000_000);
   return `${num}M`;
+};
+
+const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
+  const { store } = useStore();
+  const { toast } = useToast();
+  const context = row.original;
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(context.title);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setTitle(context.title);
+  }, [context.title]);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    const trimmedTitle = title.trim();
+    if (trimmedTitle && trimmedTitle !== context.title) {
+      store.commit(
+        events.contextUpdated({
+          id: context.id,
+          title: trimmedTitle,
+          content: context.content,
+        }),
+      );
+      toast({
+        title: "Title Updated",
+        description: `Context title updated to "${trimmedTitle}".`,
+      });
+    } else if (!trimmedTitle) {
+      setTitle(context.title); // Revert
+      toast({
+        title: "Title cannot be empty",
+        description: "The context title has been reverted.",
+        variant: "destructive",
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      setTitle(context.title);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        className="h-8"
+      />
+    );
+  }
+
+  return (
+    <div
+      onDoubleClick={() => setIsEditing(true)}
+      className="flex items-center cursor-pointer h-full"
+    >
+      <span className="font-medium truncate" title={context.title}>
+        {context.title}
+      </span>
+    </div>
+  );
 };
 
 export const contextsTableColumn: ColumnDef<Context>[] = [
@@ -57,15 +141,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row }) => {
-      return (
-        <div className="flex items-center">
-          <span className="font-medium truncate" title={row.getValue("title")}>
-            {row.getValue("title")}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => <TitleCell row={row} />,
     minSize: 300,
   },
   {
