@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
@@ -14,6 +14,7 @@ import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 import { generateContextHash } from "@/utils";
+import { useSyncContexts } from "@/hooks/useSyncContexts";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -30,6 +31,14 @@ export const SelectedContexts: React.FC = () => {
 
   const { toast } = useToast();
   const [, navigate] = useLocation();
+
+  useSyncContexts({
+    libraryContexts,
+    selectedContexts,
+    updateSelectedContext,
+    removeMultipleSelectedContextsFromPrompt,
+    toast,
+  });
 
   const onCopyPromptAndContextsClick = () => {
     const contextsText = selectedContexts
@@ -147,7 +156,7 @@ export const SelectedContexts: React.FC = () => {
     onSyncFromLibrary,
   };
 
-  const selectedContextsColumns = React.useMemo(
+  const selectedContextsColumns = useMemo(
     () => getSelectedContextsTableColumns(),
     [],
   );
