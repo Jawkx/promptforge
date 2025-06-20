@@ -110,6 +110,7 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
     onRowSelectionChange: setRowSelection,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getRowId: (row) => row.id,
     state: {
       sorting,
       columnVisibility,
@@ -210,26 +211,26 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
                   table.getFilteredSelectedRowModel().rows.length;
 
                 return (
-                  <ContextMenu key={row.id + "-cm-root"}>
+                  <ContextMenu key={context.id + "-cm-root"}>
                     <ContextMenuTrigger asChild>
                       <TableRow
-                        key={row.id}
+                        key={context.id}
                         data-state={
-                          (row.getIsSelected() || row.id === selectedId) &&
+                          (row.getIsSelected() || context.id === selectedId) &&
                           "selected"
                         }
                         className="border-b-muted cursor-pointer"
                         onClick={() => {
-                          if (selectedId === row.id) {
+                          if (selectedId === context.id) {
                             setSelectedId(null);
                           } else {
-                            setSelectedId(row.id);
+                            setSelectedId(context.id);
                             table.resetRowSelection();
                           }
                         }}
                         onContextMenuCapture={() => {
-                          if (!row.getIsSelected() && row.id !== selectedId) {
-                            setSelectedId(row.id);
+                          if (!row.getIsSelected()) {
+                            setSelectedId(context.id);
                             table.resetRowSelection();
                           }
                         }}
