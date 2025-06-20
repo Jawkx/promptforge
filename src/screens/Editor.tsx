@@ -25,7 +25,6 @@ import { SelectedContexts } from "@/components/SelectedContexts";
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
-import { useLocalStore, FocusArea } from "@/localStore";
 
 const Editor: React.FC = () => {
   const { store } = useStore();
@@ -45,11 +44,6 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
-  const { setFocusedArea } = useLocalStore();
-
-  const handleFocusSelectedContexts = () => {
-    setFocusedArea(FocusArea.SELECTED_CONTEXTS);
-  };
 
   const handleDeleteContextRequest = (id: string) => {
     setContextToDeleteId(id);
@@ -115,7 +109,6 @@ const Editor: React.FC = () => {
                   minSize={20}
                   maxSize={80}
                   className="flex flex-col"
-                  onClick={handleFocusSelectedContexts}
                 >
                   <SelectedContexts />
                 </ResizablePanel>

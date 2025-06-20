@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
+  setSelectedId: (id: string | null) => void;
 };
 
 const formatCharCount = (count: number): string => {
@@ -96,6 +97,7 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         className="h-8"
+        onClick={(e) => e.stopPropagation()}
       />
     );
   }
@@ -103,7 +105,7 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
   return (
     <div
       onDoubleClick={() => setIsEditing(true)}
-      className="flex items-center cursor-pointer h-full"
+      className="flex items-center h-full"
     >
       <span className="font-medium truncate" title={context.title}>
         {context.title}
@@ -115,23 +117,39 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
 export const contextsTableColumn: ColumnDef<Context>[] = [
   {
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    header: ({ table }) => {
+      const meta = table.options.meta as ContextsTableMeta | undefined;
+      return (
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => {
+              meta?.setSelectedId(null);
+              table.toggleAllPageRowsSelected(!!value);
+            }}
+            aria-label="Select all"
+          />
+        </div>
+      );
+    },
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as ContextsTableMeta | undefined;
+      return (
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => {
+              meta?.setSelectedId(null);
+              row.toggleSelected(!!value);
+            }}
+            aria-label="Select row"
+          />
+        </div>
+      );
+    },
     enableSorting: false,
     enableHiding: false,
     size: 40,
@@ -168,28 +186,30 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
       const meta = table.options.meta as ContextsTableMeta | undefined;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <LucideMoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border-secondary">
-            <DropdownMenuItem onClick={() => meta?.onEditContext(context)}>
-              <LucideEdit3 className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => meta?.onDeleteContext(context.id)}
-              className="text-destructive focus:text-destructive focus:bg-destructive/10"
-            >
-              <LucideTrash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <LucideMoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="border-secondary">
+              <DropdownMenuItem onClick={() => meta?.onEditContext(context)}>
+                <LucideEdit3 className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => meta?.onDeleteContext(context.id)}
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              >
+                <LucideTrash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
     size: 60,

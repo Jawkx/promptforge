@@ -21,6 +21,7 @@ export type SelectedContextsTableMeta = {
   onEditSelectedContext: (context: SelectedContext) => void;
   onSyncToLibrary: (context: SelectedContext) => void;
   onSyncFromLibrary: (context: SelectedContext) => void;
+  setSelectedId: (id: string | null) => void;
 };
 
 const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
@@ -87,6 +88,7 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         className="h-8"
+        onClick={(e) => e.stopPropagation()}
       />
     );
   }
@@ -94,7 +96,7 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
   return (
     <div
       onDoubleClick={() => setIsEditing(true)}
-      className="flex items-center gap-2 cursor-pointer h-full"
+      className="flex items-center gap-2 h-full"
     >
       <span className="font-medium truncate" title={context.title}>
         {context.title}
@@ -107,25 +109,45 @@ export const getSelectedContextsTableColumns =
   (): ColumnDef<SelectedContext>[] => [
     {
       id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      ),
+      header: ({ table }) => {
+        const meta = table.options.meta as
+          | SelectedContextsTableMeta
+          | undefined;
+        return (
+          <div onClick={(e) => e.stopPropagation()}>
+            <Checkbox
+              checked={
+                table.getIsAllPageRowsSelected() ||
+                (table.getIsSomePageRowsSelected() && "indeterminate")
+              }
+              onCheckedChange={(value) => {
+                meta?.setSelectedId(null);
+                table.toggleAllPageRowsSelected(!!value);
+              }}
+              aria-label="Select all"
+              className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            />
+          </div>
+        );
+      },
+      cell: ({ row, table }) => {
+        const meta = table.options.meta as
+          | SelectedContextsTableMeta
+          | undefined;
+        return (
+          <div onClick={(e) => e.stopPropagation()}>
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => {
+                meta?.setSelectedId(null);
+                row.toggleSelected(!!value);
+              }}
+              aria-label="Select row"
+              className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            />
+          </div>
+        );
+      },
       enableSorting: false,
       enableHiding: false,
       size: 40,
@@ -152,7 +174,7 @@ export const getSelectedContextsTableColumns =
         const isModified = currentHash !== context.originalHash;
 
         return (
-          <div className="text-right">
+          <div className="text-right" onClick={(e) => e.stopPropagation()}>
             {isModified && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -39,6 +39,8 @@ interface SelectedContextsDataTableProps {
   data: SelectedContext[];
   tableMeta: SelectedContextsTableMeta;
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
 }
 
 const DataTableRow = ({
@@ -51,6 +53,7 @@ const DataTableRow = ({
   const meta = table.options.meta as
     | (SelectedContextsTableMeta & {
         onDeleteMultipleFromPrompt?: (ids: string[]) => void;
+        selectedId: string | null;
       })
     | undefined;
   const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
@@ -78,15 +81,29 @@ const DataTableRow = ({
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <TableRow
-          data-state={row.getIsSelected() && "selected"}
-          className="border-b-muted bg-background"
+          data-state={
+            (row.getIsSelected() || row.original.id === meta?.selectedId) &&
+            "selected"
+          }
+          className="border-b-muted bg-background cursor-pointer"
+          onClick={() => {
+            if (meta?.setSelectedId) {
+              if (meta.selectedId === row.original.id) {
+                meta.setSelectedId(null);
+              } else {
+                meta.setSelectedId(row.original.id);
+                table.resetRowSelection();
+              }
+            }
+          }}
           onContextMenuCapture={() => {
-            if (!row.getIsSelected() && currentSelectedCount <= 1) {
+            if (
+              !row.getIsSelected() &&
+              row.original.id !== meta?.selectedId &&
+              meta?.setSelectedId
+            ) {
+              meta.setSelectedId(row.original.id);
               table.resetRowSelection();
-              row.toggleSelected(true);
-            } else if (!row.getIsSelected() && currentSelectedCount > 1) {
-              table.resetRowSelection();
-              row.toggleSelected(true);
             }
           }}
         >
@@ -157,6 +174,8 @@ export const SelectedContextsDataTable: React.FC<
   data,
   tableMeta,
   onDeleteMultipleFromPrompt,
+  selectedId,
+  setSelectedId,
 }) => {
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
@@ -166,9 +185,12 @@ export const SelectedContextsDataTable: React.FC<
 
   const extendedTableMeta: SelectedContextsTableMeta & {
     onDeleteMultipleFromPrompt?: (ids: string[]) => void;
+    selectedId: string | null;
   } = {
     ...tableMeta,
     onDeleteMultipleFromPrompt,
+    selectedId,
+    setSelectedId,
   };
 
   const table = useReactTable({

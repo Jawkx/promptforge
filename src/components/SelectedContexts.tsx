@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
@@ -7,7 +7,7 @@ import {
   getSelectedContextsTableColumns,
   SelectedContextsTableMeta,
 } from "./SelectedContextsTableColumns";
-import { useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/localStore";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery, useStore } from "@livestore/react";
@@ -24,6 +24,10 @@ export const SelectedContexts: React.FC = () => {
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
+  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
+  const isFocused = useLocalStore(
+    (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
+  );
 
   const prompt = useLocalStore((state) => state.prompt);
   const { store } = useStore();
@@ -32,6 +36,8 @@ export const SelectedContexts: React.FC = () => {
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   useSyncContexts({
     libraryContexts,
     selectedContexts,
@@ -39,6 +45,45 @@ export const SelectedContexts: React.FC = () => {
     removeMultipleSelectedContextsFromPrompt,
     toast,
   });
+
+  const handlePaste = useCallback(
+    async (event: React.ClipboardEvent) => {
+      const targetElement = event.target as HTMLElement;
+      const isPastingIntoInput =
+        targetElement.tagName === "INPUT" ||
+        targetElement.tagName === "TEXTAREA";
+
+      if (isFocused && !isPastingIntoInput) {
+        event.preventDefault();
+        const pastedText = event.clipboardData.getData("text");
+        if (pastedText.trim() && selectedId) {
+          const contextToUpdate = selectedContexts.find(
+            (c) => c.id === selectedId,
+          );
+          if (contextToUpdate) {
+            updateSelectedContext({
+              ...contextToUpdate,
+              content: pastedText,
+              charCount: pastedText.length,
+            });
+            toast({
+              title: "Selected Context Updated",
+              description: `Content updated by paste.`,
+            });
+            setSelectedId(null);
+          }
+        }
+      }
+    },
+    [
+      isFocused,
+      selectedId,
+      selectedContexts,
+      updateSelectedContext,
+      toast,
+      setSelectedId,
+    ],
+  );
 
   const onCopyPromptAndContextsClick = () => {
     const contextsText = selectedContexts
@@ -154,6 +199,7 @@ export const SelectedContexts: React.FC = () => {
     onEditSelectedContext,
     onSyncToLibrary,
     onSyncFromLibrary,
+    setSelectedId,
   };
 
   const selectedContextsColumns = useMemo(
@@ -162,7 +208,12 @@ export const SelectedContexts: React.FC = () => {
   );
 
   return (
-    <>
+    <div
+      className="h-full flex flex-col"
+      tabIndex={-1}
+      onPaste={handlePaste}
+      onClick={() => setFocusedArea(FocusArea.SELECTED_CONTEXTS)}
+    >
       <h2 className="font-medium text-muted-foreground mb-3 text-xl">
         Selected Contexts
       </h2>
@@ -171,6 +222,8 @@ export const SelectedContexts: React.FC = () => {
         data={selectedContexts}
         tableMeta={selectedContextsTableMeta}
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
       />
 
       <div className="h-5" />
@@ -182,6 +235,6 @@ export const SelectedContexts: React.FC = () => {
       >
         <CopyIcon className="mr-2 h-4 w-4" /> Copy All
       </Button>
-    </>
+    </div>
   );
 };

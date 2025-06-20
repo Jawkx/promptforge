@@ -46,24 +46,28 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
-import { useQuery } from "@livestore/react";
-import { contexts$ } from "@/livestore/queries";
 import { FocusArea, useLocalStore } from "@/localStore";
 
 interface ContextsDataTableProps {
+  data: readonly Context[];
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
 }
 
 export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
+  data,
   onDeleteContext,
   onDeleteSelectedContexts,
   onAddSelectedToPrompt,
   searchQuery,
   setSearchQuery,
+  selectedId,
+  setSelectedId,
 }) => {
   const [, navigate] = useLocation();
 
@@ -86,12 +90,11 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   const tableMeta: ContextsTableMeta = {
     onEditContext: handleEditContext,
     onDeleteContext: onDeleteContext,
+    setSelectedId,
   };
 
-  const contexts = useQuery(contexts$);
-
   // useReactTable for some reason expect mutatable data type
-  const mutatableContext = useMemo(() => [...contexts], [contexts]);
+  const mutatableContext = useMemo(() => [...data], [data]);
 
   const table = useReactTable({
     data: mutatableContext,
@@ -145,7 +148,7 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   };
 
   const displayedDataCount = table.getRowModel().rows.length;
-  const totalDataCount = contexts.length;
+  const totalDataCount = data.length;
 
   return (
     <div className="h-full max-h-[800px] flex flex-col ">
@@ -211,12 +214,23 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
                     <ContextMenuTrigger asChild>
                       <TableRow
                         key={row.id}
-                        data-state={row.getIsSelected() && "selected"}
-                        className="border-b-muted"
-                        onContextMenuCapture={() => {
-                          if (!row.getIsSelected()) {
+                        data-state={
+                          (row.getIsSelected() || row.id === selectedId) &&
+                          "selected"
+                        }
+                        className="border-b-muted cursor-pointer"
+                        onClick={() => {
+                          if (selectedId === row.id) {
+                            setSelectedId(null);
+                          } else {
+                            setSelectedId(row.id);
                             table.resetRowSelection();
-                            row.toggleSelected(true);
+                          }
+                        }}
+                        onContextMenuCapture={() => {
+                          if (!row.getIsSelected() && row.id !== selectedId) {
+                            setSelectedId(row.id);
+                            table.resetRowSelection();
                           }
                         }}
                       >

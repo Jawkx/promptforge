@@ -8,10 +8,11 @@ import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { v4 as uuid } from "uuid";
-import { useStore } from "@livestore/react";
+import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { FocusArea, useLocalStore } from "@/localStore";
 import { generateContextHash } from "@/utils";
+import { contexts$ } from "@/livestore/queries";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -31,8 +32,10 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const [, navigate] = useLocation();
   const { store } = useStore();
   const { toast } = useToast();
+  const contexts = useQuery(contexts$);
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const isFocused = focusedArea === FocusArea.CONTEXT_LIBRARY;
 
@@ -75,19 +78,35 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
-          const placeholderTitle = getRandomUntitledPlaceholder();
-          const id = uuid();
-          store.commit(
-            events.contextCreated({
-              id,
-              title: placeholderTitle,
-              content: pastedText,
-            }),
-          );
-          toast({
-            title: "Context Added",
-            description: `Context "${placeholderTitle}" has been added.`,
-          });
+          if (selectedId) {
+            const contextToUpdate = contexts.find((c) => c.id === selectedId);
+            store.commit(
+              events.contextUpdated({
+                id: selectedId,
+                title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
+                content: pastedText,
+              }),
+            );
+            toast({
+              title: "Context Updated",
+              description: `Context content was updated via paste.`,
+            });
+            setSelectedId(null);
+          } else {
+            const placeholderTitle = getRandomUntitledPlaceholder();
+            const id = uuid();
+            store.commit(
+              events.contextCreated({
+                id,
+                title: placeholderTitle,
+                content: pastedText,
+              }),
+            );
+            toast({
+              title: "Context Added",
+              description: `Context "${placeholderTitle}" has been added.`,
+            });
+          }
         } else {
           toast({
             title: "Paste Error",
@@ -97,7 +116,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         }
       }
     },
-    [isFocused, store, toast],
+    [isFocused, store, toast, selectedId, contexts],
   );
 
   return (
@@ -113,11 +132,14 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       </div>
 
       <ContextsDataTable
+        data={contexts}
         onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
       />
 
       <Button variant="default" onClick={handleAddContext}>
