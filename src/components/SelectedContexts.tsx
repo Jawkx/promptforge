@@ -15,6 +15,11 @@ import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 import { generateContextHash } from "@/utils";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
+import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { v4 as uuid } from "uuid";
+
+const generateId = () =>
+  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -24,6 +29,7 @@ export const SelectedContexts: React.FC = () => {
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
+  const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
@@ -56,21 +62,37 @@ export const SelectedContexts: React.FC = () => {
       if (isFocused && !isPastingIntoInput) {
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
-        if (pastedText.trim() && selectedId) {
-          const contextToUpdate = selectedContexts.find(
-            (c) => c.id === selectedId,
-          );
-          if (contextToUpdate) {
-            updateSelectedContext({
-              ...contextToUpdate,
+        if (pastedText.trim()) {
+          if (selectedId) {
+            const contextToUpdate = selectedContexts.find(
+              (c) => c.id === selectedId,
+            );
+            if (contextToUpdate) {
+              updateSelectedContext({
+                ...contextToUpdate,
+                content: pastedText,
+                charCount: pastedText.length,
+              });
+              toast({
+                title: "Selected Context Updated",
+                description: `Content updated by paste.`,
+              });
+              setSelectedId(null);
+            }
+          } else {
+            const title = getRandomUntitledPlaceholder();
+            const newContext: SelectedContext = {
+              id: generateId(),
+              title,
               content: pastedText,
               charCount: pastedText.length,
-            });
+              originalHash: generateContextHash(title, pastedText),
+            };
+            addContextToPrompt(newContext);
             toast({
-              title: "Selected Context Updated",
-              description: `Content updated by paste.`,
+              title: "Context Pasted",
+              description: `A new context "${title}" has been added to the selected list.`,
             });
-            setSelectedId(null);
           }
         }
       }
@@ -82,6 +104,7 @@ export const SelectedContexts: React.FC = () => {
       updateSelectedContext,
       toast,
       setSelectedId,
+      addContextToPrompt,
     ],
   );
 
@@ -145,6 +168,8 @@ export const SelectedContexts: React.FC = () => {
   };
 
   const onSyncToLibrary = (selectedContext: SelectedContext) => {
+    if (!selectedContext.originalContextId) return;
+
     store.commit(
       events.contextUpdated({
         id: selectedContext.originalContextId,
@@ -194,11 +219,38 @@ export const SelectedContexts: React.FC = () => {
     }
   };
 
+  const onCreateInLibrary = (selectedContext: SelectedContext) => {
+    const id = uuid();
+    store.commit(
+      events.contextCreated({
+        id,
+        title: selectedContext.title,
+        content: selectedContext.content,
+      }),
+    );
+
+    const newHash = generateContextHash(
+      selectedContext.title,
+      selectedContext.content,
+    );
+    updateSelectedContext({
+      ...selectedContext,
+      originalContextId: id,
+      originalHash: newHash,
+    });
+
+    toast({
+      title: "Added to Library",
+      description: `Context "${selectedContext.title}" has been created in the library.`,
+    });
+  };
+
   const selectedContextsTableMeta: SelectedContextsTableMeta = {
     onRemoveContext,
     onEditSelectedContext,
     onSyncToLibrary,
     onSyncFromLibrary,
+    onCreateInLibrary,
     setSelectedId,
   };
 

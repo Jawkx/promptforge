@@ -39,6 +39,12 @@ export const useSyncContexts = ({
     const idsToRemove: string[] = [];
 
     selectedContexts.forEach((selectedItem) => {
+      // Ignore contexts that don't have a corresponding item in the library
+      // (e.g., they were pasted directly into the selected contexts list)
+      if (!selectedItem.originalContextId) {
+        return;
+      }
+
       const libraryItem = libraryContextsMap.get(
         selectedItem.originalContextId,
       );

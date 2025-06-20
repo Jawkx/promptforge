@@ -3,7 +3,7 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { SelectedContext } from "../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, LucideLink2Off } from "lucide-react";
+import { X, LucideLink2Off, LucideSave } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateContextHash } from "@/utils";
 import {
@@ -15,12 +15,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { useLocalStore } from "@/localStore";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
   onEditSelectedContext: (context: SelectedContext) => void;
   onSyncToLibrary: (context: SelectedContext) => void;
   onSyncFromLibrary: (context: SelectedContext) => void;
+  onCreateInLibrary: (context: SelectedContext) => void;
   setSelectedId: (id: string | null) => void;
 };
 
@@ -169,32 +175,51 @@ export const getSelectedContextsTableColumns =
           | SelectedContextsTableMeta
           | undefined;
 
-        const currentHash = generateContextHash(context.title, context.content);
+        const isLinked = !!context.originalContextId;
 
+        const currentHash = generateContextHash(context.title, context.content);
         const isModified = currentHash !== context.originalHash;
 
         return (
           <div className="text-right" onClick={(e) => e.stopPropagation()}>
-            {isModified && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                    <LucideLink2Off className="h-3 w-3 text-muted-foreground" />
+            {!isLinked ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 p-0"
+                    onClick={() => meta?.onCreateInLibrary(context)}
+                  >
+                    <LucideSave className="h-3 w-3 text-muted-foreground" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="border-secondary">
-                  <DropdownMenuItem
-                    onClick={() => meta?.onSyncToLibrary(context)}
-                  >
-                    Update Library
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => meta?.onSyncFromLibrary(context)}
-                  >
-                    Revert Changes
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create in Library</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              isModified && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                      <LucideLink2Off className="h-3 w-3 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="border-secondary">
+                    <DropdownMenuItem
+                      onClick={() => meta?.onSyncToLibrary(context)}
+                    >
+                      Update Library
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => meta?.onSyncFromLibrary(context)}
+                    >
+                      Revert Changes
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
             )}
 
             <Button

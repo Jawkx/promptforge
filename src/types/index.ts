@@ -7,7 +7,7 @@ export type Context = {
 };
 
 export type SelectedContext = Context & {
-  readonly originalContextId: string;
+  readonly originalContextId?: string;
 };
 
 export type ContextFormData = {
