@@ -1,4 +1,4 @@
-import { Button } from "./ui/button"; // Ensure this path is correct
+import { Button } from "@/components/ui/button";
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useStore } from "@livestore/react";

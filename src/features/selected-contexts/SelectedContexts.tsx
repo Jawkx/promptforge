@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { SelectedContext } from "../types";
+import { SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { Copy as CopyIcon } from "lucide-react";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
@@ -7,16 +7,16 @@ import {
   getSelectedContextsTableColumns,
   SelectedContextsTableMeta,
 } from "./SelectedContextsTableColumns";
-import { FocusArea, useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/store/app.store";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
-import { generateContextHash } from "@/utils";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { v4 as uuid } from "uuid";
+import { generateContextHash } from "@/utils";
 
 const generateId = () =>
   `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;

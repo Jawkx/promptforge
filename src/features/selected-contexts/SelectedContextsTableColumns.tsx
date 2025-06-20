@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { SelectedContext } from "../types";
+import { SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X, LucideLink2Off, LucideSave } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { generateContextHash } from "@/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useLocalStore } from "@/localStore";
+import { useLocalStore } from "@/store/app.store";
 import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { generateContextHash } from "@/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;

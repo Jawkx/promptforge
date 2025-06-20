@@ -1,16 +1,16 @@
 import React, { useState, useCallback } from "react";
-import { Context, SelectedContext } from "../types";
+import { Context, SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { LucidePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ThemeToggler } from "./ThemeToggler";
+import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { v4 as uuid } from "uuid";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
-import { FocusArea, useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/store/app.store";
 import { generateContextHash } from "@/utils";
 import { contexts$ } from "@/livestore/queries";
 

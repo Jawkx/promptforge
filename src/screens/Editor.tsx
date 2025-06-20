@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import PromptInput from "../components/PromptInput";
-import ContextsLibrary from "../components/ContextsLibrary";
+import PromptInput from "@/features/prompt-editor/PromptInput";
+import ContextsLibrary from "@/features/context-library/ContextsLibrary";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -21,7 +21,7 @@ import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 import { useToast } from "@/hooks/use-toast";
-import { SelectedContexts } from "@/components/SelectedContexts";
+import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts";
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";

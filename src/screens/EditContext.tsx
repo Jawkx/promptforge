@@ -9,7 +9,7 @@ import { LucideSave } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { contexts$ } from "@/livestore/queries";
-import { useLocalStore } from "@/localStore";
+import { useLocalStore } from "@/store/app.store";
 import {
   Dialog,
   DialogContent,

@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Context } from "../types";
+import { Context } from "../../types";
 import {
   contextsTableColumn,
   ContextsTableMeta,
@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
-import { FocusArea, useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/store/app.store";
 
 interface ContextsDataTableProps {
   data: readonly Context[];

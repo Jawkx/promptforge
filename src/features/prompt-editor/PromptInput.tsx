@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from "react";
 import { Content } from "@tiptap/react";
-import { MinimalTiptapEditor } from "./ui/minimal-tiptap";
-import { FocusArea, useLocalStore } from "@/localStore";
+import { MinimalTiptapEditor } from "@/components/ui/minimal-tiptap";
+import { FocusArea, useLocalStore } from "@/store/app.store";
 import TurnDownService from "turndown";
 
 const turndownService = new TurnDownService();

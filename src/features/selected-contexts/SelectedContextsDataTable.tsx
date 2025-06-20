@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { SelectedContext } from "../types";
+import { SelectedContext } from "../../types";
 import { SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
 import {
   ContextMenu,
@@ -32,7 +32,7 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
-import { FocusArea, useLocalStore } from "@/localStore";
+import { FocusArea, useLocalStore } from "@/store/app.store";
 
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<SelectedContext>[];
