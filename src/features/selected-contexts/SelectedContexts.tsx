@@ -69,6 +69,7 @@ export const SelectedContexts: React.FC = () => {
                 ...contextToUpdate,
                 content: pastedText,
                 charCount: pastedText.length,
+                updatedAt: Date.now(),
               });
               toast({
                 title: "Selected Context Updated",
@@ -78,12 +79,15 @@ export const SelectedContexts: React.FC = () => {
             }
           } else {
             const title = getRandomUntitledPlaceholder();
+            const now = Date.now();
             const newContext: SelectedContext = {
               id: generateId(),
               title,
               content: pastedText,
               charCount: pastedText.length,
               originalHash: generateContextHash(title, pastedText),
+              createdAt: now,
+              updatedAt: now,
             };
             addContextToPrompt(newContext);
             toast({
@@ -177,11 +181,13 @@ export const SelectedContexts: React.FC = () => {
     (selectedContext: SelectedContext) => {
       if (!selectedContext.originalContextId) return;
 
+      const now = Date.now();
       store.commit(
         events.contextUpdated({
           id: selectedContext.originalContextId,
           title: selectedContext.title,
           content: selectedContext.content,
+          updatedAt: now,
         }),
       );
 
@@ -192,6 +198,7 @@ export const SelectedContexts: React.FC = () => {
       updateSelectedContext({
         ...selectedContext,
         originalHash: newHash,
+        updatedAt: now,
       });
 
       toast({
@@ -215,6 +222,8 @@ export const SelectedContexts: React.FC = () => {
           content: originalContext.content,
           charCount: originalContext.charCount,
           originalHash: originalContext.originalHash,
+          createdAt: originalContext.createdAt,
+          updatedAt: originalContext.updatedAt,
         });
         toast({
           title: "Synced from Library",
@@ -239,6 +248,7 @@ export const SelectedContexts: React.FC = () => {
           id,
           title: selectedContext.title,
           content: selectedContext.content,
+          createdAt: selectedContext.createdAt,
         }),
       );
 

@@ -4,6 +4,8 @@ export type Context = {
   readonly content: string;
   readonly charCount: number;
   readonly originalHash: string;
+  readonly createdAt: number;
+  readonly updatedAt: number;
 };
 
 export type SelectedContext = Context & {

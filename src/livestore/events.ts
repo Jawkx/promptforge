@@ -7,6 +7,7 @@ export const events = {
       id: Schema.String,
       title: Schema.String,
       content: Schema.String,
+      createdAt: Schema.Number,
     }),
   }),
   contextUpdated: Events.synced({
@@ -15,6 +16,7 @@ export const events = {
       id: Schema.String,
       title: Schema.String,
       content: Schema.String,
+      updatedAt: Schema.Number,
     }),
   }),
   contextDeleted: Events.synced({

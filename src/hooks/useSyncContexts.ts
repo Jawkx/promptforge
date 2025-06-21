@@ -75,6 +75,8 @@ export const useSyncContexts = ({
             content: libraryItem.content,
             charCount: libraryItem.charCount,
             originalHash: newLibraryHash,
+            createdAt: libraryItem.createdAt,
+            updatedAt: libraryItem.updatedAt,
           });
         }
       }

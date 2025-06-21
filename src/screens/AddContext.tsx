@@ -49,7 +49,12 @@ const AddContext: React.FC = () => {
     const id = uuid();
 
     store.commit(
-      events.contextCreated({ id, title: finalTitle, content: finalContent }),
+      events.contextCreated({
+        id,
+        title: finalTitle,
+        content: finalContent,
+        createdAt: Date.now(),
+      }),
     );
 
     toast({

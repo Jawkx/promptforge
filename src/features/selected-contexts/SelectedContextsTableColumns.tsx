@@ -59,6 +59,7 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
       updateSelectedContext({
         ...context,
         title: trimmedTitle,
+        updatedAt: Date.now(),
       });
       toast({
         title: "Title Updated",

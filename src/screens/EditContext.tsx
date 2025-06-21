@@ -101,6 +101,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           id: contextId,
           title: trimmedTitle,
           content: trimmedContent,
+          updatedAt: Date.now(),
         }),
       );
       toast({
@@ -113,6 +114,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         title: trimmedTitle,
         content: trimmedContent,
         charCount: trimmedContent.length,
+        updatedAt: Date.now(),
       };
       updateSelectedContext(updatedContext);
       toast({

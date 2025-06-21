@@ -56,6 +56,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             libraryContext.originalHash ||
             generateContextHash(libraryContext.title, libraryContext.content),
           originalContextId: libraryContext.id,
+          createdAt: libraryContext.createdAt,
+          updatedAt: libraryContext.updatedAt,
         };
         addContextToPrompt(newSelectedContextCopy);
         toast({
@@ -85,6 +87,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 id: selectedId,
                 title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
                 content: pastedText,
+                updatedAt: Date.now(),
               }),
             );
             toast({
@@ -100,6 +103,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 id,
                 title: placeholderTitle,
                 content: pastedText,
+                createdAt: Date.now(),
               }),
             );
             toast({

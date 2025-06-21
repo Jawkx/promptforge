@@ -61,6 +61,7 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
           id: context.id,
           title: trimmedTitle,
           content: context.content,
+          updatedAt: Date.now(),
         }),
       );
       toast({
