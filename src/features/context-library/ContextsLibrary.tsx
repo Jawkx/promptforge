@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Context, SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { LucidePlus } from "lucide-react";
@@ -35,6 +35,12 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const isFocused = focusedArea === FocusArea.CONTEXT_LIBRARY;
+
+  useEffect(() => {
+    if (focusedArea !== FocusArea.CONTEXT_LIBRARY) {
+      setActiveId(null);
+    }
+  }, [focusedArea]);
 
   const handleOnFocus = () => {
     setFocusedArea(FocusArea.CONTEXT_LIBRARY);

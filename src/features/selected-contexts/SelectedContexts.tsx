@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { SelectedContext } from "../../types";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
 import {
@@ -26,9 +26,8 @@ export const SelectedContexts: React.FC = () => {
   );
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
-  const isFocused = useLocalStore(
-    (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
-  );
+  const focusedArea = useLocalStore((state) => state.focusedArea);
+  const isFocused = focusedArea === FocusArea.SELECTED_CONTEXTS;
 
   const { store } = useStore();
   const libraryContexts = useQuery(contexts$);
@@ -37,6 +36,12 @@ export const SelectedContexts: React.FC = () => {
   const [, navigate] = useLocation();
 
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (focusedArea !== FocusArea.SELECTED_CONTEXTS) {
+      setActiveId(null);
+    }
+  }, [focusedArea]);
 
   useSyncContexts({
     libraryContexts,
