@@ -1,7 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { SelectedContext } from "../../types";
-import { Button } from "@/components/ui/button";
-import { Copy as CopyIcon } from "lucide-react";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
 import {
   getSelectedContextsTableColumns,
@@ -32,7 +30,6 @@ export const SelectedContexts: React.FC = () => {
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
   );
 
-  const prompt = useLocalStore((state) => state.prompt);
   const { store } = useStore();
   const libraryContexts = useQuery(contexts$);
 
@@ -108,40 +105,6 @@ export const SelectedContexts: React.FC = () => {
       addContextToPrompt,
     ],
   );
-
-  const onCopyPromptAndContextsClick = useCallback(() => {
-    const contextsText = selectedContexts
-      .map((context) => `# ${context.title}\n${context.content}`)
-      .join("\n\n");
-
-    const fullText = prompt ? `${prompt}\n\n${contextsText}` : contextsText;
-
-    if (!fullText.trim()) {
-      toast({
-        title: "Nothing to Copy",
-        description: "The prompt and selected contexts are empty.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    navigator.clipboard
-      .writeText(fullText)
-      .then(() => {
-        toast({
-          title: "Copied to Clipboard!",
-          description: "The prompt and contexts have been copied.",
-        });
-      })
-      .catch((err) => {
-        console.error("Failed to copy text: ", err);
-        toast({
-          title: "Copy Failed",
-          description: "Could not copy text to clipboard.",
-          variant: "destructive",
-        });
-      });
-  }, [selectedContexts, prompt, toast]);
 
   const onRemoveContext = useCallback(
     (id: string) => {
@@ -311,16 +274,6 @@ export const SelectedContexts: React.FC = () => {
         selectedId={selectedId}
         setSelectedId={setSelectedId}
       />
-
-      <div className="h-5" />
-
-      <Button
-        onClick={onCopyPromptAndContextsClick}
-        className="mt-auto w-full"
-        size="lg"
-      >
-        <CopyIcon className="mr-2 h-4 w-4" /> Copy All
-      </Button>
     </div>
   );
 };

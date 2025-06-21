@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { LucideAnvil } from "lucide-react";
+import { LucideAnvil, LucideCopy } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
@@ -16,6 +16,8 @@ import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
+import { Button } from "@/components/ui/button";
+import { CopyAllButton } from "@/features/shared/CopyAllButton";
 
 const Editor: React.FC = () => {
   const { store } = useStore();
@@ -108,9 +110,13 @@ const Editor: React.FC = () => {
                 >
                   <SelectedContexts />
                 </ResizablePanel>
+
+                <CopyAllButton />
               </ResizablePanelGroup>
             </ResizablePanel>
+
             <ResizableHandle withHandle />
+
             <ResizablePanel
               defaultSize={40}
               minSize={25}
