@@ -15,3 +15,15 @@ export const generateContextHash = (title: string, content: string): string => {
 
 export const generateId = () =>
   `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+export const formatCharCount = (count: number): string => {
+  if (count < 1000) {
+    return String(count);
+  }
+  if (count < 1_000_000) {
+    const num = Math.floor(count / 1000);
+    return `${num}k`;
+  }
+  const num = Math.floor(count / 1_000_000);
+  return `${num}M`;
+};

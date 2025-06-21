@@ -19,7 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { generateContextHash } from "@/utils";
+import { generateContextHash, formatCharCount } from "@/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
@@ -168,6 +168,23 @@ export const getSelectedContextsTableColumns =
       minSize: 200,
     },
     {
+      accessorFn: (row) => row.charCount,
+      id: "charCount",
+      header: () => <div className="text-center">Chars</div>,
+      cell: ({ row }) => {
+        const charCount = row.original.charCount;
+        return (
+          <div className="text-center" title={String(charCount)}>
+            {formatCharCount(charCount)}
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 60,
+      minSize: 60,
+      maxSize: 60,
+    },
+    {
       id: "actions",
       header: () => <div className="text-right w-full pr-2"></div>,
       cell: ({ row, table }) => {
@@ -207,7 +224,7 @@ export const getSelectedContextsTableColumns =
                       <LucideLink2Off className="h-3 w-3 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="border-secondary">
+                  <DropdownMenuContent align="end" className="border-secondary">
                     <DropdownMenuItem
                       onClick={() => meta?.onSyncToLibrary(context)}
                     >

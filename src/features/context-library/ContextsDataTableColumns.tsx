@@ -15,23 +15,12 @@ import { events } from "@/livestore/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { formatCharCount } from "@/utils";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   setSelectedId: (id: string | null) => void;
-};
-
-const formatCharCount = (count: number): string => {
-  if (count < 1000) {
-    return String(count);
-  }
-  if (count < 1_000_000) {
-    const num = Math.floor(count / 1000);
-    return `${num}k`;
-  }
-  const num = Math.floor(count / 1_000_000);
-  return `${num}M`;
 };
 
 const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
