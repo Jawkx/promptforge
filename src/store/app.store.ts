@@ -31,11 +31,14 @@ export const useLocalStore = create<LocalStoreState>((set) => ({
       selectedContexts: [...state.selectedContexts, context],
     })),
   removeMultipleSelectedContextsFromPrompt: (contextIds) =>
-    set((state) => ({
-      selectedContexts: state.selectedContexts.filter(
-        (c) => !contextIds.includes(c.id),
-      ),
-    })),
+    set((state) => {
+      const idsToRemove = new Set(contextIds);
+      return {
+        selectedContexts: state.selectedContexts.filter(
+          (c) => !idsToRemove.has(c.id),
+        ),
+      };
+    }),
   updateSelectedContext: (context) =>
     set((state) => ({
       selectedContexts: state.selectedContexts.map((c) =>

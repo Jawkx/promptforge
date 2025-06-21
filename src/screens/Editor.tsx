@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import PromptInput from "@/features/prompt-editor/PromptInput";
 import ContextsLibrary from "@/features/context-library/ContextsLibrary";
 import {
@@ -36,33 +36,38 @@ const Editor: React.FC = () => {
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
 
-  const handleDeleteContextRequest = (id: string) => {
+  const contextToDelete = useMemo(() => {
+    if (!contextToDeleteId) return null;
+    return contexts.find((c) => c.id === contextToDeleteId);
+  }, [contexts, contextToDeleteId]);
+
+  const handleDeleteContextRequest = useCallback((id: string) => {
     setContextToDeleteId(id);
     setDeleteConfirmationOpen(true);
-  };
+  }, []);
 
-  const confirmDeleteContext = () => {
+  const confirmDeleteContext = useCallback(() => {
     if (contextToDeleteId) {
       store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
       toast({
         title: "Context Deleted",
         description: `Context "${
-          contexts.find((c) => c.id === contextToDeleteId)?.title
+          contextToDelete?.title
         }" has been deleted from library.`,
         variant: "destructive",
       });
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
-  };
+  }, [contextToDeleteId, store, toast, contextToDelete]);
 
-  const handleDeleteMultipleContextsRequest = (ids: string[]) => {
+  const handleDeleteMultipleContextsRequest = useCallback((ids: string[]) => {
     if (ids.length === 0) return;
     setContextsToDeleteIds(ids);
     setDeleteMultipleConfirmationOpen(true);
-  };
+  }, []);
 
-  const confirmDeleteMultipleContexts = () => {
+  const confirmDeleteMultipleContexts = useCallback(() => {
     if (contextsToDeleteIds.length > 0) {
       store.commit(events.contextDeleted({ ids: contextsToDeleteIds }));
       toast({
@@ -73,7 +78,7 @@ const Editor: React.FC = () => {
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
-  };
+  }, [contextsToDeleteIds, store, toast]);
 
   return (
     <>
@@ -126,11 +131,8 @@ const Editor: React.FC = () => {
               <>
                 This action cannot be undone. This will permanently delete the
                 context "
-                <strong>
-                  {contexts.find((c) => c.id === contextToDeleteId)?.title ||
-                    "this context"}
-                </strong>
-                " from the library.
+                <strong>{contextToDelete?.title || "this context"}</strong>"
+                from the library.
               </>
             }
             onConfirm={confirmDeleteContext}

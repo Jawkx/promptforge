@@ -105,7 +105,7 @@ export const SelectedContexts: React.FC = () => {
     ],
   );
 
-  const onCopyPromptAndContextsClick = () => {
+  const onCopyPromptAndContextsClick = useCallback(() => {
     const contextsText = selectedContexts
       .map((context) => `# ${context.title}\n${context.content}`)
       .join("\n\n");
@@ -137,119 +137,146 @@ export const SelectedContexts: React.FC = () => {
           variant: "destructive",
         });
       });
-  };
+  }, [selectedContexts, prompt, toast]);
 
-  const onRemoveContext = (id: string) => {
-    const context = selectedContexts.find((c) => c.id === id);
-    if (context) {
-      removeMultipleSelectedContextsFromPrompt([id]);
+  const onRemoveContext = useCallback(
+    (id: string) => {
+      const context = selectedContexts.find((c) => c.id === id);
+      if (context) {
+        removeMultipleSelectedContextsFromPrompt([id]);
+        toast({
+          title: "Context Removed",
+          description: `Context "${context.title}" removed from prompt.`,
+          variant: "destructive",
+        });
+      }
+    },
+    [selectedContexts, removeMultipleSelectedContextsFromPrompt, toast],
+  );
+
+  const onEditSelectedContext = useCallback(
+    (context: SelectedContext) => {
+      navigate(`/edit/selected/${context.id}`);
+    },
+    [navigate],
+  );
+
+  const onDeleteMultipleFromPrompt = useCallback(
+    (ids: string[]) => {
+      removeMultipleSelectedContextsFromPrompt(ids);
       toast({
-        title: "Context Removed",
-        description: `Context "${context.title}" removed from prompt.`,
+        title: `${ids.length} Context(s) Removed`,
+        description: `${ids.length} context(s) have been removed from the prompt.`,
         variant: "destructive",
       });
-    }
-  };
+    },
+    [removeMultipleSelectedContextsFromPrompt, toast],
+  );
 
-  const onEditSelectedContext = (context: SelectedContext) => {
-    navigate(`/edit/selected/${context.id}`);
-  };
+  const onSyncToLibrary = useCallback(
+    (selectedContext: SelectedContext) => {
+      if (!selectedContext.originalContextId) return;
 
-  const onDeleteMultipleFromPrompt = (ids: string[]) => {
-    removeMultipleSelectedContextsFromPrompt(ids);
-    toast({
-      title: `${ids.length} Context(s) Removed`,
-      description: `${ids.length} context(s) have been removed from the prompt.`,
-      variant: "destructive",
-    });
-  };
+      store.commit(
+        events.contextUpdated({
+          id: selectedContext.originalContextId,
+          title: selectedContext.title,
+          content: selectedContext.content,
+        }),
+      );
 
-  const onSyncToLibrary = (selectedContext: SelectedContext) => {
-    if (!selectedContext.originalContextId) return;
-
-    store.commit(
-      events.contextUpdated({
-        id: selectedContext.originalContextId,
-        title: selectedContext.title,
-        content: selectedContext.content,
-      }),
-    );
-
-    const newHash = generateContextHash(
-      selectedContext.title,
-      selectedContext.content,
-    );
-    updateSelectedContext({
-      ...selectedContext,
-      originalHash: newHash,
-    });
-
-    toast({
-      title: "Synced to Library",
-      description: `Context in library has been updated.`,
-    });
-  };
-
-  const onSyncFromLibrary = (selectedContext: SelectedContext) => {
-    const originalContext = libraryContexts.find(
-      (c) => c.id === selectedContext.originalContextId,
-    );
-
-    if (originalContext) {
+      const newHash = generateContextHash(
+        selectedContext.title,
+        selectedContext.content,
+      );
       updateSelectedContext({
         ...selectedContext,
-        title: originalContext.title,
-        content: originalContext.content,
-        charCount: originalContext.charCount,
-        originalHash: originalContext.originalHash,
+        originalHash: newHash,
       });
+
       toast({
-        title: "Synced from Library",
-        description: `Selected context has been reverted to library version.`,
+        title: "Synced to Library",
+        description: `Context in library has been updated.`,
       });
-    } else {
+    },
+    [store, updateSelectedContext, toast],
+  );
+
+  const onSyncFromLibrary = useCallback(
+    (selectedContext: SelectedContext) => {
+      const originalContext = libraryContexts.find(
+        (c) => c.id === selectedContext.originalContextId,
+      );
+
+      if (originalContext) {
+        updateSelectedContext({
+          ...selectedContext,
+          title: originalContext.title,
+          content: originalContext.content,
+          charCount: originalContext.charCount,
+          originalHash: originalContext.originalHash,
+        });
+        toast({
+          title: "Synced from Library",
+          description: `Selected context has been reverted to library version.`,
+        });
+      } else {
+        toast({
+          title: "Sync Error",
+          description: `Original context not found in library.`,
+          variant: "destructive",
+        });
+      }
+    },
+    [libraryContexts, updateSelectedContext, toast],
+  );
+
+  const onCreateInLibrary = useCallback(
+    (selectedContext: SelectedContext) => {
+      const id = uuid();
+      store.commit(
+        events.contextCreated({
+          id,
+          title: selectedContext.title,
+          content: selectedContext.content,
+        }),
+      );
+
+      const newHash = generateContextHash(
+        selectedContext.title,
+        selectedContext.content,
+      );
+      updateSelectedContext({
+        ...selectedContext,
+        originalContextId: id,
+        originalHash: newHash,
+      });
+
       toast({
-        title: "Sync Error",
-        description: `Original context not found in library.`,
-        variant: "destructive",
+        title: "Added to Library",
+        description: `Context "${selectedContext.title}" has been created in the library.`,
       });
-    }
-  };
+    },
+    [store, updateSelectedContext, toast],
+  );
 
-  const onCreateInLibrary = (selectedContext: SelectedContext) => {
-    const id = uuid();
-    store.commit(
-      events.contextCreated({
-        id,
-        title: selectedContext.title,
-        content: selectedContext.content,
-      }),
-    );
-
-    const newHash = generateContextHash(
-      selectedContext.title,
-      selectedContext.content,
-    );
-    updateSelectedContext({
-      ...selectedContext,
-      originalContextId: id,
-      originalHash: newHash,
-    });
-
-    toast({
-      title: "Added to Library",
-      description: `Context "${selectedContext.title}" has been created in the library.`,
-    });
-  };
-
-  const selectedContextsTableMeta: SelectedContextsTableMeta = {
-    onRemoveContext,
-    onEditSelectedContext,
-    onSyncToLibrary,
-    onSyncFromLibrary,
-    onCreateInLibrary,
-    setSelectedId,
-  };
+  const selectedContextsTableMeta: SelectedContextsTableMeta = useMemo(
+    () => ({
+      onRemoveContext,
+      onEditSelectedContext,
+      onSyncToLibrary,
+      onSyncFromLibrary,
+      onCreateInLibrary,
+      setSelectedId,
+    }),
+    [
+      onRemoveContext,
+      onEditSelectedContext,
+      onSyncToLibrary,
+      onSyncFromLibrary,
+      onCreateInLibrary,
+    ],
+  );
 
   const selectedContextsColumns = useMemo(
     () => getSelectedContextsTableColumns(),

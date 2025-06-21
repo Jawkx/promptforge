@@ -44,25 +44,28 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
     navigate("/add");
   };
 
-  const onAddSelectedToPrompt = (libraryContexts: Context[]) => {
-    libraryContexts.forEach((libraryContext) => {
-      const newSelectedContextCopy: SelectedContext = {
-        id: generateId(),
-        title: libraryContext.title,
-        content: libraryContext.content,
-        charCount: libraryContext.content.length,
-        originalHash:
-          libraryContext.originalHash ||
-          generateContextHash(libraryContext.title, libraryContext.content),
-        originalContextId: libraryContext.id,
-      };
-      addContextToPrompt(newSelectedContextCopy);
-      toast({
-        title: "Context Selected",
-        description: `Context "${newSelectedContextCopy.title}" copied to prompt.`,
+  const onAddSelectedToPrompt = useCallback(
+    (libraryContexts: Context[]) => {
+      libraryContexts.forEach((libraryContext) => {
+        const newSelectedContextCopy: SelectedContext = {
+          id: generateId(),
+          title: libraryContext.title,
+          content: libraryContext.content,
+          charCount: libraryContext.content.length,
+          originalHash:
+            libraryContext.originalHash ||
+            generateContextHash(libraryContext.title, libraryContext.content),
+          originalContextId: libraryContext.id,
+        };
+        addContextToPrompt(newSelectedContextCopy);
+        toast({
+          title: "Context Selected",
+          description: `Context "${newSelectedContextCopy.title}" copied to prompt.`,
+        });
       });
-    });
-  };
+    },
+    [addContextToPrompt, toast],
+  );
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent) => {

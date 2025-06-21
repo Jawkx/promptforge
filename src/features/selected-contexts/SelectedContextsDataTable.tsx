@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -43,129 +43,139 @@ interface SelectedContextsDataTableProps {
   setSelectedId: (id: string | null) => void;
 }
 
-const DataTableRow = ({
-  row,
-  table,
-}: {
-  row: Row<SelectedContext>;
-  table: ReturnType<typeof useReactTable<SelectedContext>>;
-}) => {
-  const meta = table.options.meta as
-    | (SelectedContextsTableMeta & {
-        onDeleteMultipleFromPrompt?: (ids: string[]) => void;
-        selectedId: string | null;
-      })
-    | undefined;
-  const currentSelectedCount = table.getFilteredSelectedRowModel().rows.length;
+const MemoizedDataTableRow = React.memo(
+  ({
+    row,
+    table,
+    isSelected,
+  }: {
+    row: Row<SelectedContext>;
+    table: ReturnType<typeof useReactTable<SelectedContext>>;
+    isSelected: boolean;
+  }) => {
+    const meta = table.options.meta as
+      | (SelectedContextsTableMeta & {
+          onDeleteMultipleFromPrompt?: (ids: string[]) => void;
+          selectedId: string | null;
+          setSelectedId: (id: string | null) => void;
+        })
+      | undefined;
+    const currentSelectedCount =
+      table.getFilteredSelectedRowModel().rows.length;
 
-  const handleRemoveFromPrompt = () => {
-    meta?.onRemoveContext(row.original.id);
-    table.resetRowSelection();
-  };
+    const handleRemoveFromPrompt = useCallback(() => {
+      meta?.onRemoveContext(row.original.id);
+      table.resetRowSelection();
+    }, [meta, row.original.id, table]);
 
-  const handleEditSelected = () => {
-    if (meta?.onEditSelectedContext) {
-      meta.onEditSelectedContext(row.original);
-    }
-  };
+    const handleEditSelected = useCallback(() => {
+      if (meta?.onEditSelectedContext) {
+        meta.onEditSelectedContext(row.original);
+      }
+    }, [meta, row.original]);
 
-  const handleDeleteMultiple = () => {
-    const selectedIds = table
-      .getFilteredSelectedRowModel()
-      .rows.map((r) => r.original.id);
-    meta?.onDeleteMultipleFromPrompt?.(selectedIds);
-    table.resetRowSelection();
-  };
+    const handleDeleteMultiple = useCallback(() => {
+      const selectedIds = table
+        .getFilteredSelectedRowModel()
+        .rows.map((r) => r.original.id);
+      meta?.onDeleteMultipleFromPrompt?.(selectedIds);
+      table.resetRowSelection();
+    }, [meta, table]);
 
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <TableRow
-          data-state={
-            (row.getIsSelected() || row.original.id === meta?.selectedId) &&
-            "selected"
-          }
-          className="border-b-muted bg-background cursor-pointer"
-          onClick={() => {
-            if (meta?.setSelectedId) {
-              if (meta.selectedId === row.original.id) {
-                meta.setSelectedId(null);
-              } else {
-                meta.setSelectedId(row.original.id);
-                table.resetRowSelection();
-              }
+    const handleRowClick = useCallback(() => {
+      if (meta?.setSelectedId) {
+        if (meta.selectedId === row.original.id) {
+          meta.setSelectedId(null);
+        } else {
+          meta.setSelectedId(row.original.id);
+          table.resetRowSelection();
+        }
+      }
+    }, [meta, row.original.id, table]);
+
+    const handleContextMenuCapture = useCallback(() => {
+      if (
+        !row.getIsSelected() &&
+        row.original.id !== meta?.selectedId &&
+        meta?.setSelectedId
+      ) {
+        meta.setSelectedId(row.original.id);
+        table.resetRowSelection();
+      }
+    }, [row, meta]);
+
+    return (
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <TableRow
+            data-state={
+              (isSelected || row.original.id === meta?.selectedId) && "selected"
             }
-          }}
-          onContextMenuCapture={() => {
-            if (
-              !row.getIsSelected() &&
-              row.original.id !== meta?.selectedId &&
-              meta?.setSelectedId
-            ) {
-              meta.setSelectedId(row.original.id);
-              table.resetRowSelection();
-            }
-          }}
-        >
-          {row.getVisibleCells().map((cell) => (
-            <TableCell
-              key={cell.id}
-              className={cn(
-                "py-2",
-                cell.column.id === "select" ? "px-2" : "px-3",
-              )}
-              style={{
-                width:
-                  cell.column.getSize() !== 150
-                    ? cell.column.getSize()
-                    : undefined,
-              }}
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          ))}
-        </TableRow>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="border-secondary">
-        {currentSelectedCount > 1 && row.getIsSelected() ? (
-          <>
-            <ContextMenuLabel>
-              {currentSelectedCount} items selected
-            </ContextMenuLabel>
-            <ContextMenuItem
-              onClick={handleDeleteMultiple}
-              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-            >
-              <LucideTrash className="mr-2 h-4 w-4" />
-              Remove {currentSelectedCount} from Prompt
-            </ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={handleEditSelected} disabled>
-              <LucideEdit3 className="mr-2 h-4 w-4" />
-              Edit (select one)
-            </ContextMenuItem>
-          </>
-        ) : (
-          <>
-            <ContextMenuLabel>Context: {row.original.title}</ContextMenuLabel>
-            <ContextMenuItem onClick={handleEditSelected}>
-              <LucideEdit3 className="mr-2 h-4 w-4" />
-              Edit Context
-            </ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuItem
-              onClick={handleRemoveFromPrompt}
-              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-            >
-              <LucideListX className="mr-2 h-4 w-4" />
-              Remove from Prompt
-            </ContextMenuItem>
-          </>
-        )}
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-};
+            className="border-b-muted bg-background cursor-pointer"
+            onClick={handleRowClick}
+            onContextMenuCapture={handleContextMenuCapture}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <TableCell
+                key={cell.id}
+                className={cn(
+                  "py-2",
+                  cell.column.id === "select" ? "px-2" : "px-3",
+                )}
+                style={{
+                  width:
+                    cell.column.getSize() !== 150
+                      ? cell.column.getSize()
+                      : undefined,
+                }}
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="border-secondary">
+          {currentSelectedCount > 1 && isSelected ? (
+            <>
+              <ContextMenuLabel>
+                {currentSelectedCount} items selected
+              </ContextMenuLabel>
+              <ContextMenuItem
+                onClick={handleDeleteMultiple}
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              >
+                <LucideTrash className="mr-2 h-4 w-4" />
+                Remove {currentSelectedCount} from Prompt
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={handleEditSelected} disabled>
+                <LucideEdit3 className="mr-2 h-4 w-4" />
+                Edit (select one)
+              </ContextMenuItem>
+            </>
+          ) : (
+            <>
+              <ContextMenuLabel>Context: {row.original.title}</ContextMenuLabel>
+              <ContextMenuItem onClick={handleEditSelected}>
+                <LucideEdit3 className="mr-2 h-4 w-4" />
+                Edit Context
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem
+                onClick={handleRemoveFromPrompt}
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              >
+                <LucideListX className="mr-2 h-4 w-4" />
+                Remove from Prompt
+              </ContextMenuItem>
+            </>
+          )}
+        </ContextMenuContent>
+      </ContextMenu>
+    );
+  },
+);
+MemoizedDataTableRow.displayName = "MemoizedDataTableRow";
 
 export const SelectedContextsDataTable: React.FC<
   SelectedContextsDataTableProps
@@ -183,15 +193,15 @@ export const SelectedContextsDataTable: React.FC<
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
-  const extendedTableMeta: SelectedContextsTableMeta & {
-    onDeleteMultipleFromPrompt?: (ids: string[]) => void;
-    selectedId: string | null;
-  } = {
-    ...tableMeta,
-    onDeleteMultipleFromPrompt,
-    selectedId,
-    setSelectedId,
-  };
+  const extendedTableMeta = useMemo(
+    () => ({
+      ...tableMeta,
+      onDeleteMultipleFromPrompt,
+      selectedId,
+      setSelectedId,
+    }),
+    [tableMeta, onDeleteMultipleFromPrompt, selectedId, setSelectedId],
+  );
 
   const table = useReactTable({
     data,
@@ -265,7 +275,12 @@ export const SelectedContextsDataTable: React.FC<
               table
                 .getRowModel()
                 .rows.map((row) => (
-                  <DataTableRow key={row.id} row={row} table={table} />
+                  <MemoizedDataTableRow
+                    key={row.id}
+                    row={row}
+                    table={table}
+                    isSelected={row.getIsSelected()}
+                  />
                 ))
             ) : (
               <TableRow>

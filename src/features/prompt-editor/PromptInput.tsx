@@ -17,7 +17,7 @@ const PromptInput: React.FC = () => {
 
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleFocusClick = () => {
+  const handleFocusClick = useCallback(() => {
     if (editorContainerRef.current) {
       const editableElement =
         editorContainerRef.current.querySelector<HTMLElement>(".ProseMirror");
@@ -26,11 +26,14 @@ const PromptInput: React.FC = () => {
         editableElement.focus();
       }
     }
-  };
+  }, []);
 
-  const handleSetPrompt = (inputContent: Content) => {
-    setPrompt(turndownService.turndown(inputContent as string));
-  };
+  const handleSetPrompt = useCallback(
+    (inputContent: Content) => {
+      setPrompt(turndownService.turndown(inputContent as string));
+    },
+    [setPrompt],
+  );
 
   return (
     <div className="w-full h-full" onClick={handleFocusClick}>
