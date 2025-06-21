@@ -36,7 +36,7 @@ export const SelectedContexts: React.FC = () => {
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useSyncContexts({
     libraryContexts,
@@ -57,9 +57,9 @@ export const SelectedContexts: React.FC = () => {
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
-          if (selectedId) {
+          if (activeId) {
             const contextToUpdate = selectedContexts.find(
-              (c) => c.id === selectedId,
+              (c) => c.id === activeId,
             );
             if (contextToUpdate) {
               updateSelectedContext({
@@ -72,7 +72,7 @@ export const SelectedContexts: React.FC = () => {
                 title: "Selected Context Updated",
                 description: `Content updated by paste.`,
               });
-              setSelectedId(null);
+              setActiveId(null);
             }
           } else {
             const title = getRandomUntitledPlaceholder();
@@ -97,11 +97,11 @@ export const SelectedContexts: React.FC = () => {
     },
     [
       isFocused,
-      selectedId,
+      activeId,
       selectedContexts,
       updateSelectedContext,
       toast,
-      setSelectedId,
+      setActiveId,
       addContextToPrompt,
     ],
   );
@@ -240,7 +240,7 @@ export const SelectedContexts: React.FC = () => {
       onSyncToLibrary,
       onSyncFromLibrary,
       onCreateInLibrary,
-      setSelectedId,
+      setActiveId,
     }),
     [
       onRemoveContext,
@@ -248,6 +248,7 @@ export const SelectedContexts: React.FC = () => {
       onSyncToLibrary,
       onSyncFromLibrary,
       onCreateInLibrary,
+      setActiveId,
     ],
   );
 
@@ -271,8 +272,8 @@ export const SelectedContexts: React.FC = () => {
         data={selectedContexts}
         tableMeta={selectedContextsTableMeta}
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
+        activeId={activeId}
+        setActiveId={setActiveId}
       />
     </div>
   );

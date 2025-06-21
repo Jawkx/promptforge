@@ -53,21 +53,21 @@ const DataTableRow = React.memo(
   ({
     row,
     table,
-    selectedId,
+    activeId,
     isSelected,
     onAddSelectedToPrompt,
     onDeleteSelectedContexts,
   }: {
     row: Row<Context>;
     table: ReturnType<typeof useReactTable<Context>>;
-    selectedId: string | null;
+    activeId: string | null;
     isSelected: boolean;
     onAddSelectedToPrompt: (contexts: Context[]) => void;
     onDeleteSelectedContexts: (ids: string[]) => void;
   }) => {
     const context = row.original;
     const meta = table.options.meta as ContextsTableMeta | undefined;
-    const { setSelectedId } = meta || {};
+    const { setActiveId } = meta || {};
     const currentSelectedCount =
       table.getFilteredSelectedRowModel().rows.length;
 
@@ -90,27 +90,27 @@ const DataTableRow = React.memo(
     }, [table, onDeleteSelectedContexts]);
 
     const handleRowClick = useCallback(() => {
-      if (!setSelectedId) return;
-      if (selectedId === context.id) {
-        setSelectedId(null);
+      if (!setActiveId) return;
+      if (activeId === context.id) {
+        setActiveId(null);
       } else {
-        setSelectedId(context.id);
+        setActiveId(context.id);
         table.resetRowSelection();
       }
-    }, [setSelectedId, selectedId, context.id, table]);
+    }, [setActiveId, activeId, context.id, table]);
 
     const handleContextMenuCapture = useCallback(() => {
-      if (!row.getIsSelected() && setSelectedId) {
-        setSelectedId(context.id);
+      if (!row.getIsSelected() && setActiveId) {
+        setActiveId(context.id);
         table.resetRowSelection();
       }
-    }, [row, context.id, setSelectedId, table]);
+    }, [row, context.id, setActiveId, table]);
 
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow
-            data-state={(isSelected || context.id === selectedId) && "selected"}
+            data-state={(isSelected || context.id === activeId) && "selected"}
             className="border-b-muted cursor-pointer"
             onClick={handleRowClick}
             onContextMenuCapture={handleContextMenuCapture}
@@ -198,8 +198,8 @@ interface ContextsDataTableProps {
   onAddSelectedToPrompt: (selectedContexts: Context[]) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
+  activeId: string | null;
+  setActiveId: (id: string | null) => void;
 }
 
 export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
@@ -209,8 +209,8 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   onAddSelectedToPrompt,
   searchQuery,
   setSearchQuery,
-  selectedId,
-  setSelectedId,
+  activeId,
+  setActiveId,
 }) => {
   const [, navigate] = useLocation();
 
@@ -237,9 +237,9 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
     () => ({
       onEditContext: handleEditContext,
       onDeleteContext: onDeleteContext,
-      setSelectedId,
+      setActiveId,
     }),
-    [handleEditContext, onDeleteContext, setSelectedId],
+    [handleEditContext, onDeleteContext, setActiveId],
   );
 
   // useReactTable for some reason expect mutatable data type
@@ -339,7 +339,7 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
                     key={row.id}
                     row={row}
                     table={table}
-                    selectedId={selectedId}
+                    activeId={activeId}
                     isSelected={row.getIsSelected()}
                     onAddSelectedToPrompt={onAddSelectedToPrompt}
                     onDeleteSelectedContexts={onDeleteSelectedContexts}

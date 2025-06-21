@@ -32,7 +32,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const contexts = useQuery(contexts$);
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const isFocused = focusedArea === FocusArea.CONTEXT_LIBRARY;
 
@@ -80,11 +80,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         event.preventDefault();
         const pastedText = event.clipboardData.getData("text");
         if (pastedText.trim()) {
-          if (selectedId) {
-            const contextToUpdate = contexts.find((c) => c.id === selectedId);
+          if (activeId) {
+            const contextToUpdate = contexts.find((c) => c.id === activeId);
             store.commit(
               events.contextUpdated({
-                id: selectedId,
+                id: activeId,
                 title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
                 content: pastedText,
                 updatedAt: Date.now(),
@@ -94,7 +94,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
               title: "Context Updated",
               description: `Context content was updated via paste.`,
             });
-            setSelectedId(null);
+            setActiveId(null);
           } else {
             const placeholderTitle = getRandomUntitledPlaceholder();
             const id = uuid();
@@ -120,7 +120,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         }
       }
     },
-    [isFocused, store, toast, selectedId, contexts],
+    [isFocused, store, toast, activeId, contexts],
   );
 
   return (
@@ -142,8 +142,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
+        activeId={activeId}
+        setActiveId={setActiveId}
       />
 
       <Button variant="default" onClick={handleAddContext}>

@@ -27,7 +27,7 @@ export type SelectedContextsTableMeta = {
   onSyncToLibrary: (context: SelectedContext) => void;
   onSyncFromLibrary: (context: SelectedContext) => void;
   onCreateInLibrary: (context: SelectedContext) => void;
-  setSelectedId: (id: string | null) => void;
+  setActiveId: (id: string | null) => void;
 };
 
 const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
@@ -128,7 +128,7 @@ export const getSelectedContextsTableColumns =
                 (table.getIsSomePageRowsSelected() && "indeterminate")
               }
               onCheckedChange={(value) => {
-                meta?.setSelectedId(null);
+                meta?.setActiveId(null);
                 table.toggleAllPageRowsSelected(!!value);
               }}
               aria-label="Select all"
@@ -146,7 +146,7 @@ export const getSelectedContextsTableColumns =
             <Checkbox
               checked={row.getIsSelected()}
               onCheckedChange={(value) => {
-                meta?.setSelectedId(null);
+                meta?.setActiveId(null);
                 row.toggleSelected(!!value);
               }}
               aria-label="Select row"

@@ -39,23 +39,23 @@ interface SelectedContextsDataTableProps {
   data: SelectedContext[];
   tableMeta: SelectedContextsTableMeta;
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
+  activeId: string | null;
+  setActiveId: (id: string | null) => void;
 }
 
 interface MemoizedDataTableRowProps {
   row: Row<SelectedContext>;
   table: ReturnType<typeof useReactTable<SelectedContext>>;
   isSelected: boolean;
-  selectedId: string | null;
+  activeId: string | null;
 }
 
 const MemoizedDataTableRow = React.memo(
-  ({ row, table, isSelected, selectedId }: MemoizedDataTableRowProps) => {
+  ({ row, table, isSelected, activeId }: MemoizedDataTableRowProps) => {
     const meta = table.options.meta as
       | (SelectedContextsTableMeta & {
           onDeleteMultipleFromPrompt?: (ids: string[]) => void;
-          setSelectedId: (id: string | null) => void;
+          setActiveId: (id: string | null) => void;
         })
       | undefined;
     const currentSelectedCount =
@@ -81,33 +81,33 @@ const MemoizedDataTableRow = React.memo(
     }, [meta, table]);
 
     const handleRowClick = useCallback(() => {
-      if (meta?.setSelectedId) {
-        if (selectedId === row.original.id) {
-          meta.setSelectedId(null);
+      if (meta?.setActiveId) {
+        if (activeId === row.original.id) {
+          meta.setActiveId(null);
         } else {
-          meta.setSelectedId(row.original.id);
+          meta.setActiveId(row.original.id);
           table.resetRowSelection();
         }
       }
-    }, [meta, selectedId, row.original.id, table]);
+    }, [meta, activeId, row.original.id, table]);
 
     const handleContextMenuCapture = useCallback(() => {
       if (
         !row.getIsSelected() &&
-        row.original.id !== selectedId &&
-        meta?.setSelectedId
+        row.original.id !== activeId &&
+        meta?.setActiveId
       ) {
-        meta.setSelectedId(row.original.id);
+        meta.setActiveId(row.original.id);
         table.resetRowSelection();
       }
-    }, [row, selectedId, meta, table]);
+    }, [row, activeId, meta, table]);
 
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow
             data-state={
-              (isSelected || row.original.id === selectedId) && "selected"
+              (isSelected || row.original.id === activeId) && "selected"
             }
             className="border-b-muted cursor-pointer"
             onClick={handleRowClick}
@@ -182,8 +182,8 @@ export const SelectedContextsDataTable: React.FC<
   data,
   tableMeta,
   onDeleteMultipleFromPrompt,
-  selectedId,
-  setSelectedId,
+  activeId,
+  setActiveId,
 }) => {
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
@@ -195,10 +195,10 @@ export const SelectedContextsDataTable: React.FC<
     () => ({
       ...tableMeta,
       onDeleteMultipleFromPrompt,
-      selectedId,
-      setSelectedId,
+      activeId,
+      setActiveId,
     }),
-    [tableMeta, onDeleteMultipleFromPrompt, selectedId, setSelectedId],
+    [tableMeta, onDeleteMultipleFromPrompt, activeId, setActiveId],
   );
 
   const table = useReactTable({
@@ -278,7 +278,7 @@ export const SelectedContextsDataTable: React.FC<
                     row={row}
                     table={table}
                     isSelected={row.getIsSelected()}
-                    selectedId={selectedId}
+                    activeId={activeId}
                   />
                 ))
             ) : (

@@ -20,7 +20,7 @@ import { formatCharCount } from "@/utils";
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
-  setSelectedId: (id: string | null) => void;
+  setActiveId: (id: string | null) => void;
 };
 
 const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
@@ -117,7 +117,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
               (table.getIsSomePageRowsSelected() && "indeterminate")
             }
             onCheckedChange={(value) => {
-              meta?.setSelectedId(null);
+              meta?.setActiveId(null);
               table.toggleAllPageRowsSelected(!!value);
             }}
             aria-label="Select all"
@@ -132,7 +132,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => {
-              meta?.setSelectedId(null);
+              meta?.setActiveId(null);
               row.toggleSelected(!!value);
             }}
             aria-label="Select row"
