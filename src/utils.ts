@@ -12,3 +12,6 @@ export const generateContextHash = (title: string, content: string): string => {
   }
   return String(hash >>> 0); // Ensure positive integer string
 };
+
+export const generateId = () =>
+  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;

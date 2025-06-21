@@ -11,16 +11,13 @@ import { v4 as uuid } from "uuid";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { FocusArea, useLocalStore } from "@/store/app.store";
-import { generateContextHash } from "@/utils";
+import { generateContextHash, generateId } from "@/utils";
 import { contexts$ } from "@/livestore/queries";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
   onDeleteSelectedContexts: (ids: string[]) => void;
 }
-
-const generateId = () =>
-  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   onDeleteContext,

@@ -6,16 +6,6 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { LucideAnvil } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
@@ -25,6 +15,7 @@ import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts"
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
+import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 
 const Editor: React.FC = () => {
   const { store } = useStore();
@@ -127,63 +118,43 @@ const Editor: React.FC = () => {
             </ResizablePanel>
           </ResizablePanelGroup>
 
-          <AlertDialog
-            open={deleteConfirmationOpen}
+          <ConfirmationDialog
+            isOpen={deleteConfirmationOpen}
             onOpenChange={setDeleteConfirmationOpen}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-primary">
-                  Are you sure?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the
-                  context "
+            title="Are you sure?"
+            description={
+              <>
+                This action cannot be undone. This will permanently delete the
+                context "
+                <strong>
                   {contexts.find((c) => c.id === contextToDeleteId)?.title ||
                     "this context"}
-                  " from the library.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setContextToDeleteId(null)}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={confirmDeleteContext}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog
-            open={deleteMultipleConfirmationOpen}
+                </strong>
+                " from the library.
+              </>
+            }
+            onConfirm={confirmDeleteContext}
+            onCancel={() => setContextToDeleteId(null)}
+            confirmText="Delete"
+            confirmVariant="destructive"
+          />
+
+          <ConfirmationDialog
+            isOpen={deleteMultipleConfirmationOpen}
             onOpenChange={setDeleteMultipleConfirmationOpen}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-primary">
-                  Are you sure?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete{" "}
-                  {contextsToDeleteIds.length} context(s) from the library.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setContextsToDeleteIds([])}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={confirmDeleteMultipleContexts}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            title="Are you sure?"
+            description={
+              <>
+                This action cannot be undone. This will permanently delete{" "}
+                <strong>{contextsToDeleteIds.length}</strong> context(s) from
+                the library.
+              </>
+            }
+            onConfirm={confirmDeleteMultipleContexts}
+            onCancel={() => setContextsToDeleteIds([])}
+            confirmText="Delete"
+            confirmVariant="destructive"
+          />
         </div>
       </div>
       {isAddModalOpen && <AddContext />}

@@ -16,10 +16,7 @@ import { events } from "@/livestore/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { v4 as uuid } from "uuid";
-import { generateContextHash } from "@/utils";
-
-const generateId = () =>
-  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+import { generateContextHash, generateId } from "@/utils";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);

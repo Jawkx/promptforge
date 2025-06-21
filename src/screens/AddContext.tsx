@@ -34,32 +34,20 @@ const AddContext: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const finalTitle =
-      title.length !== 0 ? title.trim() : getRandomUntitledPlaceholder();
+
     const finalContent = content.trim();
-
-    if (!finalTitle && !finalContent) {
+    if (!finalContent) {
       toast({
-        title: "Empty Context",
-        description:
-          "Both title and content are empty. Please add some content or a title.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!finalContent && finalTitle) {
-      // Allow this case
-    } else if (!finalContent) {
-      toast({
-        title: "Empty Content",
-        description:
-          "Content cannot be empty if title is also blank or nearly blank.",
+        title: "Content Required",
+        description: "The context content cannot be empty.",
         variant: "destructive",
       });
       return;
     }
 
+    const finalTitle = title.trim() || getRandomUntitledPlaceholder();
     const id = uuid();
+
     store.commit(
       events.contextCreated({ id, title: finalTitle, content: finalContent }),
     );

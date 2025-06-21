@@ -11,6 +11,18 @@ type OldToastProps = {
   action?: ExternalToast["action"];
 };
 
+const SUCCESS_KEYWORDS = new Set([
+  "success",
+  "added",
+  "updated",
+  "deleted",
+  "copied",
+  "processed",
+  "selected",
+  "removed",
+  "synced",
+]);
+
 function toast(props: OldToastProps) {
   const { title, description, variant, action, ...rest } = props;
 
@@ -35,16 +47,11 @@ function toast(props: OldToastProps) {
     // Heuristic to determine if it's a success toast based on title
     // For "default" variant or when no variant is specified.
     const titleString = typeof title === "string" ? title.toLowerCase() : "";
-    if (
-      titleString.includes("success") ||
-      titleString.includes("added") ||
-      titleString.includes("updated") ||
-      titleString.includes("deleted") ||
-      titleString.includes("copied") ||
-      titleString.includes("processed") ||
-      titleString.includes("selected") ||
-      titleString.includes("removed")
-    ) {
+    const isSuccess = [...SUCCESS_KEYWORDS].some((keyword) =>
+      titleString.includes(keyword),
+    );
+
+    if (isSuccess) {
       toastId = sonnerToast.success(message, sonnerOptions);
     } else {
       // Default Sonner toast for general messages
