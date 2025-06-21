@@ -43,20 +43,18 @@ interface SelectedContextsDataTableProps {
   setSelectedId: (id: string | null) => void;
 }
 
+interface MemoizedDataTableRowProps {
+  row: Row<SelectedContext>;
+  table: ReturnType<typeof useReactTable<SelectedContext>>;
+  isSelected: boolean;
+  selectedId: string | null;
+}
+
 const MemoizedDataTableRow = React.memo(
-  ({
-    row,
-    table,
-    isSelected,
-  }: {
-    row: Row<SelectedContext>;
-    table: ReturnType<typeof useReactTable<SelectedContext>>;
-    isSelected: boolean;
-  }) => {
+  ({ row, table, isSelected, selectedId }: MemoizedDataTableRowProps) => {
     const meta = table.options.meta as
       | (SelectedContextsTableMeta & {
           onDeleteMultipleFromPrompt?: (ids: string[]) => void;
-          selectedId: string | null;
           setSelectedId: (id: string | null) => void;
         })
       | undefined;
@@ -84,34 +82,34 @@ const MemoizedDataTableRow = React.memo(
 
     const handleRowClick = useCallback(() => {
       if (meta?.setSelectedId) {
-        if (meta.selectedId === row.original.id) {
+        if (selectedId === row.original.id) {
           meta.setSelectedId(null);
         } else {
           meta.setSelectedId(row.original.id);
           table.resetRowSelection();
         }
       }
-    }, [meta, row.original.id, table]);
+    }, [meta, selectedId, row.original.id, table]);
 
     const handleContextMenuCapture = useCallback(() => {
       if (
         !row.getIsSelected() &&
-        row.original.id !== meta?.selectedId &&
+        row.original.id !== selectedId &&
         meta?.setSelectedId
       ) {
         meta.setSelectedId(row.original.id);
         table.resetRowSelection();
       }
-    }, [row, meta]);
+    }, [row, selectedId, meta, table]);
 
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow
             data-state={
-              (isSelected || row.original.id === meta?.selectedId) && "selected"
+              (isSelected || row.original.id === selectedId) && "selected"
             }
-            className="border-b-muted bg-background cursor-pointer"
+            className="border-b-muted cursor-pointer"
             onClick={handleRowClick}
             onContextMenuCapture={handleContextMenuCapture}
           >
@@ -280,6 +278,7 @@ export const SelectedContextsDataTable: React.FC<
                     row={row}
                     table={table}
                     isSelected={row.getIsSelected()}
+                    selectedId={selectedId}
                   />
                 ))
             ) : (
