@@ -1,47 +1,54 @@
 import * as React from "react";
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { AlertDialog } from "@base-ui-components/react/alert-dialog";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-const AlertDialog = AlertDialogPrimitive.Root;
+const AlertDialogRoot = AlertDialog.Root;
+const AlertDialogTrigger = AlertDialog.Trigger;
+const AlertDialogPortal = AlertDialog.Portal;
 
-const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
-
-const AlertDialogPortal = AlertDialogPrimitive.Portal;
-
-const AlertDialogOverlay = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+const AlertDialogBackdrop = React.forwardRef<
+  React.ElementRef<typeof AlertDialog.Backdrop>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Backdrop>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Overlay
+  <AlertDialog.Backdrop
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-black/80 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0",
       className,
     )}
     {...props}
     ref={ref}
   />
 ));
-AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
+AlertDialogBackdrop.displayName = "AlertDialogBackdrop";
+
+const AlertDialogPopup = React.forwardRef<
+  React.ElementRef<typeof AlertDialog.Popup>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Popup>
+>(({ className, ...props }, ref) => (
+  <AlertDialog.Popup
+    ref={ref}
+    className={cn(
+      "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+      "transition-all duration-200 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0",
+      className,
+    )}
+    {...props}
+  />
+));
+AlertDialogPopup.displayName = "AlertDialogPopup";
 
 const AlertDialogContent = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+  React.ElementRef<typeof AlertDialog.Popup>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Popup>
 >(({ className, ...props }, ref) => (
   <AlertDialogPortal>
-    <AlertDialogOverlay />
-    <AlertDialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        className,
-      )}
-      {...props}
-    />
+    <AlertDialogBackdrop />
+    <AlertDialogPopup ref={ref} className={className} {...props} />
   </AlertDialogPortal>
 ));
-AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
+AlertDialogContent.displayName = "AlertDialogContent";
 
 const AlertDialogHeader = ({
   className,
@@ -72,47 +79,46 @@ const AlertDialogFooter = ({
 AlertDialogFooter.displayName = "AlertDialogFooter";
 
 const AlertDialogTitle = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+  React.ElementRef<typeof AlertDialog.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Title>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Title
+  <AlertDialog.Title
     ref={ref}
     className={cn("text-lg font-semibold", className)}
     {...props}
   />
 ));
-AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName;
+AlertDialogTitle.displayName = "AlertDialogTitle";
 
 const AlertDialogDescription = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+  React.ElementRef<typeof AlertDialog.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Description>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Description
+  <AlertDialog.Description
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ));
-AlertDialogDescription.displayName =
-  AlertDialogPrimitive.Description.displayName;
+AlertDialogDescription.displayName = "AlertDialogDescription";
 
 const AlertDialogAction = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+  React.ElementRef<typeof AlertDialog.Close>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Close>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Action
+  <AlertDialog.Close
     ref={ref}
     className={cn(buttonVariants(), className)}
     {...props}
   />
 ));
-AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
+AlertDialogAction.displayName = "AlertDialogAction";
 
 const AlertDialogCancel = React.forwardRef<
-  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+  React.ElementRef<typeof AlertDialog.Close>,
+  React.ComponentPropsWithoutRef<typeof AlertDialog.Close>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Cancel
+  <AlertDialog.Close
     ref={ref}
     className={cn(
       buttonVariants({ variant: "outline" }),
@@ -122,12 +128,12 @@ const AlertDialogCancel = React.forwardRef<
     {...props}
   />
 ));
-AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
+AlertDialogCancel.displayName = "AlertDialogCancel";
 
 export {
-  AlertDialog,
+  AlertDialogRoot as AlertDialog,
   AlertDialogPortal,
-  AlertDialogOverlay,
+  AlertDialogBackdrop as AlertDialogOverlay,
   AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
