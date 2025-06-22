@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 export const generateContextHash = (title: string, content: string): string => {
   const dataString = JSON.stringify({
     title,
@@ -13,8 +15,7 @@ export const generateContextHash = (title: string, content: string): string => {
   return String(hash >>> 0); // Ensure positive integer string
 };
 
-export const generateId = () =>
-  `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+export const generateId = () => `context-${uuid()}`;
 
 export const formatCharCount = (count: number): string => {
   if (count < 1000) {

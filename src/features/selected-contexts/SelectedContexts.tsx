@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { SelectedContext } from "../../types";
 import { SelectedContextsDataTable } from "./SelectedContextsDataTable";
 import {
@@ -13,7 +13,6 @@ import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { v4 as uuid } from "uuid";
 import { generateContextHash, generateId } from "@/utils";
 
 export const SelectedContexts: React.FC = () => {
@@ -210,7 +209,7 @@ export const SelectedContexts: React.FC = () => {
 
   const onCreateInLibrary = useCallback(
     (selectedContext: SelectedContext) => {
-      const id = uuid();
+      const id = generateId();
       store.commit(
         events.contextCreated({
           id,

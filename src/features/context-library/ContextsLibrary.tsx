@@ -7,7 +7,6 @@ import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { v4 as uuid } from "uuid";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { FocusArea, useLocalStore } from "@/store/app.store";
@@ -103,10 +102,9 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             setActiveId(null);
           } else {
             const placeholderTitle = getRandomUntitledPlaceholder();
-            const id = uuid();
             store.commit(
               events.contextCreated({
-                id,
+                id: generateId(),
                 title: placeholderTitle,
                 content: pastedText,
                 createdAt: Date.now(),

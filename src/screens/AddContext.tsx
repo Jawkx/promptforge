@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { LucideSave } from "lucide-react";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
-import { v4 as uuid } from "uuid";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import {
   Dialog,
@@ -18,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { generateId } from "@/utils";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
@@ -46,11 +46,10 @@ const AddContext: React.FC = () => {
     }
 
     const finalTitle = title.trim() || getRandomUntitledPlaceholder();
-    const id = uuid();
 
     store.commit(
       events.contextCreated({
-        id,
+        id: generateId(),
         title: finalTitle,
         content: finalContent,
         createdAt: Date.now(),
