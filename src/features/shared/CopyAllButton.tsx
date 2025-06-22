@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { useLocalStore } from "@/store/app.store";
 import { LucideCopy } from "lucide-react";
 import { useCallback } from "react";
 
 export const CopyAllButton = () => {
-  const { toast } = useToast();
   const prompt = useLocalStore((state) => state.prompt);
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
 
@@ -17,10 +16,8 @@ export const CopyAllButton = () => {
     const fullText = prompt ? `${prompt}\n\n${contextsText}` : contextsText;
 
     if (!fullText.trim()) {
-      toast({
-        title: "Nothing to Copy",
+      sonnerToast.error("Nothing to Copy", {
         description: "The prompt and selected contexts are empty.",
-        variant: "destructive",
       });
       return;
     }
@@ -28,20 +25,17 @@ export const CopyAllButton = () => {
     navigator.clipboard
       .writeText(fullText)
       .then(() => {
-        toast({
-          title: "Copied to Clipboard!",
+        sonnerToast.success("Copied to Clipboard!", {
           description: "The prompt and contexts have been copied.",
         });
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);
-        toast({
-          title: "Copy Failed",
+        sonnerToast.error("Copy Failed", {
           description: "Could not copy text to clipboard.",
-          variant: "destructive",
         });
       });
-  }, [selectedContexts, prompt, toast]);
+  }, [selectedContexts, prompt]);
 
   return (
     <Button

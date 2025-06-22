@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
 import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
@@ -13,7 +13,6 @@ import { ContextFormData } from "@/types";
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { store } = useStore();
-  const { toast } = useToast();
 
   const handleClose = () => {
     navigate("/");
@@ -22,10 +21,8 @@ const AddContext: React.FC = () => {
   const handleSubmit = (data: ContextFormData) => {
     const finalContent = data.content.trim();
     if (!finalContent) {
-      toast({
-        title: "Content Required",
+      sonnerToast.error("Content Required", {
         description: "The context content cannot be empty.",
-        variant: "destructive",
       });
       return;
     }
@@ -41,8 +38,7 @@ const AddContext: React.FC = () => {
       }),
     );
 
-    toast({
-      title: "Context Added",
+    sonnerToast.success("Context Added", {
       description: `Context "${finalTitle}" has been added.`,
     });
 

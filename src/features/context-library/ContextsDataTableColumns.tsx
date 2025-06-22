@@ -14,7 +14,7 @@ import { useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { formatCharCount } from "@/utils";
 
 export type ContextsTableMeta = {
@@ -25,7 +25,6 @@ export type ContextsTableMeta = {
 
 const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
   const { store } = useStore();
-  const { toast } = useToast();
   const context = row.original;
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(context.title);
@@ -53,16 +52,13 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
           updatedAt: Date.now(),
         }),
       );
-      toast({
-        title: "Title Updated",
+      sonnerToast.success("Title Updated", {
         description: `Context title updated to "${trimmedTitle}".`,
       });
     } else if (!trimmedTitle) {
       setTitle(context.title); // Revert
-      toast({
-        title: "Title cannot be empty",
+      sonnerToast.error("Title cannot be empty", {
         description: "The context title has been reverted.",
-        variant: "destructive",
       });
     }
     setIsEditing(false);

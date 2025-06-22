@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Context, SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { LucidePlus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
@@ -27,7 +27,6 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   const [, navigate] = useLocation();
   const { store } = useStore();
-  const { toast } = useToast();
   const contexts = useQuery(contexts$);
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,13 +64,12 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           updatedAt: libraryContext.updatedAt,
         };
         addContextToPrompt(newSelectedContextCopy);
-        toast({
-          title: "Context Selected",
+        sonnerToast.success("Context Selected", {
           description: `Context "${newSelectedContextCopy.title}" copied to prompt.`,
         });
       });
     },
-    [addContextToPrompt, toast],
+    [addContextToPrompt],
   );
 
   const handlePaste = useCallback(
@@ -95,8 +93,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 updatedAt: Date.now(),
               }),
             );
-            toast({
-              title: "Context Updated",
+            sonnerToast.success("Context Updated", {
               description: `Context content was updated via paste.`,
             });
             setActiveId(null);
@@ -110,21 +107,18 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 createdAt: Date.now(),
               }),
             );
-            toast({
-              title: "Context Added",
+            sonnerToast.success("Context Added", {
               description: `Context "${placeholderTitle}" has been added.`,
             });
           }
         } else {
-          toast({
-            title: "Paste Error",
+          sonnerToast.error("Paste Error", {
             description: "Pasted content is empty.",
-            variant: "destructive",
           });
         }
       }
     },
-    [isFocused, store, toast, activeId, contexts],
+    [isFocused, store, activeId, contexts],
   );
 
   return (

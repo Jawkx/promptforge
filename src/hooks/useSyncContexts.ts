@@ -1,16 +1,13 @@
 import { useEffect } from "react";
 import { Context, SelectedContext } from "@/types";
 import { generateContextHash } from "@/utils";
-import { useToast } from "@/hooks/use-toast";
-
-type ToastFn = ReturnType<typeof useToast>["toast"];
+import { toast as sonnerToast } from "sonner";
 
 interface UseSyncContextsParams {
   libraryContexts: readonly Context[];
   selectedContexts: SelectedContext[];
   updateSelectedContext: (context: SelectedContext) => void;
   removeMultipleSelectedContextsFromPrompt: (contextIds: string[]) => void;
-  toast: ToastFn;
 }
 
 /**
@@ -26,7 +23,6 @@ export const useSyncContexts = ({
   selectedContexts,
   updateSelectedContext,
   removeMultipleSelectedContextsFromPrompt,
-  toast,
 }: UseSyncContextsParams) => {
   useEffect(() => {
     if (selectedContexts.length === 0 || libraryContexts.length === 0) {
@@ -85,18 +81,15 @@ export const useSyncContexts = ({
     // Apply all collected changes
     if (updatesToApply.length > 0) {
       updatesToApply.forEach((context) => updateSelectedContext(context));
-      toast({
-        title: "Contexts Auto-Updated",
+      sonnerToast.success("Contexts Auto-Updated", {
         description: `${updatesToApply.length} selected context(s) were automatically updated from the library.`,
       });
     }
 
     if (idsToRemove.length > 0) {
       removeMultipleSelectedContextsFromPrompt(idsToRemove);
-      toast({
-        title: "Stale Contexts Removed",
+      sonnerToast.error("Stale Contexts Removed", {
         description: `${idsToRemove.length} selected context(s) were removed because their original was deleted from the library.`,
-        variant: "destructive",
       });
     }
   }, [
@@ -104,6 +97,5 @@ export const useSyncContexts = ({
     selectedContexts,
     updateSelectedContext,
     removeMultipleSelectedContextsFromPrompt,
-    toast,
   ]);
 };

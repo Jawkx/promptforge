@@ -10,7 +10,7 @@ import { LucideAnvil } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
 import { events } from "@/livestore/events";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts";
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
@@ -21,7 +21,6 @@ import { CopyAllButton } from "@/features/shared/CopyAllButton";
 const Editor: React.FC = () => {
   const { store } = useStore();
   const contexts = useQuery(contexts$);
-  const { toast } = useToast();
 
   const [isAddModalOpen] = useRoute("/add");
   const [isEditModalOpen, params] = useRoute<{
@@ -50,17 +49,13 @@ const Editor: React.FC = () => {
   const confirmDeleteContext = useCallback(() => {
     if (contextToDeleteId) {
       store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
-      toast({
-        title: "Context Deleted",
-        description: `Context "${
-          contextToDelete?.title
-        }" has been deleted from library.`,
-        variant: "destructive",
+      sonnerToast.error("Context Deleted", {
+        description: `Context "${contextToDelete?.title}" has been deleted from library.`,
       });
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
-  }, [contextToDeleteId, store, toast, contextToDelete]);
+  }, [contextToDeleteId, store, contextToDelete]);
 
   const handleDeleteMultipleContextsRequest = useCallback((ids: string[]) => {
     if (ids.length === 0) return;
@@ -71,15 +66,13 @@ const Editor: React.FC = () => {
   const confirmDeleteMultipleContexts = useCallback(() => {
     if (contextsToDeleteIds.length > 0) {
       store.commit(events.contextDeleted({ ids: contextsToDeleteIds }));
-      toast({
-        title: `${contextsToDeleteIds.length} Contexts Deleted`,
+      sonnerToast.error(`${contextsToDeleteIds.length} Contexts Deleted`, {
         description: `Successfully deleted ${contextsToDeleteIds.length} context(s) from the library.`,
-        variant: "destructive",
       });
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
-  }, [contextsToDeleteIds, store, toast]);
+  }, [contextsToDeleteIds, store]);
 
   return (
     <>

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useLocalStore } from "@/store/app.store";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import {
   Tooltip,
   TooltipContent,
@@ -36,7 +36,6 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
-  const { toast } = useToast();
   const context = row.original;
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(context.title);
@@ -61,16 +60,13 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
         title: trimmedTitle,
         updatedAt: Date.now(),
       });
-      toast({
-        title: "Title Updated",
+      sonnerToast.success("Title Updated", {
         description: `Selected context title updated to "${trimmedTitle}".`,
       });
     } else if (!trimmedTitle) {
       setTitle(context.title);
-      toast({
-        title: "Title cannot be empty",
+      sonnerToast.error("Title cannot be empty", {
         description: "The selected context title has been reverted.",
-        variant: "destructive",
       });
     }
     setIsEditing(false);

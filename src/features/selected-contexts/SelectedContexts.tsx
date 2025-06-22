@@ -6,7 +6,7 @@ import {
   SelectedContextsTableMeta,
 } from "./SelectedContextsTableColumns";
 import { FocusArea, useLocalStore } from "@/store/app.store";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { useLocation } from "wouter";
 import { useQuery, useStore } from "@livestore/react";
 import { contexts$ } from "@/livestore/queries";
@@ -31,7 +31,6 @@ export const SelectedContexts: React.FC = () => {
   const { store } = useStore();
   const libraryContexts = useQuery(contexts$);
 
-  const { toast } = useToast();
   const [, navigate] = useLocation();
 
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -47,7 +46,6 @@ export const SelectedContexts: React.FC = () => {
     selectedContexts,
     updateSelectedContext,
     removeMultipleSelectedContextsFromPrompt,
-    toast,
   });
 
   const handlePaste = useCallback(
@@ -72,8 +70,7 @@ export const SelectedContexts: React.FC = () => {
                 charCount: pastedText.length,
                 updatedAt: Date.now(),
               });
-              toast({
-                title: "Selected Context Updated",
+              sonnerToast.success("Selected Context Updated", {
                 description: `Content updated by paste.`,
               });
               setActiveId(null);
@@ -91,8 +88,7 @@ export const SelectedContexts: React.FC = () => {
               updatedAt: now,
             };
             addContextToPrompt(newContext);
-            toast({
-              title: "Context Pasted",
+            sonnerToast("Context Pasted", {
               description: `A new context "${title}" has been added to the selected list.`,
             });
           }
@@ -104,7 +100,6 @@ export const SelectedContexts: React.FC = () => {
       activeId,
       selectedContexts,
       updateSelectedContext,
-      toast,
       setActiveId,
       addContextToPrompt,
     ],
@@ -115,14 +110,12 @@ export const SelectedContexts: React.FC = () => {
       const context = selectedContexts.find((c) => c.id === id);
       if (context) {
         removeMultipleSelectedContextsFromPrompt([id]);
-        toast({
-          title: "Context Removed",
+        sonnerToast.error("Context Removed", {
           description: `Context "${context.title}" removed from prompt.`,
-          variant: "destructive",
         });
       }
     },
-    [selectedContexts, removeMultipleSelectedContextsFromPrompt, toast],
+    [selectedContexts, removeMultipleSelectedContextsFromPrompt],
   );
 
   const onEditSelectedContext = useCallback(
@@ -135,13 +128,11 @@ export const SelectedContexts: React.FC = () => {
   const onDeleteMultipleFromPrompt = useCallback(
     (ids: string[]) => {
       removeMultipleSelectedContextsFromPrompt(ids);
-      toast({
-        title: `${ids.length} Context(s) Removed`,
+      sonnerToast.error(`${ids.length} Context(s) Removed`, {
         description: `${ids.length} context(s) have been removed from the prompt.`,
-        variant: "destructive",
       });
     },
-    [removeMultipleSelectedContextsFromPrompt, toast],
+    [removeMultipleSelectedContextsFromPrompt],
   );
 
   const onSyncToLibrary = useCallback(
@@ -168,12 +159,11 @@ export const SelectedContexts: React.FC = () => {
         updatedAt: now,
       });
 
-      toast({
-        title: "Synced to Library",
+      sonnerToast.success("Synced to Library", {
         description: `Context in library has been updated.`,
       });
     },
-    [store, updateSelectedContext, toast],
+    [store, updateSelectedContext],
   );
 
   const onSyncFromLibrary = useCallback(
@@ -192,19 +182,16 @@ export const SelectedContexts: React.FC = () => {
           createdAt: originalContext.createdAt,
           updatedAt: originalContext.updatedAt,
         });
-        toast({
-          title: "Synced from Library",
+        sonnerToast.success("Synced from Library", {
           description: `Selected context has been reverted to library version.`,
         });
       } else {
-        toast({
-          title: "Sync Error",
+        sonnerToast.error("Sync Error", {
           description: `Original context not found in library.`,
-          variant: "destructive",
         });
       }
     },
-    [libraryContexts, updateSelectedContext, toast],
+    [libraryContexts, updateSelectedContext],
   );
 
   const onCreateInLibrary = useCallback(
@@ -229,12 +216,11 @@ export const SelectedContexts: React.FC = () => {
         originalHash: newHash,
       });
 
-      toast({
-        title: "Added to Library",
+      sonnerToast.success("Added to Library", {
         description: `Context "${selectedContext.title}" has been created in the library.`,
       });
     },
-    [store, updateSelectedContext, toast],
+    [store, updateSelectedContext],
   );
 
   const selectedContextsTableMeta: SelectedContextsTableMeta = useMemo(

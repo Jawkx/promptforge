@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Context, SelectedContext, ContextFormData } from "@/types";
-import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
 import { useQuery, useStore } from "@livestore/react";
 import { events } from "@/livestore/events";
@@ -24,7 +24,6 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     (state) => state.updateSelectedContext,
   );
   const contexts = useQuery(contexts$);
-  const { toast } = useToast();
 
   const [initialData, setInitialData] = useState<ContextFormData | null>(null);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -48,15 +47,13 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         content: foundContext.content,
       });
     } else {
-      toast({
-        title: "Context Not Found",
+      sonnerToast.error("Context Not Found", {
         description:
           "The context you are trying to edit does not exist or could not be found.",
-        variant: "destructive",
       });
       handleClose();
     }
-  }, [contextId, type, contexts, selectedContexts, toast, handleClose]);
+  }, [contextId, type, contexts, selectedContexts, handleClose]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
@@ -66,18 +63,14 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       const trimmedContent = data.content.trim();
 
       if (!trimmedTitle) {
-        toast({
-          title: "Title Required",
+        sonnerToast.error("Title Required", {
           description: "Title cannot be empty.",
-          variant: "destructive",
         });
         return;
       }
       if (!trimmedContent) {
-        toast({
-          title: "Content Required",
+        sonnerToast.error("Content Required", {
           description: "Content cannot be empty.",
-          variant: "destructive",
         });
         return;
       }
@@ -91,8 +84,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             updatedAt: Date.now(),
           }),
         );
-        toast({
-          title: "Context Updated",
+        sonnerToast.success("Context Updated", {
           description: `Context "${trimmedTitle}" has been updated.`,
         });
       } else if (type === "selected") {
@@ -104,22 +96,13 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           updatedAt: Date.now(),
         };
         updateSelectedContext(updatedContext);
-        toast({
-          title: "Selected Context Updated",
+        sonnerToast.success("Selected Context Updated", {
           description: `Selected context "${trimmedTitle}" has been updated.`,
         });
       }
       handleClose();
     },
-    [
-      contextId,
-      initialData,
-      type,
-      store,
-      updateSelectedContext,
-      toast,
-      handleClose,
-    ],
+    [contextId, initialData, type, store, updateSelectedContext, handleClose],
   );
 
   if (!initialData) {
