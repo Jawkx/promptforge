@@ -1,15 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useStore } from "@livestore/react";
-import { tables } from "@/livestore/schema";
+import { useStore, useQuery } from "@livestore/react";
+import { preference$ } from "@/livestore/queries";
+import { events } from "@/livestore/events";
 
 export const ThemeToggler = () => {
   const { store } = useStore();
+  const preference = useQuery(preference$);
 
-  const [{ theme }, updatePreferences] = store.useClientDocument(
-    tables.preferences,
-  );
+  const theme = preference.theme ?? "dark";
 
   const [currentIcon, setCurrentIcon] = useState(
     theme === "dark" ? "moon" : "sun",
@@ -25,7 +25,9 @@ export const ThemeToggler = () => {
   }, [theme]);
 
   const handleToggleTheme = () => {
-    updatePreferences({ theme: theme === "dark" ? "light" : "dark" });
+    store.commit(
+      events.preferenceStateSet({ theme: theme === "dark" ? "light" : "dark" }),
+    );
   };
 
   return (

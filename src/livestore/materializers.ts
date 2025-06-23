@@ -1,6 +1,6 @@
 import { events } from "./events";
 import { State } from "@livestore/livestore";
-import { tables } from "./schema";
+import { tables } from "./tables";
 import { generateContextHash } from "@/utils";
 
 export const materializers = State.SQLite.materializers(events, {

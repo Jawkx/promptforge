@@ -1,16 +1,12 @@
-import { tables } from "@/livestore/schema";
-import { useStore } from "@livestore/react";
 import { Toaster as Sonner } from "sonner";
+import { useQuery } from "@livestore/react";
+import { preference$ } from "@/livestore/queries";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { store } = useStore();
-
-  const [{ theme }] = store.useClientDocument(
-    tables.preferences,
-  );
-
+  const preference = useQuery(preference$);
+  const theme = preference.theme ?? "dark";
 
   return (
     <Sonner

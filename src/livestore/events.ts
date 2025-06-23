@@ -1,4 +1,5 @@
 import { Events, Schema } from "@livestore/livestore";
+import { tables } from "./tables";
 
 export const events = {
   contextCreated: Events.synced({
@@ -23,4 +24,5 @@ export const events = {
     name: "v1.ContextsDeleted",
     schema: Schema.Struct({ ids: Schema.Array(Schema.String) }),
   }),
+  preferenceStateSet: tables.preferences.set,
 };
