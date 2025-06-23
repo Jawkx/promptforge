@@ -24,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <LiveStoreProvider
       schema={schema}
+      storeId="promptforge"
       adapter={adapter}
       renderLoading={() => <LoadingScreen />}
       batchUpdates={batchUpdates}
