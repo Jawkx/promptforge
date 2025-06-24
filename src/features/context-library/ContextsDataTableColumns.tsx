@@ -10,12 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LucideMoreVertical, LucideEdit3, LucideTrash2 } from "lucide-react";
-import { useStore } from "@livestore/react";
-import { events } from "@/livestore/events";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { formatCharCount } from "@/utils";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -24,7 +24,7 @@ export type ContextsTableMeta = {
 };
 
 const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
-  const { store } = useStore();
+  const { contextLibraryStore } = useAppStores();
   const context = row.original;
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(context.title);
@@ -44,8 +44,8 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
   const handleSave = () => {
     const trimmedTitle = title.trim();
     if (trimmedTitle && trimmedTitle !== context.title) {
-      store.commit(
-        events.contextUpdated({
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextUpdated({
           id: context.id,
           title: trimmedTitle,
           content: context.content,

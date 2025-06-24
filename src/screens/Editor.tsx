@@ -7,9 +7,9 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { LucideAnvil } from "lucide-react";
-import { useQuery, useStore } from "@livestore/react";
-import { contexts$ } from "@/livestore/queries";
-import { events } from "@/livestore/events";
+import { useQuery } from "@livestore/react";
+import { contexts$ } from "@/livestore/context-library-store/queries";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { toast as sonnerToast } from "sonner";
 import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts";
 import { useRoute } from "wouter";
@@ -17,10 +17,11 @@ import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 import { CopyAllButton } from "@/features/shared/CopyAllButton";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 const Editor: React.FC = () => {
-  const { store } = useStore();
-  const contexts = useQuery(contexts$);
+  const { contextLibraryStore } = useAppStores();
+  const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [isAddModalOpen] = useRoute("/add");
   const [isEditModalOpen, params] = useRoute<{
@@ -48,14 +49,16 @@ const Editor: React.FC = () => {
 
   const confirmDeleteContext = useCallback(() => {
     if (contextToDeleteId) {
-      store.commit(events.contextDeleted({ ids: [contextToDeleteId] }));
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextsDeleted({ ids: [contextToDeleteId] }),
+      );
       sonnerToast.error("Context Deleted", {
         description: `Context "${contextToDelete?.title}" has been deleted from library.`,
       });
     }
     setDeleteConfirmationOpen(false);
     setContextToDeleteId(null);
-  }, [contextToDeleteId, store, contextToDelete]);
+  }, [contextToDeleteId, contextLibraryStore, contextToDelete]);
 
   const handleDeleteMultipleContextsRequest = useCallback((ids: string[]) => {
     if (ids.length === 0) return;
@@ -65,14 +68,16 @@ const Editor: React.FC = () => {
 
   const confirmDeleteMultipleContexts = useCallback(() => {
     if (contextsToDeleteIds.length > 0) {
-      store.commit(events.contextDeleted({ ids: contextsToDeleteIds }));
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextsDeleted({ ids: contextsToDeleteIds }),
+      );
       sonnerToast.error(`${contextsToDeleteIds.length} Contexts Deleted`, {
         description: `Successfully deleted ${contextsToDeleteIds.length} context(s) from the library.`,
       });
     }
     setDeleteMultipleConfirmationOpen(false);
     setContextsToDeleteIds([]);
-  }, [contextsToDeleteIds, store]);
+  }, [contextsToDeleteIds, contextLibraryStore]);
 
   return (
     <>

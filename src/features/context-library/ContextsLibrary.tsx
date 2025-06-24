@@ -6,12 +6,13 @@ import { toast as sonnerToast } from "sonner";
 import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { useLocation } from "wouter";
+import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { useQuery, useStore } from "@livestore/react";
-import { events } from "@/livestore/events";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/app.store";
 import { generateContextHash, generateId } from "@/utils";
-import { contexts$ } from "@/livestore/queries";
+import { contexts$ } from "@/livestore/context-library-store/queries";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -26,8 +27,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const focusedArea = useLocalStore((state) => state.focusedArea);
 
   const [, navigate] = useLocation();
-  const { store } = useStore();
-  const contexts = useQuery(contexts$);
+  const { contextLibraryStore } = useAppStores();
+  const contexts = useQuery(contexts$, { store: contextLibraryStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -85,8 +86,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         if (pastedText.trim()) {
           if (activeId) {
             const contextToUpdate = contexts.find((c) => c.id === activeId);
-            store.commit(
-              events.contextUpdated({
+            contextLibraryStore.commit(
+              contextLibraryEvents.contextUpdated({
                 id: activeId,
                 title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
                 content: pastedText,
@@ -99,8 +100,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             setActiveId(null);
           } else {
             const placeholderTitle = getRandomUntitledPlaceholder();
-            store.commit(
-              events.contextCreated({
+            contextLibraryStore.commit(
+              contextLibraryEvents.contextCreated({
                 id: generateId(),
                 title: placeholderTitle,
                 content: pastedText,
@@ -118,7 +119,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         }
       }
     },
-    [isFocused, store, activeId, contexts],
+    [isFocused, contextLibraryStore, activeId, contexts],
   );
 
   return (

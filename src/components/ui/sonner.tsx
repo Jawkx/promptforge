@@ -1,11 +1,13 @@
 import { Toaster as Sonner } from "sonner";
 import { useQuery } from "@livestore/react";
-import { preference$ } from "@/livestore/queries";
+import { preference$ } from "@/livestore/user-store/queries";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const preference = useQuery(preference$);
+  const { userStore } = useAppStores();
+  const preference = useQuery(preference$, { store: userStore });
   const theme = preference.theme ?? "dark";
 
   return (

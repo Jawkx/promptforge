@@ -2,17 +2,17 @@ import React from "react";
 import { useLocation } from "wouter";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
-import { useStore } from "@livestore/react";
-import { events } from "@/livestore/events";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/utils";
 import ContextForm from "@/features/shared/ContextForm";
 import { ContextFormData } from "@/types";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
-  const { store } = useStore();
+  const { contextLibraryStore } = useAppStores();
 
   const handleClose = () => {
     navigate("/");
@@ -29,8 +29,8 @@ const AddContext: React.FC = () => {
 
     const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
 
-    store.commit(
-      events.contextCreated({
+    contextLibraryStore.commit(
+      contextLibraryEvents.contextCreated({
         id: generateId(),
         title: finalTitle,
         content: finalContent,

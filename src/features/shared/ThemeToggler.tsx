@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useStore, useQuery } from "@livestore/react";
-import { preference$ } from "@/livestore/queries";
-import { events } from "@/livestore/events";
+import { useQuery } from "@livestore/react";
+import { preference$ } from "@/livestore/user-store/queries";
+import { userEvents } from "@/livestore/user-store/events";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 export const ThemeToggler = () => {
-  const { store } = useStore();
-  const preference = useQuery(preference$);
+  const { userStore } = useAppStores();
+  const preference = useQuery(preference$, { store: userStore });
 
   const theme = preference.theme ?? "dark";
 
@@ -25,8 +26,10 @@ export const ThemeToggler = () => {
   }, [theme]);
 
   const handleToggleTheme = () => {
-    store.commit(
-      events.preferenceStateSet({ theme: theme === "dark" ? "light" : "dark" }),
+    userStore.commit(
+      userEvents.preferenceStateSet({
+        theme: theme === "dark" ? "light" : "dark",
+      }),
     );
   };
 

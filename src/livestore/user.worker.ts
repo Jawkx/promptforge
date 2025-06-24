@@ -1,6 +1,6 @@
 import { makeWorker } from "@livestore/adapter-web/worker";
-import { schema } from "./schema.ts";
+import { userSchema } from "./user-store/schema.ts";
 
 makeWorker({
-  schema,
+  schema: userSchema,
 });

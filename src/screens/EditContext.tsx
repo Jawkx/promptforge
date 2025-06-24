@@ -3,12 +3,13 @@ import { useLocation } from "wouter";
 import { Context, SelectedContext, ContextFormData } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
-import { useQuery, useStore } from "@livestore/react";
-import { events } from "@/livestore/events";
-import { contexts$ } from "@/livestore/queries";
+import { useQuery } from "@livestore/react";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useLocalStore } from "@/store/app.store";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 interface EditContextProps {
   type: "library" | "selected";
@@ -17,13 +18,13 @@ interface EditContextProps {
 
 const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const [, navigate] = useLocation();
-  const { store } = useStore();
+  const { contextLibraryStore } = useAppStores();
 
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
-  const contexts = useQuery(contexts$);
+  const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [initialData, setInitialData] = useState<ContextFormData | null>(null);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -76,8 +77,8 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       }
 
       if (type === "library") {
-        store.commit(
-          events.contextUpdated({
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextUpdated({
             id: contextId,
             title: trimmedTitle,
             content: trimmedContent,
@@ -102,7 +103,14 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       }
       handleClose();
     },
-    [contextId, initialData, type, store, updateSelectedContext, handleClose],
+    [
+      contextId,
+      initialData,
+      type,
+      contextLibraryStore,
+      updateSelectedContext,
+      handleClose,
+    ],
   );
 
   if (!initialData) {

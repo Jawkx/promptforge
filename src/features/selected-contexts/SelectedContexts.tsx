@@ -8,12 +8,13 @@ import {
 import { FocusArea, useLocalStore } from "@/store/app.store";
 import { toast as sonnerToast } from "sonner";
 import { useLocation } from "wouter";
-import { useQuery, useStore } from "@livestore/react";
-import { contexts$ } from "@/livestore/queries";
-import { events } from "@/livestore/events";
+import { useQuery } from "@livestore/react";
+import { contexts$ } from "@/livestore/context-library-store/queries";
+import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { generateContextHash, generateId } from "@/utils";
+import { useAppStores } from "@/store/LiveStoreProvider";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -28,8 +29,8 @@ export const SelectedContexts: React.FC = () => {
   const focusedArea = useLocalStore((state) => state.focusedArea);
   const isFocused = focusedArea === FocusArea.SELECTED_CONTEXTS;
 
-  const { store } = useStore();
-  const libraryContexts = useQuery(contexts$);
+  const { contextLibraryStore } = useAppStores();
+  const libraryContexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [, navigate] = useLocation();
 
@@ -140,8 +141,8 @@ export const SelectedContexts: React.FC = () => {
       if (!selectedContext.originalContextId) return;
 
       const now = Date.now();
-      store.commit(
-        events.contextUpdated({
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextUpdated({
           id: selectedContext.originalContextId,
           title: selectedContext.title,
           content: selectedContext.content,
@@ -163,7 +164,7 @@ export const SelectedContexts: React.FC = () => {
         description: `Context in library has been updated.`,
       });
     },
-    [store, updateSelectedContext],
+    [contextLibraryStore, updateSelectedContext],
   );
 
   const onSyncFromLibrary = useCallback(
@@ -197,8 +198,8 @@ export const SelectedContexts: React.FC = () => {
   const onCreateInLibrary = useCallback(
     (selectedContext: SelectedContext) => {
       const id = generateId();
-      store.commit(
-        events.contextCreated({
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextCreated({
           id,
           title: selectedContext.title,
           content: selectedContext.content,
@@ -220,7 +221,7 @@ export const SelectedContexts: React.FC = () => {
         description: `Context "${selectedContext.title}" has been created in the library.`,
       });
     },
-    [store, updateSelectedContext],
+    [contextLibraryStore, updateSelectedContext],
   );
 
   const selectedContextsTableMeta: SelectedContextsTableMeta = useMemo(

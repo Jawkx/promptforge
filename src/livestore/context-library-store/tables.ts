@@ -1,4 +1,4 @@
-import { Schema, State } from "@livestore/livestore";
+import { State } from "@livestore/livestore";
 
 const contextLivewireColumns = {
   id: State.SQLite.text({ primaryKey: true }),
@@ -10,16 +10,9 @@ const contextLivewireColumns = {
   updatedAt: State.SQLite.integer({ nullable: false, default: 0 }),
 };
 
-export const tables = {
+export const contextLibraryTables = {
   contexts: State.SQLite.table({
     name: "contextsLibrary",
     columns: contextLivewireColumns,
-  }),
-  preferences: State.SQLite.clientDocument({
-    name: "preference",
-    schema: Schema.Struct({
-      theme: Schema.Literal("light", "dark"),
-    }),
-    default: { id: "main", value: { theme: "dark" } },
   }),
 };

@@ -1,7 +1,6 @@
 import { Events, Schema } from "@livestore/livestore";
-import { tables } from "./tables";
 
-export const events = {
+export const contextLibraryEvents = {
   contextCreated: Events.synced({
     name: "v1.ContextCreated",
     schema: Schema.Struct({
@@ -20,9 +19,8 @@ export const events = {
       updatedAt: Schema.Number,
     }),
   }),
-  contextDeleted: Events.synced({
+  contextsDeleted: Events.synced({
     name: "v1.ContextsDeleted",
     schema: Schema.Struct({ ids: Schema.Array(Schema.String) }),
   }),
-  preferenceStateSet: tables.preferences.set,
 };
