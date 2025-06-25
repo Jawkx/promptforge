@@ -56,7 +56,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           id: generateId(),
           title: libraryContext.title,
           content: libraryContext.content,
-          charCount: libraryContext.content.length,
+          tokenCount: libraryContext.tokenCount,
           originalHash:
             libraryContext.originalHash ||
             generateContextHash(libraryContext.title, libraryContext.content),

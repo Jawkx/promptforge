@@ -13,7 +13,7 @@ import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { generateContextHash, generateId } from "@/utils";
+import { generateContextHash, generateId, estimateTokens } from "@/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
 export const SelectedContexts: React.FC = () => {
@@ -68,7 +68,7 @@ export const SelectedContexts: React.FC = () => {
               updateSelectedContext({
                 ...contextToUpdate,
                 content: pastedText,
-                charCount: pastedText.length,
+                tokenCount: estimateTokens(pastedText),
                 updatedAt: Date.now(),
               });
               sonnerToast.success("Selected Context Updated", {
@@ -83,7 +83,7 @@ export const SelectedContexts: React.FC = () => {
               id: generateId(),
               title,
               content: pastedText,
-              charCount: pastedText.length,
+              tokenCount: estimateTokens(pastedText),
               originalHash: generateContextHash(title, pastedText),
               createdAt: now,
               updatedAt: now,
@@ -178,7 +178,7 @@ export const SelectedContexts: React.FC = () => {
           ...selectedContext,
           title: originalContext.title,
           content: originalContext.content,
-          charCount: originalContext.charCount,
+          tokenCount: originalContext.tokenCount,
           originalHash: originalContext.originalHash,
           createdAt: originalContext.createdAt,
           updatedAt: originalContext.updatedAt,

@@ -17,7 +17,13 @@ export const generateContextHash = (title: string, content: string): string => {
 
 export const generateId = () => `context-${uuid()}`;
 
-export const formatCharCount = (count: number): string => {
+export const estimateTokens = (text: string): number => {
+  // A rough estimate: 1 token for every 4 characters.
+  // This is a common heuristic for English text across many LLMs.
+  return Math.ceil(text.length / 4);
+};
+
+export const formatTokenCount = (count: number): string => {
   if (count < 1000) {
     return String(count);
   }

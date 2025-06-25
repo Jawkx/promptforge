@@ -14,7 +14,7 @@ import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { formatCharCount } from "@/utils";
+import { formatTokenCount } from "@/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
 export type ContextsTableMeta = {
@@ -149,14 +149,13 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
     minSize: 300,
   },
   {
-    accessorFn: (row) => row.content.length,
-    id: "charCount",
-    header: "Chars",
+    accessorKey: "tokenCount",
+    header: "Tokens",
     cell: ({ row }) => {
-      const charCount = row.original.content.length;
+      const tokenCount = row.original.tokenCount;
       return (
-        <div className="text-center" title={String(charCount)}>
-          {formatCharCount(charCount)}
+        <div className="text-center" title={String(tokenCount)}>
+          {formatTokenCount(tokenCount)}
         </div>
       );
     },

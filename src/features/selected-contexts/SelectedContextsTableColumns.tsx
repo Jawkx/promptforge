@@ -19,7 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { generateContextHash, formatCharCount } from "@/utils";
+import { generateContextHash, formatTokenCount } from "@/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
@@ -164,14 +164,13 @@ export const getSelectedContextsTableColumns =
       minSize: 200,
     },
     {
-      accessorFn: (row) => row.charCount,
-      id: "charCount",
-      header: () => <div className="text-center">Chars</div>,
+      accessorKey: "tokenCount",
+      header: () => <div className="text-center">Tokens</div>,
       cell: ({ row }) => {
-        const charCount = row.original.charCount;
+        const tokenCount = row.original.tokenCount;
         return (
-          <div className="text-center" title={String(charCount)}>
-            {formatCharCount(charCount)}
+          <div className="text-center" title={String(tokenCount)}>
+            {formatTokenCount(tokenCount)}
           </div>
         );
       },

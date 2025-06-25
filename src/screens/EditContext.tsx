@@ -10,6 +10,7 @@ import { useLocalStore } from "@/store/app.store";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import { estimateTokens } from "@/utils";
 
 interface EditContextProps {
   type: "library" | "selected";
@@ -93,7 +94,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           ...(initialData as SelectedContext),
           title: trimmedTitle,
           content: trimmedContent,
-          charCount: trimmedContent.length,
+          tokenCount: estimateTokens(trimmedContent),
           updatedAt: Date.now(),
         };
         updateSelectedContext(updatedContext);

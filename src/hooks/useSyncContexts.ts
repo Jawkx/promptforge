@@ -69,7 +69,7 @@ export const useSyncContexts = ({
             ...selectedItem,
             title: libraryItem.title,
             content: libraryItem.content,
-            charCount: libraryItem.charCount,
+            tokenCount: libraryItem.tokenCount,
             originalHash: newLibraryHash,
             createdAt: libraryItem.createdAt,
             updatedAt: libraryItem.updatedAt,

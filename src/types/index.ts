@@ -2,7 +2,7 @@ export type Context = {
   readonly id: string;
   readonly title: string;
   readonly content: string;
-  readonly charCount: number;
+  readonly tokenCount: number;
   readonly originalHash: string;
   readonly createdAt: number;
   readonly updatedAt: number;

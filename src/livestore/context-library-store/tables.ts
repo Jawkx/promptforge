@@ -4,7 +4,7 @@ const contextLivewireColumns = {
   id: State.SQLite.text({ primaryKey: true }),
   title: State.SQLite.text({ default: "" }),
   content: State.SQLite.text({ default: "" }),
-  charCount: State.SQLite.integer({ nullable: false, default: 0 }),
+  tokenCount: State.SQLite.integer({ nullable: false, default: 0 }),
   originalHash: State.SQLite.text({ nullable: false }),
   createdAt: State.SQLite.integer({ nullable: false, default: 0 }),
   updatedAt: State.SQLite.integer({ nullable: false, default: 0 }),
