@@ -126,7 +126,10 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
     header: ({ table }) => {
       const meta = table.options.meta as ContextsTableMeta | undefined;
       return (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex h-full items-center justify-center"
+        >
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
@@ -144,7 +147,10 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as ContextsTableMeta | undefined;
       return (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex h-full items-center justify-center"
+        >
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => {

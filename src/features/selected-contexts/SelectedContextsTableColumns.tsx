@@ -135,7 +135,10 @@ export const getSelectedContextsTableColumns =
           | SelectedContextsTableMeta
           | undefined;
         return (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-full items-center justify-center"
+          >
             <Checkbox
               checked={
                 table.getIsAllPageRowsSelected() ||
@@ -156,7 +159,10 @@ export const getSelectedContextsTableColumns =
           | SelectedContextsTableMeta
           | undefined;
         return (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-full items-center justify-center"
+          >
             <Checkbox
               checked={row.getIsSelected()}
               onCheckedChange={(value) => {
