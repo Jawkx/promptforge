@@ -28,6 +28,8 @@ export type SelectedContextsTableMeta = {
   onSyncFromLibrary: (context: SelectedContext) => void;
   onCreateInLibrary: (context: SelectedContext) => void;
   setActiveId: (id: string | null) => void;
+  editingTitleId?: string | null;
+  setEditingTitleId?: (id: string | null) => void;
 };
 
 const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
@@ -37,13 +39,23 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
     (state) => state.updateSelectedContext,
   );
   const context = row.original;
-  const [isEditing, setIsEditing] = useState(false);
+  const table = row.getTable();
+  const meta = table.options.meta as SelectedContextsTableMeta | undefined;
+  const { editingTitleId, setEditingTitleId } = meta || {};
+
+  const [isEditing, setIsEditing] = useState(context.id === editingTitleId);
   const [title, setTitle] = useState(context.title);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTitle(context.title);
   }, [context.title]);
+
+  useEffect(() => {
+    if (context.id === editingTitleId) {
+      setIsEditing(true);
+    }
+  }, [editingTitleId, context.id]);
 
   useEffect(() => {
     if (isEditing) {
@@ -70,6 +82,9 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
       });
     }
     setIsEditing(false);
+    if (setEditingTitleId && context.id === editingTitleId) {
+      setEditingTitleId(null);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -79,6 +94,9 @@ const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
     } else if (e.key === "Escape") {
       setTitle(context.title);
       setIsEditing(false);
+      if (setEditingTitleId && context.id === editingTitleId) {
+        setEditingTitleId(null);
+      }
     }
   };
 

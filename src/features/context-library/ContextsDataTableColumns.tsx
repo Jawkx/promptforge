@@ -21,18 +21,32 @@ export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
   onDeleteContext: (id: string) => void;
   setActiveId: (id: string | null) => void;
+  editingTitleId: string | null;
+  setEditingTitleId: (id: string | null) => void;
 };
 
-const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
+const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
+  row,
+  table,
+}) => {
   const { contextLibraryStore } = useAppStores();
   const context = row.original;
-  const [isEditing, setIsEditing] = useState(false);
+  const meta = table.options.meta as ContextsTableMeta | undefined;
+  const { editingTitleId, setEditingTitleId } = meta || {};
+
+  const [isEditing, setIsEditing] = useState(context.id === editingTitleId);
   const [title, setTitle] = useState(context.title);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTitle(context.title);
   }, [context.title]);
+
+  useEffect(() => {
+    if (context.id === editingTitleId) {
+      setIsEditing(true);
+    }
+  }, [editingTitleId, context.id]);
 
   useEffect(() => {
     if (isEditing) {
@@ -62,6 +76,9 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
       });
     }
     setIsEditing(false);
+    if (setEditingTitleId && context.id === editingTitleId) {
+      setEditingTitleId(null);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -71,6 +88,9 @@ const TitleCell: React.FC<{ row: Row<Context> }> = ({ row }) => {
     } else if (e.key === "Escape") {
       setTitle(context.title);
       setIsEditing(false);
+      if (setEditingTitleId && context.id === editingTitleId) {
+        setEditingTitleId(null);
+      }
     }
   };
 
@@ -110,7 +130,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
+              table.getIsSomePageRowsSelected()
             }
             onCheckedChange={(value) => {
               meta?.setActiveId(null);
@@ -145,7 +165,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row }) => <TitleCell row={row} />,
+    cell: ({ row, table }) => <TitleCell row={row} table={table} />,
     minSize: 300,
   },
   {

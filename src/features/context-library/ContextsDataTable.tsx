@@ -200,6 +200,8 @@ interface ContextsDataTableProps {
   setSearchQuery: (query: string) => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
+  editingTitleId: string | null;
+  setEditingTitleId: (id: string | null) => void;
 }
 
 export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
@@ -211,6 +213,8 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   setSearchQuery,
   activeId,
   setActiveId,
+  editingTitleId,
+  setEditingTitleId,
 }) => {
   const [, navigate] = useLocation();
 
@@ -238,8 +242,16 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
       onEditContext: handleEditContext,
       onDeleteContext: onDeleteContext,
       setActiveId,
+      editingTitleId,
+      setEditingTitleId,
     }),
-    [handleEditContext, onDeleteContext, setActiveId],
+    [
+      handleEditContext,
+      onDeleteContext,
+      setActiveId,
+      editingTitleId,
+      setEditingTitleId,
+    ],
   );
 
   // useReactTable for some reason expect mutatable data type

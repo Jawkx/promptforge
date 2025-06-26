@@ -35,6 +35,7 @@ export const SelectedContexts: React.FC = () => {
   const [, navigate] = useLocation();
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
 
   useEffect(() => {
     if (focusedArea !== FocusArea.SELECTED_CONTEXTS) {
@@ -79,8 +80,9 @@ export const SelectedContexts: React.FC = () => {
           } else {
             const title = getRandomUntitledPlaceholder();
             const now = Date.now();
+            const newId = generateId();
             const newContext: SelectedContext = {
-              id: generateId(),
+              id: newId,
               title,
               content: pastedText,
               tokenCount: estimateTokens(pastedText),
@@ -92,6 +94,7 @@ export const SelectedContexts: React.FC = () => {
             sonnerToast("Context Pasted", {
               description: `A new context "${title}" has been added to the selected list.`,
             });
+            setEditingTitleId(newId);
           }
         }
       }
@@ -232,6 +235,8 @@ export const SelectedContexts: React.FC = () => {
       onSyncFromLibrary,
       onCreateInLibrary,
       setActiveId,
+      editingTitleId,
+      setEditingTitleId,
     }),
     [
       onRemoveContext,
@@ -240,6 +245,8 @@ export const SelectedContexts: React.FC = () => {
       onSyncFromLibrary,
       onCreateInLibrary,
       setActiveId,
+      editingTitleId,
+      setEditingTitleId,
     ],
   );
 

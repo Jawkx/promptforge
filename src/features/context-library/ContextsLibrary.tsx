@@ -32,6 +32,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
 
   const isFocused = focusedArea === FocusArea.CONTEXT_LIBRARY;
 
@@ -100,9 +101,10 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             setActiveId(null);
           } else {
             const placeholderTitle = getRandomUntitledPlaceholder();
+            const newId = generateId();
             contextLibraryStore.commit(
               contextLibraryEvents.contextCreated({
-                id: generateId(),
+                id: newId,
                 title: placeholderTitle,
                 content: pastedText,
                 createdAt: Date.now(),
@@ -111,6 +113,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
             sonnerToast.success("Context Added", {
               description: `Context "${placeholderTitle}" has been added.`,
             });
+            setEditingTitleId(newId);
           }
         } else {
           sonnerToast.error("Paste Error", {
@@ -143,6 +146,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         setSearchQuery={setSearchTerm}
         activeId={activeId}
         setActiveId={setActiveId}
+        editingTitleId={editingTitleId}
+        setEditingTitleId={setEditingTitleId}
       />
 
       <Button variant="default" onClick={handleAddContext}>
