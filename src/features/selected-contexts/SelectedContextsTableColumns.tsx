@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ColumnDef, Row } from "@tanstack/react-table";
+import { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,14 +32,14 @@ export type SelectedContextsTableMeta = {
   setEditingTitleId?: (id: string | null) => void;
 };
 
-const SelectedTitleCell: React.FC<{ row: Row<SelectedContext> }> = ({
-  row,
-}) => {
+const SelectedTitleCell: React.FC<{
+  row: Row<SelectedContext>;
+  table: Table<SelectedContext>;
+}> = ({ row, table }) => {
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
   const context = row.original;
-  const table = row.getTable();
   const meta = table.options.meta as SelectedContextsTableMeta | undefined;
   const { editingTitleId, setEditingTitleId } = meta || {};
 
@@ -139,7 +139,7 @@ export const getSelectedContextsTableColumns =
             <Checkbox
               checked={
                 table.getIsAllPageRowsSelected() ||
-                (table.getIsSomePageRowsSelected() && "indeterminate")
+                table.getIsSomePageRowsSelected()
               }
               onCheckedChange={(value) => {
                 meta?.setActiveId(null);
@@ -178,7 +178,7 @@ export const getSelectedContextsTableColumns =
     {
       accessorKey: "title",
       header: "Title",
-      cell: ({ row }) => <SelectedTitleCell row={row} />,
+      cell: ({ row, table }) => <SelectedTitleCell row={row} table={table} />,
       minSize: 200,
     },
     {
