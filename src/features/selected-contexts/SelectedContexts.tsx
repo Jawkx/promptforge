@@ -16,7 +16,6 @@ import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { generateContextHash, generateId, estimateTokens } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
 import { useDroppable } from "@dnd-kit/core";
-import { cn } from "@/lib/utils";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -263,11 +262,7 @@ export const SelectedContexts: React.FC = () => {
 
   return (
     <div
-      ref={setNodeRef}
-      className={cn(
-        "h-full flex flex-col rounded-lg transition-all",
-        isOver && "bg-primary/5",
-      )}
+      className="h-full flex flex-col p-0.5"
       tabIndex={-1}
       onPaste={handlePaste}
       onClick={() => setFocusedArea(FocusArea.SELECTED_CONTEXTS)}
@@ -282,6 +277,8 @@ export const SelectedContexts: React.FC = () => {
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
         activeId={activeId}
         setActiveId={setActiveId}
+        droppableRef={setNodeRef}
+        isDroppableOver={isOver}
       />
     </div>
   );

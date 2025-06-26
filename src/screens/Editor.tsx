@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { LucideAnvil } from "lucide-react";
+import { LucideAnvil, LucideFile, LucideFiles } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -241,12 +241,17 @@ const Editor: React.FC = () => {
       </div>
       <DragOverlay>
         {activeDraggedContexts ? (
-          <div className="bg-secondary h-24 flex">
-            <h2 className="text-lg text-foreground">
+          <div className="pointer-events-none flex items-center gap-3 rounded-lg border bg-background p-3 shadow-xl">
+            {activeDraggedContexts.length > 1 ? (
+              <LucideFiles className="h-5 w-5 text-primary" />
+            ) : (
+              <LucideFile className="h-5 w-5 text-primary" />
+            )}
+            <span className="max-w-xs truncate font-medium text-foreground">
               {activeDraggedContexts.length > 1
                 ? `${activeDraggedContexts.length} contexts`
                 : activeDraggedContexts[0].title}
-            </h2>
+            </span>
           </div>
         ) : null}
       </DragOverlay>
