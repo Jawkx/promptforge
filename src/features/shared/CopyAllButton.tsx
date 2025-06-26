@@ -10,8 +10,11 @@ export const CopyAllButton = () => {
 
   const onCopyPromptAndContextsClick = useCallback(() => {
     const contextsText = selectedContexts
-      .map((context) => `# ${context.title}\n${context.content}`)
-      .join("\n\n");
+      .map(
+        (context) =>
+          `${context.title}\n ${"=".repeat(20)} \n${context.content}`,
+      )
+      .join(`\n\n`);
 
     const fullText = prompt ? `${prompt}\n\n${contextsText}` : contextsText;
 
