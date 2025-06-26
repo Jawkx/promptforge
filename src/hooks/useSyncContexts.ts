@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Context, SelectedContext } from "@/types";
-import { generateContextHash } from "@/utils";
+import { generateContextHash } from "@/lib/utils";
 import { toast as sonnerToast } from "sonner";
 
 interface UseSyncContextsParams {

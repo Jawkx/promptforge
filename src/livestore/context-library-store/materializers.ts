@@ -1,7 +1,7 @@
 import { contextLibraryEvents } from "./events";
 import { State } from "@livestore/livestore";
 import { contextLibraryTables } from "./tables";
-import { generateContextHash, estimateTokens } from "@/utils";
+import { generateContextHash, estimateTokens } from "@/lib/utils";
 
 export const contextLibraryMaterializers = State.SQLite.materializers(
   contextLibraryEvents,

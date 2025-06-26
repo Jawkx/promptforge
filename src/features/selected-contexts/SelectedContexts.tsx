@@ -13,7 +13,7 @@ import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { generateContextHash, generateId, estimateTokens } from "@/utils";
+import { generateContextHash, generateId, estimateTokens } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
 export const SelectedContexts: React.FC = () => {

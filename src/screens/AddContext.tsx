@@ -5,7 +5,7 @@ import { LucideSave } from "lucide-react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { Dialog } from "@/components/ui/dialog";
-import { generateId } from "@/utils";
+import { generateId } from "@/lib/utils";
 import ContextForm from "@/features/shared/ContextForm";
 import { ContextFormData } from "@/types";
 import { useAppStores } from "@/store/LiveStoreProvider";

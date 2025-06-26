@@ -10,7 +10,7 @@ import { useLocalStore } from "@/store/app.store";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
 import { useAppStores } from "@/store/LiveStoreProvider";
-import { estimateTokens } from "@/utils";
+import { estimateTokens } from "@/lib/utils";
 
 interface EditContextProps {
   type: "library" | "selected";

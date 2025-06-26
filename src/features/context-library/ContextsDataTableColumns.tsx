@@ -14,7 +14,7 @@ import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { formatTokenCount } from "@/utils";
+import { formatTokenCount } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
 export type ContextsTableMeta = {

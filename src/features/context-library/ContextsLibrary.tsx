@@ -10,7 +10,7 @@ import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/app.store";
-import { generateContextHash, generateId } from "@/utils";
+import { generateContextHash, generateId } from "@/lib/utils";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useAppStores } from "@/store/LiveStoreProvider";
 

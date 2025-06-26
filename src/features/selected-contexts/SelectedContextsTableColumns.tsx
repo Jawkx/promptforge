@@ -19,7 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { generateContextHash, formatTokenCount } from "@/utils";
+import { generateContextHash, formatTokenCount } from "@/lib/utils";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
