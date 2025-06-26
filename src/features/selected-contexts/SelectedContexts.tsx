@@ -15,9 +15,14 @@ import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { generateContextHash, generateId, estimateTokens } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
-import { useDroppable } from "@dnd-kit/core";
 
-export const SelectedContexts: React.FC = () => {
+interface SelectedContextsProps {
+  isDroppableOver: boolean;
+}
+
+export const SelectedContexts: React.FC<SelectedContextsProps> = ({
+  isDroppableOver,
+}) => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const removeMultipleSelectedContextsFromPrompt = useLocalStore(
     (state) => state.removeMultipleSelectedContextsFromPrompt,
@@ -37,10 +42,6 @@ export const SelectedContexts: React.FC = () => {
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
-
-  const { setNodeRef, isOver } = useDroppable({
-    id: "selected-contexts-droppable-area",
-  });
 
   useEffect(() => {
     if (focusedArea !== FocusArea.SELECTED_CONTEXTS) {
@@ -262,7 +263,7 @@ export const SelectedContexts: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col p-0.5"
+      className="h-full flex flex-col"
       tabIndex={-1}
       onPaste={handlePaste}
       onClick={() => setFocusedArea(FocusArea.SELECTED_CONTEXTS)}
@@ -277,8 +278,7 @@ export const SelectedContexts: React.FC = () => {
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
         activeId={activeId}
         setActiveId={setActiveId}
-        droppableRef={setNodeRef}
-        isDroppableOver={isOver}
+        isDroppableOver={isDroppableOver}
       />
     </div>
   );
