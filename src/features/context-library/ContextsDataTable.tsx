@@ -48,6 +48,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { FocusArea, useLocalStore } from "@/store/app.store";
+import { useDraggable } from "@dnd-kit/core";
 
 const DataTableRow = React.memo(
   ({
@@ -70,6 +71,20 @@ const DataTableRow = React.memo(
     const { setActiveId } = meta || {};
     const currentSelectedCount =
       table.getFilteredSelectedRowModel().rows.length;
+
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+      id: context.id,
+      data: {
+        contexts: isSelected
+          ? table.getFilteredSelectedRowModel().rows.map((r) => r.original)
+          : [context],
+        type: "context-library-item",
+      },
+    });
+
+    const style = {
+      opacity: isDragging ? 0.4 : 1,
+    };
 
     const handleAddSelectedFromContextMenu = useCallback(() => {
       const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -110,6 +125,10 @@ const DataTableRow = React.memo(
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
             data-state={(isSelected || context.id === activeId) && "selected"}
             className="border-b-muted cursor-pointer"
             onClick={handleRowClick}

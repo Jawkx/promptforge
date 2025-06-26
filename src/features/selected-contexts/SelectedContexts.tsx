@@ -15,6 +15,8 @@ import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { generateContextHash, generateId, estimateTokens } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import { useDroppable } from "@dnd-kit/core";
+import { cn } from "@/lib/utils";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -36,6 +38,10 @@ export const SelectedContexts: React.FC = () => {
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: "selected-contexts-droppable-area",
+  });
 
   useEffect(() => {
     if (focusedArea !== FocusArea.SELECTED_CONTEXTS) {
@@ -257,7 +263,11 @@ export const SelectedContexts: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col"
+      ref={setNodeRef}
+      className={cn(
+        "h-full flex flex-col rounded-lg transition-all",
+        isOver && "bg-primary/5",
+      )}
       tabIndex={-1}
       onPaste={handlePaste}
       onClick={() => setFocusedArea(FocusArea.SELECTED_CONTEXTS)}

@@ -18,10 +18,23 @@ import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 import { CopyAllButton } from "@/features/shared/CopyAllButton";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { Context, SelectedContext } from "@/types";
+import { useLocalStore } from "@/store/app.store";
+import { generateContextHash, generateId } from "@/lib/utils";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useAppStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
 
   const [isAddModalOpen] = useRoute("/add");
   const [isEditModalOpen, params] = useRoute<{
@@ -36,6 +49,18 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
+  const [activeDraggedContexts, setActiveDraggedContexts] = useState<
+    Context[] | null
+  >(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Require the mouse to move by 8 pixels before activating
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
 
   const contextToDelete = useMemo(() => {
     if (!contextToDeleteId) return null;
@@ -79,8 +104,60 @@ const Editor: React.FC = () => {
     setContextsToDeleteIds([]);
   }, [contextsToDeleteIds, contextLibraryStore]);
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const { active } = event;
+    const draggedData = active.data.current as
+      | { contexts: Context[]; type: string }
+      | undefined;
+
+    if (draggedData?.type === "context-library-item" && draggedData.contexts) {
+      setActiveDraggedContexts(draggedData.contexts);
+    }
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { over } = event;
+
+      if (
+        over?.id === "selected-contexts-droppable-area" &&
+        activeDraggedContexts
+      ) {
+        activeDraggedContexts.forEach((libraryContext) => {
+          const newSelectedContextCopy: SelectedContext = {
+            id: generateId(),
+            title: libraryContext.title,
+            content: libraryContext.content,
+            tokenCount: libraryContext.tokenCount,
+            originalHash:
+              libraryContext.originalHash ||
+              generateContextHash(libraryContext.title, libraryContext.content),
+            originalContextId: libraryContext.id,
+            createdAt: libraryContext.createdAt,
+            updatedAt: libraryContext.updatedAt,
+          };
+          addContextToPrompt(newSelectedContextCopy);
+        });
+        sonnerToast.success(
+          `${activeDraggedContexts.length} Context(s) Added`,
+          {
+            description: `Copied ${activeDraggedContexts.length} context(s) to prompt.`,
+          },
+        );
+      }
+
+      setActiveDraggedContexts(null);
+    },
+    [activeDraggedContexts, addContextToPrompt],
+  );
+
   return (
-    <>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveDraggedContexts(null)}
+    >
       <div className="flex justify-center h-screen w-screen">
         <div className="h-full w-full max-w-screen-2xl">
           <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -162,13 +239,24 @@ const Editor: React.FC = () => {
           />
         </div>
       </div>
+      <DragOverlay>
+        {activeDraggedContexts ? (
+          <div className="bg-secondary h-24 flex">
+            <h2 className="text-lg text-foreground">
+              {activeDraggedContexts.length > 1
+                ? `${activeDraggedContexts.length} contexts`
+                : activeDraggedContexts[0].title}
+            </h2>
+          </div>
+        ) : null}
+      </DragOverlay>
       {isAddModalOpen && <AddContext />}
       {isEditModalOpen &&
         params &&
         (params.type === "library" || params.type === "selected") && (
           <EditContext type={params.type} id={params.id} />
         )}
-    </>
+    </DndContext>
   );
 };
 
