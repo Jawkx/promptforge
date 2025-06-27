@@ -1,23 +1,21 @@
 import React, { useState, useMemo, useCallback } from "react";
-import PromptInput from "@/features/prompt-editor/PromptInput";
 import ContextsLibrary from "@/features/context-library/ContextsLibrary";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { LucideAnvil, LucideFile, LucideFiles } from "lucide-react";
+import { LucideFile, LucideFiles } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { toast as sonnerToast } from "sonner";
-import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts";
 import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
-import { CopyAllButton } from "@/features/shared/CopyAllButton";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import { LeftPanel } from "./LeftPanel";
 import {
   DndContext,
   DragOverlay,
@@ -26,12 +24,10 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
-  useDroppable,
 } from "@dnd-kit/core";
 import { Context, SelectedContext } from "@/types";
 import { useLocalStore } from "@/store/app.store";
 import { generateContextHash, generateId } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useAppStores();
@@ -63,10 +59,6 @@ const Editor: React.FC = () => {
       },
     }),
   );
-
-  const { setNodeRef, isOver } = useDroppable({
-    id: "selected-contexts-droppable-area",
-  });
 
   const contextToDelete = useMemo(() => {
     if (!contextToDeleteId) return null;
@@ -167,44 +159,7 @@ const Editor: React.FC = () => {
       <div className="flex justify-center h-screen w-screen">
         <div className="h-full w-full max-w-screen-2xl">
           <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel
-              defaultSize={60}
-              minSize={30}
-              className={cn(
-                "flex flex-col p-4 transition-colors",
-                isOver && "bg-primary/5",
-              )}
-            >
-              <div className="flex flex-row mb-4">
-                <LucideAnvil className="h-9 w-9 mr-3" />
-                <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
-              </div>
-
-              <ResizablePanelGroup direction="vertical" className="flex-grow">
-                <div
-                  ref={setNodeRef}
-                  className={cn(
-                    "flex flex-1 flex-col p-4 transition-colors",
-                    isOver && "bg-primary/5",
-                  )}
-                >
-                  <ResizablePanel className="flex-1">
-                    <PromptInput />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle className="my-4" />
-                  <ResizablePanel
-                    defaultSize={40}
-                    minSize={20}
-                    maxSize={80}
-                    className="flex flex-col"
-                  >
-                    <SelectedContexts isDroppableOver={isOver} />
-                  </ResizablePanel>
-
-                  <CopyAllButton />
-                </div>
-              </ResizablePanelGroup>
-            </ResizablePanel>
+            <LeftPanel />
 
             <ResizableHandle withHandle />
 
