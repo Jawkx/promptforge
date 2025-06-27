@@ -1,5 +1,5 @@
 import { Toaster } from "./components/ui/sonner";
-import Editor from "./screens/Editor";
+import Editor from "./screens/Editor/index";
 
 function App() {
   return (
