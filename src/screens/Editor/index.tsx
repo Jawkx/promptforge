@@ -21,19 +21,12 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragStartEvent,
-  type DragEndEvent,
-  DropAnimation,
-  defaultDropAnimation,
 } from "@dnd-kit/core";
-import { Context, SelectedContext } from "@/types";
-import { useLocalStore } from "@/store/app.store";
-import { generateContextHash, generateId } from "@/lib/utils";
+import { useDragAndDrop } from "./useDragAndDrop";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useAppStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
-  const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
 
   const [isAddModalOpen] = useRoute("/add");
   const [isEditModalOpen, params] = useRoute<{
@@ -48,13 +41,14 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
-  const [activeDraggedContexts, setActiveDraggedContexts] = useState<
-    Context[] | null
-  >(null);
 
-  const [dropAnimation, setDropAnimation] = useState<DropAnimation | null>(
-    defaultDropAnimation,
-  );
+  const {
+    activeDraggedContexts,
+    dropAnimation,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+  } = useDragAndDrop();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -107,62 +101,12 @@ const Editor: React.FC = () => {
     setContextsToDeleteIds([]);
   }, [contextsToDeleteIds, contextLibraryStore]);
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    setDropAnimation(defaultDropAnimation);
-    const { active } = event;
-    const draggedData = active.data.current as
-      | { contexts: Context[]; type: string }
-      | undefined;
-
-    if (draggedData?.type === "context-library-item" && draggedData.contexts) {
-      setActiveDraggedContexts(draggedData.contexts);
-    }
-  }, []);
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { over } = event;
-
-      if (
-        over?.id === "selected-contexts-droppable-area" &&
-        activeDraggedContexts
-      ) {
-        // If it's inside context, don't need to animate the overlay to go back to the original position
-        setDropAnimation(null);
-        activeDraggedContexts.forEach((libraryContext) => {
-          const newSelectedContextCopy: SelectedContext = {
-            id: generateId(),
-            title: libraryContext.title,
-            content: libraryContext.content,
-            tokenCount: libraryContext.tokenCount,
-            originalHash:
-              libraryContext.originalHash ||
-              generateContextHash(libraryContext.title, libraryContext.content),
-            originalContextId: libraryContext.id,
-            createdAt: libraryContext.createdAt,
-            updatedAt: libraryContext.updatedAt,
-          };
-          addContextToPrompt(newSelectedContextCopy);
-        });
-        sonnerToast.success(
-          `${activeDraggedContexts.length} Context(s) Added`,
-          {
-            description: `Copied ${activeDraggedContexts.length} context(s) to prompt.`,
-          },
-        );
-      }
-
-      setActiveDraggedContexts(null);
-    },
-    [activeDraggedContexts, addContextToPrompt],
-  );
-
   return (
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveDraggedContexts(null)}
+      onDragCancel={handleDragCancel}
     >
       <div className="flex justify-center h-screen w-screen">
         <div className="h-full w-full max-w-screen-2xl">
