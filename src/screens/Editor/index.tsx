@@ -23,6 +23,8 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
+  DropAnimation,
+  defaultDropAnimation,
 } from "@dnd-kit/core";
 import { Context, SelectedContext } from "@/types";
 import { useLocalStore } from "@/store/app.store";
@@ -49,6 +51,10 @@ const Editor: React.FC = () => {
   const [activeDraggedContexts, setActiveDraggedContexts] = useState<
     Context[] | null
   >(null);
+
+  const [dropAnimation, setDropAnimation] = useState<DropAnimation | null>(
+    defaultDropAnimation,
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -102,6 +108,7 @@ const Editor: React.FC = () => {
   }, [contextsToDeleteIds, contextLibraryStore]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
+    setDropAnimation(defaultDropAnimation);
     const { active } = event;
     const draggedData = active.data.current as
       | { contexts: Context[]; type: string }
@@ -120,6 +127,8 @@ const Editor: React.FC = () => {
         over?.id === "selected-contexts-droppable-area" &&
         activeDraggedContexts
       ) {
+        // If it's inside context, don't need to animate the overlay to go back to the original position
+        setDropAnimation(null);
         activeDraggedContexts.forEach((libraryContext) => {
           const newSelectedContextCopy: SelectedContext = {
             id: generateId(),
@@ -204,7 +213,7 @@ const Editor: React.FC = () => {
           />
         </div>
       </div>
-      <DragOverlay>
+      <DragOverlay dropAnimation={dropAnimation}>
         {activeDraggedContexts ? (
           <div className="pointer-events-none flex items-center gap-3 rounded-lg border bg-background p-3 shadow-xl">
             {activeDraggedContexts.length > 1 ? (
