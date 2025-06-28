@@ -22,18 +22,17 @@ export const LeftPanel: React.FC = () => {
       minSize={30}
       className={cn("flex flex-col p-4 transition-colors")}
     >
+      <div className="flex flex-row mb-4">
+        <LucideAnvil className="h-9 w-9 mr-3" />
+        <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
+      </div>
       <div
         ref={setNodeRef}
         className={cn(
-          "flex flex-1 flex-col p-4 transition-colors",
+          "flex flex-1 flex-col p-2 rounded-md transition-colors",
           isOver && "bg-primary/5",
         )}
       >
-        <div className="flex flex-row mb-4">
-          <LucideAnvil className="h-9 w-9 mr-3" />
-          <h1 className="font-semibold text-3xl"> Prompt Forge</h1>
-        </div>
-
         <ResizablePanelGroup direction="vertical" className="flex-grow">
           <ResizablePanel className="flex-1">
             <PromptInput />
@@ -48,9 +47,8 @@ export const LeftPanel: React.FC = () => {
             <SelectedContexts isDroppableOver={false} />
           </ResizablePanel>
         </ResizablePanelGroup>
-
-        <CopyAllButton />
       </div>
+      <CopyAllButton />
     </ResizablePanel>
   );
 };

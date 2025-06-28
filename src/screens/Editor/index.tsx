@@ -1,8 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
-import ContextsLibrary from "@/features/context-library/ContextsLibrary";
 import {
   ResizablePanelGroup,
-  ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { LucideFile, LucideFiles } from "lucide-react";
@@ -16,6 +14,7 @@ import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 import { useAppStores } from "@/store/LiveStoreProvider";
 import { LeftPanel } from "./LeftPanel";
+import { RightPanel } from "./RightPanel";
 import {
   DndContext,
   DragOverlay,
@@ -163,16 +162,10 @@ const Editor: React.FC = () => {
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel
-              defaultSize={40}
-              minSize={25}
-              className="flex flex-col"
-            >
-              <ContextsLibrary
-                onDeleteContext={handleDeleteContextRequest}
-                onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
-              />
-            </ResizablePanel>
+            <RightPanel
+              onDeleteContext={handleDeleteContextRequest}
+              onDeleteSelectedContexts={handleDeleteMultipleContextsRequest}
+            />
           </ResizablePanelGroup>
 
           <ConfirmationDialog
