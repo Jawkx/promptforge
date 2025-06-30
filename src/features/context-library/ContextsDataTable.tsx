@@ -39,6 +39,7 @@ import {
   ContextMenuLabel,
 } from "@/components/ui/context-menu";
 import {
+  LucideCopy,
   LucideEdit3,
   LucideListPlus,
   LucideSearch,
@@ -49,6 +50,7 @@ import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { FocusArea, useLocalStore } from "@/store/app.store";
 import { useDraggable } from "@dnd-kit/core";
+import { toast as sonnerToast } from "sonner";
 
 const DataTableRow = React.memo(
   ({
@@ -103,6 +105,22 @@ const DataTableRow = React.memo(
         table.resetRowSelection();
       }
     }, [table, onDeleteSelectedContexts]);
+
+    const handleCopyContent = useCallback(() => {
+      navigator.clipboard
+        .writeText(context.content)
+        .then(() => {
+          sonnerToast.success("Content Copied", {
+            description: `Content of "${context.title}" copied to clipboard.`,
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to copy content: ", err);
+          sonnerToast.error("Copy Failed", {
+            description: "Could not copy content to clipboard.",
+          });
+        });
+    }, [context.content, context.title]);
 
     const handleRowClick = useCallback(() => {
       if (!setActiveId) return;
@@ -188,6 +206,10 @@ const DataTableRow = React.memo(
               <ContextMenuItem onClick={() => onAddSelectedToPrompt([context])}>
                 <LucideListPlus className="mr-2 h-4 w-4" />
                 Add to Prompt
+              </ContextMenuItem>
+              <ContextMenuItem onClick={handleCopyContent}>
+                <LucideCopy className="mr-2 h-4 w-4" />
+                Copy Content
               </ContextMenuItem>
               <ContextMenuItem onClick={() => meta?.onEditContext(context)}>
                 <LucideEdit3 className="mr-2 h-4 w-4" />

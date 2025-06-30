@@ -10,7 +10,8 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
-import { LucideTrash, LucideListX, LucideEdit3 } from "lucide-react";
+import { LucideCopy, LucideTrash, LucideListX, LucideEdit3 } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 
 import {
   Table,
@@ -72,6 +73,22 @@ const MemoizedDataTableRow = React.memo(
         meta.onEditSelectedContext(row.original);
       }
     }, [meta, row.original]);
+
+    const handleCopyContent = useCallback(() => {
+      navigator.clipboard
+        .writeText(row.original.content)
+        .then(() => {
+          sonnerToast.success("Content Copied", {
+            description: `Content of "${row.original.title}" copied to clipboard.`,
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to copy content: ", err);
+          sonnerToast.error("Copy Failed", {
+            description: "Could not copy content to clipboard.",
+          });
+        });
+    }, [row.original.content, row.original.title]);
 
     const handleDeleteMultiple = useCallback(() => {
       const selectedIds = table
@@ -158,6 +175,10 @@ const MemoizedDataTableRow = React.memo(
               <ContextMenuItem onClick={handleEditSelected}>
                 <LucideEdit3 className="mr-2 h-4 w-4" />
                 Edit Context
+              </ContextMenuItem>
+              <ContextMenuItem onClick={handleCopyContent}>
+                <LucideCopy className="mr-2 h-4 w-4" />
+                Copy Content
               </ContextMenuItem>
               <ContextMenuSeparator />
               <ContextMenuItem
