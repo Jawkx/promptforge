@@ -155,7 +155,7 @@ const MemoizedDataTableRow = React.memo(
             ))}
           </TableRow>
         </ContextMenuTrigger>
-        <ContextMenuContent className="border-secondary">
+        <ContextMenuContent>
           {currentSelectedCount > 1 && isSelected ? (
             <>
               <ContextMenuLabel>

@@ -113,8 +113,18 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
   return (
     <div
       onDoubleClick={() => setIsEditing(true)}
-      className="flex items-center h-full"
+      className="flex items-center h-full gap-2"
     >
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {context.labels?.map((label) => (
+          <span
+            key={label.id}
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: label.color }}
+            title={label.name}
+          />
+        ))}
+      </div>
       <span className="font-medium truncate" title={context.title}>
         {context.title}
       </span>
@@ -207,7 +217,7 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
                 <LucideMoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="border-secondary">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => meta?.onEditContext(context)}>
                 <LucideEdit3 className="mr-2 h-4 w-4" />
                 Edit

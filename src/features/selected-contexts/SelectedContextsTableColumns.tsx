@@ -121,6 +121,16 @@ const SelectedTitleCell: React.FC<{
       onDoubleClick={() => setIsEditing(true)}
       className="flex items-center gap-2 h-full"
     >
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {context.labels?.map((label) => (
+          <span
+            key={label.id}
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: label.color }}
+            title={label.name}
+          />
+        ))}
+      </div>
       <span className="font-medium truncate" title={context.title}>
         {context.title}
       </span>
@@ -243,7 +253,7 @@ export const getSelectedContextsTableColumns =
                       <LucideLink2Off className="h-3 w-3 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="border-secondary">
+                  <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       onClick={() => meta?.onSyncToLibrary(context)}
                     >

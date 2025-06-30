@@ -53,6 +53,7 @@ export const useDragAndDrop = () => {
             originalContextId: libraryContext.id,
             createdAt: libraryContext.createdAt,
             updatedAt: libraryContext.updatedAt,
+            labels: libraryContext.labels,
           };
           addContextToPrompt(newSelectedContextCopy);
         });

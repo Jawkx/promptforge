@@ -66,6 +66,7 @@ export const useSyncContexts = ({
             originalVersion: libraryItem.version,
             createdAt: libraryItem.createdAt,
             updatedAt: libraryItem.updatedAt,
+            labels: libraryItem.labels,
           });
         }
       }

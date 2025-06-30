@@ -25,4 +25,33 @@ export const contextLibraryEvents = {
     name: "v1.ContextsDeleted",
     schema: Schema.Struct({ ids: Schema.Array(Schema.String) }),
   }),
+  // Label Events
+  labelCreated: Events.synced({
+    name: "v1.LabelCreated",
+    schema: Schema.Struct({
+      id: Schema.String,
+      name: Schema.String,
+      color: Schema.String,
+    }),
+  }),
+  labelUpdated: Events.synced({
+    name: "v1.LabelUpdated",
+    schema: Schema.Struct({
+      id: Schema.String,
+      name: Schema.String,
+      color: Schema.String,
+    }),
+  }),
+  labelDeleted: Events.synced({
+    name: "v1.LabelDeleted",
+    schema: Schema.Struct({ id: Schema.String }),
+  }),
+  // Context-Label Association Event
+  contextLabelsUpdated: Events.synced({
+    name: "v1.ContextLabelsUpdated",
+    schema: Schema.Struct({
+      contextId: Schema.String,
+      labelIds: Schema.Array(Schema.String),
+    }),
+  }),
 };

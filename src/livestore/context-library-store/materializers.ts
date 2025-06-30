@@ -35,5 +35,31 @@ export const contextLibraryMaterializers = State.SQLite.materializers(
         contextLibraryTables.contexts.delete().where({ id }),
       );
     },
+    // Label Materializers
+    "v1.LabelCreated": ({ id, name, color }) => {
+      return contextLibraryTables.labels.insert({ id, name, color });
+    },
+    "v1.LabelUpdated": ({ id, name, color }) => {
+      return contextLibraryTables.labels.update({ name, color }).where({ id });
+    },
+    "v1.LabelDeleted": ({ id }) => {
+      return [
+        contextLibraryTables.labels.delete().where({ id }),
+        contextLibraryTables.context_labels.delete().where({ labelId: id }),
+      ];
+    },
+    "v1.ContextLabelsUpdated": ({ contextId, labelIds }) => {
+      // First, delete all existing associations for this context
+      const deleteOp = contextLibraryTables.context_labels
+        .delete()
+        .where({ contextId });
+
+      // Then, insert the new associations
+      const insertOps = labelIds.map((labelId) =>
+        contextLibraryTables.context_labels.insert({ contextId, labelId }),
+      );
+
+      return [deleteOp, ...insertOps];
+    },
   },
 );

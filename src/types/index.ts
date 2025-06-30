@@ -1,3 +1,9 @@
+export type Label = {
+  readonly id: string;
+  readonly name: string;
+  readonly color: string;
+};
+
 export type Context = {
   readonly id: string;
   readonly title: string;
@@ -6,6 +12,7 @@ export type Context = {
   readonly version: string;
   readonly createdAt: number;
   readonly updatedAt: number;
+  readonly labels: readonly Label[];
 };
 
 export type SelectedContext = Context & {

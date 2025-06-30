@@ -37,12 +37,16 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuLabel,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from "@/components/ui/context-menu";
 import {
   LucideCopy,
   LucideEdit3,
   LucideListPlus,
   LucideSearch,
+  LucideTag,
   LucideTrash,
   LucideTrash2,
 } from "lucide-react";
@@ -51,6 +55,7 @@ import { useLocation } from "wouter";
 import { FocusArea, useLocalStore } from "@/store/app.store";
 import { useDraggable } from "@dnd-kit/core";
 import { toast as sonnerToast } from "sonner";
+import { LabelAssignment } from "./LabelAssignment";
 
 const DataTableRow = React.memo(
   ({
@@ -71,15 +76,17 @@ const DataTableRow = React.memo(
     const context = row.original;
     const meta = table.options.meta as ContextsTableMeta | undefined;
     const { setActiveId } = meta || {};
-    const currentSelectedCount =
-      table.getFilteredSelectedRowModel().rows.length;
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const currentSelectedCount = selectedRows.length;
+    const selectedContextIds = useMemo(
+      () => selectedRows.map((r) => r.original.id),
+      [selectedRows],
+    );
 
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
       id: context.id,
       data: {
-        contexts: isSelected
-          ? table.getFilteredSelectedRowModel().rows.map((r) => r.original)
-          : [context],
+        contexts: isSelected ? selectedRows.map((r) => r.original) : [context],
         type: "context-library-item",
       },
     });
@@ -89,22 +96,19 @@ const DataTableRow = React.memo(
     };
 
     const handleAddSelectedFromContextMenu = useCallback(() => {
-      const selectedRows = table.getFilteredSelectedRowModel().rows;
-      const selectedContexts = selectedRows.map((r) => r.original);
-      if (selectedContexts.length > 0) {
-        onAddSelectedToPrompt(selectedContexts);
+      const contextsToAdd = selectedRows.map((r) => r.original);
+      if (contextsToAdd.length > 0) {
+        onAddSelectedToPrompt(contextsToAdd);
         table.resetRowSelection();
       }
-    }, [table, onAddSelectedToPrompt]);
+    }, [selectedRows, onAddSelectedToPrompt, table]);
 
     const handleDeleteSelectedFromContextMenu = useCallback(() => {
-      const selectedRows = table.getFilteredSelectedRowModel().rows;
-      const selectedIds = selectedRows.map((r) => r.original.id);
-      if (selectedIds.length > 0) {
-        onDeleteSelectedContexts(selectedIds);
+      if (selectedContextIds.length > 0) {
+        onDeleteSelectedContexts(selectedContextIds);
         table.resetRowSelection();
       }
-    }, [table, onDeleteSelectedContexts]);
+    }, [selectedContextIds, onDeleteSelectedContexts, table]);
 
     const handleCopyContent = useCallback(() => {
       navigator.clipboard
@@ -168,7 +172,7 @@ const DataTableRow = React.memo(
             ))}
           </TableRow>
         </ContextMenuTrigger>
-        <ContextMenuContent className="border-secondary">
+        <ContextMenuContent className="border-border">
           {currentSelectedCount > 1 && isSelected ? (
             <>
               <ContextMenuLabel>
@@ -178,6 +182,15 @@ const DataTableRow = React.memo(
                 <LucideListPlus className="mr-2 h-4 w-4" />
                 Add {currentSelectedCount} to Prompt
               </ContextMenuItem>
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                  <LucideTag className="mr-2 h-4 w-4" />
+                  Labels
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent className="p-0">
+                  <LabelAssignment contextIds={selectedContextIds} />
+                </ContextMenuSubContent>
+              </ContextMenuSub>
               <ContextMenuItem
                 onClick={handleDeleteSelectedFromContextMenu}
                 className="text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -215,6 +228,15 @@ const DataTableRow = React.memo(
                 <LucideEdit3 className="mr-2 h-4 w-4" />
                 Edit "{context.title}"
               </ContextMenuItem>
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                  <LucideTag className="mr-2 h-4 w-4" />
+                  Labels
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent className="p-0">
+                  <LabelAssignment contextIds={[context.id]} />
+                </ContextMenuSubContent>
+              </ContextMenuSub>
               <ContextMenuSeparator />
               <ContextMenuItem
                 onClick={() => meta?.onDeleteContext(context.id)}

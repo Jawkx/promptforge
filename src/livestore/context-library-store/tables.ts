@@ -15,4 +15,24 @@ export const contextLibraryTables = {
     name: "contextsLibrary",
     columns: contextLivewireColumns,
   }),
+  labels: State.SQLite.table({
+    name: "labels",
+    columns: {
+      id: State.SQLite.text({ primaryKey: true }),
+      name: State.SQLite.text(),
+      color: State.SQLite.text(),
+    },
+  }),
+  context_labels: State.SQLite.table({
+    name: "context_labels",
+    columns: {
+      contextId: State.SQLite.text(),
+      labelId: State.SQLite.text(),
+    },
+    // Note: LiveStore's schema definition doesn't have an explicit API for composite primary keys.
+    // The combination of (contextId, labelId) should be unique, which we'll enforce
+    // through application logic (delete all then insert new).
+    // For performance, indices could be added if necessary.
+    // e.g. using `indices: (t) => [t.contextId(), t.labelId()]` if API supported it.
+  }),
 };

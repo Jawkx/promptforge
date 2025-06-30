@@ -44,7 +44,7 @@ export const LeftPanel: React.FC = () => {
             maxSize={80}
             className="flex flex-col"
           >
-            <SelectedContexts isDroppableOver={false} />
+            <SelectedContexts isDroppableOver={isOver} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

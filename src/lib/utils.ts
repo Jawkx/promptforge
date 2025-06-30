@@ -8,6 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export const generateId = () => `context-${uuid()}`;
 
+export const generateLabelId = () => `label-${uuid()}`;
+
 export const estimateTokens = (text: string): number => {
   // A rough estimate: 1 token for every 4 characters.
   // This is a common heuristic for English text across many LLMs.
