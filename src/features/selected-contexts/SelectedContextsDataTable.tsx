@@ -10,7 +10,12 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
-import { LucideCopy, LucideTrash, LucideListX, LucideEdit3 } from "lucide-react";
+import {
+  LucideCopy,
+  LucideTrash,
+  LucideListX,
+  LucideEdit3,
+} from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 
 import {

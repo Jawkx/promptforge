@@ -52,7 +52,8 @@ export const useSyncContexts = ({
 
       // Case 2: The library item has been updated.
       if (libraryItem.version !== selectedItem.originalVersion) {
-        const isPristine = selectedItem.version === selectedItem.originalVersion;
+        const isPristine =
+          selectedItem.version === selectedItem.originalVersion;
 
         // If the selected context is "pristine" (unmodified), auto-update it.
         if (isPristine) {
