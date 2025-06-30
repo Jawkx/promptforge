@@ -3,13 +3,14 @@ export type Context = {
   readonly title: string;
   readonly content: string;
   readonly tokenCount: number;
-  readonly originalHash: string;
+  readonly version: string;
   readonly createdAt: number;
   readonly updatedAt: number;
 };
 
 export type SelectedContext = Context & {
   readonly originalContextId?: string;
+  readonly originalVersion?: string;
 };
 
 export type ContextFormData = {

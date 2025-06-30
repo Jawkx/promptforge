@@ -8,7 +8,7 @@ import {
 import { toast as sonnerToast } from "sonner";
 import { Context, SelectedContext } from "@/types";
 import { useLocalStore } from "@/store/app.store";
-import { generateContextHash, generateId } from "@/lib/utils";
+import { generateId } from "@/lib/utils";
 
 export const useDragAndDrop = () => {
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
@@ -48,9 +48,8 @@ export const useDragAndDrop = () => {
             title: libraryContext.title,
             content: libraryContext.content,
             tokenCount: libraryContext.tokenCount,
-            originalHash:
-              libraryContext.originalHash ||
-              generateContextHash(libraryContext.title, libraryContext.content),
+            version: libraryContext.version,
+            originalVersion: libraryContext.version,
             originalContextId: libraryContext.id,
             createdAt: libraryContext.createdAt,
             updatedAt: libraryContext.updatedAt,

@@ -16,6 +16,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { formatTokenCount } from "@/lib/utils";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import { v4 as uuid } from "uuid";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -64,6 +65,7 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
           title: trimmedTitle,
           content: context.content,
           updatedAt: Date.now(),
+          version: uuid(),
         }),
       );
       sonnerToast.success("Title Updated", {

@@ -8,6 +8,7 @@ export const contextLibraryEvents = {
       title: Schema.String,
       content: Schema.String,
       createdAt: Schema.Number,
+      version: Schema.String,
     }),
   }),
   contextUpdated: Events.synced({
@@ -17,6 +18,7 @@ export const contextLibraryEvents = {
       title: Schema.String,
       content: Schema.String,
       updatedAt: Schema.Number,
+      version: Schema.String,
     }),
   }),
   contextsDeleted: Events.synced({

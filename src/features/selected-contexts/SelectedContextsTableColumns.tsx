@@ -19,7 +19,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { generateContextHash, formatTokenCount } from "@/lib/utils";
+import { formatTokenCount } from "@/lib/utils";
+import { v4 as uuid } from "uuid";
 
 export type SelectedContextsTableMeta = {
   onRemoveContext: (id: string) => void;
@@ -71,6 +72,7 @@ const SelectedTitleCell: React.FC<{
         ...context,
         title: trimmedTitle,
         updatedAt: Date.now(),
+        version: uuid(),
       });
       sonnerToast.success("Title Updated", {
         description: `Selected context title updated to "${trimmedTitle}".`,
@@ -213,9 +215,7 @@ export const getSelectedContextsTableColumns =
           | undefined;
 
         const isLinked = !!context.originalContextId;
-
-        const currentHash = generateContextHash(context.title, context.content);
-        const isModified = currentHash !== context.originalHash;
+        const isModified = context.version !== context.originalVersion;
 
         return (
           <div className="text-right" onClick={(e) => e.stopPropagation()}>

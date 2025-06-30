@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Context, SelectedContext } from "@/types";
-import { generateContextHash } from "@/lib/utils";
 import { toast as sonnerToast } from "sonner";
 
 interface UseSyncContextsParams {
@@ -51,26 +50,19 @@ export const useSyncContexts = ({
         return;
       }
 
-      const newLibraryHash = generateContextHash(
-        libraryItem.title,
-        libraryItem.content,
-      );
-
       // Case 2: The library item has been updated.
-      if (newLibraryHash !== selectedItem.originalHash) {
-        const selectedItemCurrentHash = generateContextHash(
-          selectedItem.title,
-          selectedItem.content,
-        );
+      if (libraryItem.version !== selectedItem.originalVersion) {
+        const isPristine = selectedItem.version === selectedItem.originalVersion;
 
         // If the selected context is "pristine" (unmodified), auto-update it.
-        if (selectedItemCurrentHash === selectedItem.originalHash) {
+        if (isPristine) {
           updatesToApply.push({
             ...selectedItem,
             title: libraryItem.title,
             content: libraryItem.content,
             tokenCount: libraryItem.tokenCount,
-            originalHash: newLibraryHash,
+            version: libraryItem.version,
+            originalVersion: libraryItem.version,
             createdAt: libraryItem.createdAt,
             updatedAt: libraryItem.updatedAt,
           });

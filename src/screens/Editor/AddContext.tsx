@@ -9,6 +9,7 @@ import { generateId } from "@/lib/utils";
 import ContextForm from "@/features/shared/ContextForm";
 import { ContextFormData } from "@/types";
 import { useAppStores } from "@/store/LiveStoreProvider";
+import { v4 as uuid } from "uuid";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
@@ -35,6 +36,7 @@ const AddContext: React.FC = () => {
         title: finalTitle,
         content: finalContent,
         createdAt: Date.now(),
+        version: uuid(),
       }),
     );
 

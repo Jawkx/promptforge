@@ -10,7 +10,8 @@ import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/app.store";
-import { generateContextHash, generateId } from "@/lib/utils";
+import { generateId } from "@/lib/utils";
+import { v4 as uuid } from "uuid";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
@@ -58,9 +59,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           title: libraryContext.title,
           content: libraryContext.content,
           tokenCount: libraryContext.tokenCount,
-          originalHash:
-            libraryContext.originalHash ||
-            generateContextHash(libraryContext.title, libraryContext.content),
+          version: libraryContext.version,
+          originalVersion: libraryContext.version,
           originalContextId: libraryContext.id,
           createdAt: libraryContext.createdAt,
           updatedAt: libraryContext.updatedAt,
@@ -93,6 +93,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
                 content: pastedText,
                 updatedAt: Date.now(),
+                version: uuid(),
               }),
             );
             sonnerToast.success("Context Updated", {
@@ -108,6 +109,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 title: placeholderTitle,
                 content: pastedText,
                 createdAt: Date.now(),
+                version: uuid(),
               }),
             );
             sonnerToast.success("Context Added", {

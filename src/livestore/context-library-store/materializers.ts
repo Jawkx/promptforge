@@ -1,33 +1,31 @@
 import { contextLibraryEvents } from "./events";
 import { State } from "@livestore/livestore";
 import { contextLibraryTables } from "./tables";
-import { generateContextHash, estimateTokens } from "@/lib/utils";
+import { estimateTokens } from "@/lib/utils";
 
 export const contextLibraryMaterializers = State.SQLite.materializers(
   contextLibraryEvents,
   {
-    "v1.ContextCreated": ({ id, title, content, createdAt }) => {
-      const contextHash = generateContextHash(title, content);
+    "v1.ContextCreated": ({ id, title, content, createdAt, version }) => {
       const tokenCount = estimateTokens(content);
       return contextLibraryTables.contexts.insert({
         id,
         title,
         content,
         tokenCount,
-        originalHash: contextHash,
+        version,
         createdAt,
         updatedAt: createdAt,
       });
     },
-    "v1.ContextUpdated": ({ id, title, content, updatedAt }) => {
-      const contextHash = generateContextHash(title, content);
+    "v1.ContextUpdated": ({ id, title, content, updatedAt, version }) => {
       const tokenCount = estimateTokens(content);
       return contextLibraryTables.contexts
         .update({
           title,
           content,
           tokenCount,
-          originalHash: contextHash,
+          version,
           updatedAt,
         })
         .where({ id });

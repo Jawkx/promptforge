@@ -11,6 +11,7 @@ import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
 import { useAppStores } from "@/store/LiveStoreProvider";
 import { estimateTokens } from "@/lib/utils";
+import { v4 as uuid } from "uuid";
 
 interface EditContextProps {
   type: "library" | "selected";
@@ -59,7 +60,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
-      if (!contextId || !initialData) return;
+      if (!contextId) return;
 
       const trimmedTitle = data.title.trim();
       const trimmedContent = data.content.trim();
@@ -84,33 +85,40 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             title: trimmedTitle,
             content: trimmedContent,
             updatedAt: Date.now(),
+            version: uuid(),
           }),
         );
         sonnerToast.success("Context Updated", {
           description: `Context "${trimmedTitle}" has been updated.`,
         });
       } else if (type === "selected") {
-        const updatedContext: SelectedContext = {
-          ...(initialData as SelectedContext),
-          title: trimmedTitle,
-          content: trimmedContent,
-          tokenCount: estimateTokens(trimmedContent),
-          updatedAt: Date.now(),
-        };
-        updateSelectedContext(updatedContext);
-        sonnerToast.success("Selected Context Updated", {
-          description: `Selected context "${trimmedTitle}" has been updated.`,
-        });
+        const contextToUpdate = selectedContexts.find(
+          (c) => c.id === contextId,
+        );
+        if (contextToUpdate) {
+          const updatedContext: SelectedContext = {
+            ...contextToUpdate,
+            title: trimmedTitle,
+            content: trimmedContent,
+            tokenCount: estimateTokens(trimmedContent),
+            updatedAt: Date.now(),
+            version: uuid(),
+          };
+          updateSelectedContext(updatedContext);
+          sonnerToast.success("Selected Context Updated", {
+            description: `Selected context "${trimmedTitle}" has been updated.`,
+          });
+        }
       }
       handleClose();
     },
     [
       contextId,
-      initialData,
       type,
       contextLibraryStore,
       updateSelectedContext,
       handleClose,
+      selectedContexts,
     ],
   );
 

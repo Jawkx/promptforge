@@ -13,7 +13,8 @@ import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
-import { generateContextHash, generateId, estimateTokens } from "@/lib/utils";
+import { generateId, estimateTokens } from "@/lib/utils";
+import { v4 as uuid } from "uuid";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
 interface SelectedContextsProps {
@@ -77,6 +78,7 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
                 content: pastedText,
                 tokenCount: estimateTokens(pastedText),
                 updatedAt: Date.now(),
+                version: uuid(),
               });
               sonnerToast.success("Selected Context Updated", {
                 description: `Content updated by paste.`,
@@ -92,7 +94,7 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
               title,
               content: pastedText,
               tokenCount: estimateTokens(pastedText),
-              originalHash: generateContextHash(title, pastedText),
+              version: uuid(),
               createdAt: now,
               updatedAt: now,
             };
@@ -150,22 +152,21 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
       if (!selectedContext.originalContextId) return;
 
       const now = Date.now();
+      const newVersion = uuid();
       contextLibraryStore.commit(
         contextLibraryEvents.contextUpdated({
           id: selectedContext.originalContextId,
           title: selectedContext.title,
           content: selectedContext.content,
           updatedAt: now,
+          version: newVersion,
         }),
       );
 
-      const newHash = generateContextHash(
-        selectedContext.title,
-        selectedContext.content,
-      );
       updateSelectedContext({
         ...selectedContext,
-        originalHash: newHash,
+        version: newVersion,
+        originalVersion: newVersion,
         updatedAt: now,
       });
 
@@ -188,7 +189,8 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
           title: originalContext.title,
           content: originalContext.content,
           tokenCount: originalContext.tokenCount,
-          originalHash: originalContext.originalHash,
+          version: originalContext.version,
+          originalVersion: originalContext.version,
           createdAt: originalContext.createdAt,
           updatedAt: originalContext.updatedAt,
         });
@@ -207,23 +209,22 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
   const onCreateInLibrary = useCallback(
     (selectedContext: SelectedContext) => {
       const id = generateId();
+      const newVersion = uuid();
       contextLibraryStore.commit(
         contextLibraryEvents.contextCreated({
           id,
           title: selectedContext.title,
           content: selectedContext.content,
           createdAt: selectedContext.createdAt,
+          version: newVersion,
         }),
       );
 
-      const newHash = generateContextHash(
-        selectedContext.title,
-        selectedContext.content,
-      );
       updateSelectedContext({
         ...selectedContext,
         originalContextId: id,
-        originalHash: newHash,
+        version: newVersion,
+        originalVersion: newVersion,
       });
 
       sonnerToast.success("Added to Library", {
