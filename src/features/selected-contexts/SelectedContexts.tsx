@@ -17,13 +17,7 @@ import { generateId, estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { useAppStores } from "@/store/LiveStoreProvider";
 
-interface SelectedContextsProps {
-  isDroppableOver: boolean;
-}
-
-export const SelectedContexts: React.FC<SelectedContextsProps> = ({
-  isDroppableOver,
-}) => {
+export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const removeMultipleSelectedContextsFromPrompt = useLocalStore(
     (state) => state.removeMultipleSelectedContextsFromPrompt,
@@ -298,7 +292,6 @@ export const SelectedContexts: React.FC<SelectedContextsProps> = ({
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
         activeId={activeId}
         setActiveId={setActiveId}
-        isDroppableOver={isDroppableOver}
       />
     </div>
   );

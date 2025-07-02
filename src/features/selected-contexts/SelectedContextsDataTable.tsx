@@ -47,7 +47,6 @@ interface SelectedContextsDataTableProps {
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
-  isDroppableOver: boolean;
 }
 
 interface MemoizedDataTableRowProps {
@@ -211,7 +210,6 @@ export const SelectedContextsDataTable: React.FC<
   onDeleteMultipleFromPrompt,
   activeId,
   setActiveId,
-  isDroppableOver,
 }) => {
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
@@ -250,8 +248,7 @@ export const SelectedContextsDataTable: React.FC<
       <div
         className={cn(
           "flex-grow flex items-center justify-center border rounded-md transition-all",
-          isFocused ? "border-primary" : "border-muted",
-          isDroppableOver && "bg-primary/5 ring-1 ring-primary",
+          isFocused && "border-primary",
         )}
       >
         <p className="text-sm text-muted-foreground text-center py-10">
@@ -266,8 +263,7 @@ export const SelectedContextsDataTable: React.FC<
       <ScrollArea
         className={cn(
           "flex rounded-md border flex-grow relative transition-all",
-          isFocused ? "border-primary" : "border-muted",
-          isDroppableOver && "bg-primary/5 ring-1 ring-primary",
+          isFocused && "border-primary",
         )}
       >
         <Table className="h-full">
