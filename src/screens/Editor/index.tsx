@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ResizablePanelGroup,
   ResizableHandle,
@@ -24,6 +24,7 @@ import {
 } from "@dnd-kit/core";
 import { useDragAndDrop } from "./useDragAndDrop";
 import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialog";
+import { useLocalStore } from "@/store/app.store";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useAppStores();
@@ -43,6 +44,29 @@ const Editor: React.FC = () => {
   const [deleteMultipleConfirmationOpen, setDeleteMultipleConfirmationOpen] =
     useState(false);
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const { prompt, selectedContexts } = useLocalStore.getState();
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const hasContentInPrompt =
+        typeof prompt === "string" && prompt.trim() !== "";
+      const hasSelectedContexts = selectedContexts.length > 0;
+
+      if (hasContentInPrompt || hasSelectedContexts) {
+        event.preventDefault();
+        // Modern browsers show a generic message, but this is required for the prompt to appear.
+        const message = "Information might not be saved";
+        return message;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   const {
     activeDraggedContexts,
