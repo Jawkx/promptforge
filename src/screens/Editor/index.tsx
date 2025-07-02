@@ -23,12 +23,14 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useDragAndDrop } from "./useDragAndDrop";
+import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialog";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useAppStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [isAddModalOpen] = useRoute("/add");
+  const [isLabelsModalOpen] = useRoute("/labels");
   const [isEditModalOpen, params] = useRoute<{
     type: "library" | "selected";
     id: string;
@@ -174,6 +176,7 @@ const Editor: React.FC = () => {
         ) : null}
       </DragOverlay>
       {isAddModalOpen && <AddContext />}
+      {isLabelsModalOpen && <ManageLabelsDialog />}
       {isEditModalOpen &&
         params &&
         (params.type === "library" || params.type === "selected") && (

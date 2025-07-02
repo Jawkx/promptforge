@@ -359,14 +359,19 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
 
   return (
     <div className="h-full max-h-[800px] flex flex-col ">
-      <div className="flex items-center mb-3">
-        <LucideSearch className="text-primary mr-4" />
-        <Input
-          placeholder="Filter contexts by title or content..."
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          className="h-9 "
-        />
+      <div className="flex items-center mb-3 gap-2">
+        <div className="relative flex-1">
+          <LucideSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Filter contexts by title or content..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="h-9 w-full pl-10"
+          />
+        </div>
+        <Button variant="outline" onClick={() => navigate("/labels")}>
+          Manage Labels
+        </Button>
       </div>
       <ScrollArea
         className={cn(
