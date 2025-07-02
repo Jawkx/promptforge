@@ -2,13 +2,11 @@ import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { useLocalStore } from "@/store/app.store";
 import { LucideCopy } from "lucide-react";
-import { useCallback } from "react";
 
 export const CopyAllButton = () => {
-  const prompt = useLocalStore((state) => state.prompt);
-  const selectedContexts = useLocalStore((state) => state.selectedContexts);
+  const onCopyPromptAndContextsClick = () => {
+    const { prompt, selectedContexts } = useLocalStore.getState();
 
-  const onCopyPromptAndContextsClick = useCallback(() => {
     const contextsText = selectedContexts
       .map(
         (context) =>
@@ -38,7 +36,7 @@ export const CopyAllButton = () => {
           description: "Could not copy text to clipboard.",
         });
       });
-  }, [selectedContexts, prompt]);
+  };
 
   return (
     <Button
