@@ -46,9 +46,9 @@ const Editor: React.FC = () => {
   const [contextsToDeleteIds, setContextsToDeleteIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const { prompt, selectedContexts } = useLocalStore.getState();
-
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const { prompt, selectedContexts } = useLocalStore.getState();
+
       const hasContentInPrompt =
         typeof prompt === "string" && prompt.trim() !== "";
       const hasSelectedContexts = selectedContexts.length > 0;
