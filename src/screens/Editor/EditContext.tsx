@@ -6,7 +6,7 @@ import { LucideSave } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useLocalStore } from "@/store/app.store";
+import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
 import { useLiveStores } from "@/store/LiveStoreProvider";

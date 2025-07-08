@@ -24,7 +24,7 @@ import {
 } from "@dnd-kit/core";
 import { useDragAndDrop } from "./useDragAndDrop";
 import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialog";
-import { useLocalStore } from "@/store/app.store";
+import { useLocalStore } from "@/store/localStore";
 
 const Editor: React.FC = () => {
   const { contextLibraryStore } = useLiveStores();

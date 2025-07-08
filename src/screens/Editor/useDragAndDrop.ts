@@ -7,7 +7,7 @@ import {
 } from "@dnd-kit/core";
 import { toast as sonnerToast } from "sonner";
 import { Context, SelectedContext } from "@/types";
-import { useLocalStore } from "@/store/app.store";
+import { useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 
 export const useDragAndDrop = () => {

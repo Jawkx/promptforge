@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { FocusArea, useLocalStore } from "@/store/app.store";
+import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { contexts$ } from "@/livestore/context-library-store/queries";

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
-import { useLocalStore } from "@/store/app.store";
+import { useLocalStore } from "@/store/localStore";
 import { LucideCopy } from "lucide-react";
 
 export const CopyAllButton = () => {

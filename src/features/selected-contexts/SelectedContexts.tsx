@@ -5,7 +5,7 @@ import {
   getSelectedContextsTableColumns,
   SelectedContextsTableMeta,
 } from "./SelectedContextsTableColumns";
-import { FocusArea, useLocalStore } from "@/store/app.store";
+import { FocusArea, useLocalStore } from "@/store/localStore";
 import { toast as sonnerToast } from "sonner";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";

@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
-import { FocusArea, useLocalStore } from "@/store/app.store";
+import { FocusArea, useLocalStore } from "@/store/localStore";
 import { useDraggable } from "@dnd-kit/core";
 import { toast as sonnerToast } from "sonner";
 import { LabelAssignment } from "./LabelAssignment";

@@ -38,7 +38,7 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
-import { FocusArea, useLocalStore } from "@/store/app.store";
+import { FocusArea, useLocalStore } from "@/store/localStore";
 
 interface SelectedContextsDataTableProps {
   columns: ColumnDef<SelectedContext>[];

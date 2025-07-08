@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useLocalStore } from "@/store/app.store";
+import { useLocalStore } from "@/store/localStore";
 import { toast as sonnerToast } from "sonner";
 import {
   Tooltip,
