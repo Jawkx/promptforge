@@ -4,16 +4,16 @@ import App from "./App.tsx";
 import "./index.css";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import { scan } from "react-scan";
-import { AppStoresProvider } from "./store/LiveStoreProvider.tsx";
+import { LiveStoresProvider } from "./store/LiveStoreProvider.tsx";
 
 scan({ enabled: import.meta.env.VITE_REACT_SCAN === "true" });
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AppStoresProvider>
+    <LiveStoresProvider>
       <TooltipProvider>
         <App />
       </TooltipProvider>
-    </AppStoresProvider>
+    </LiveStoresProvider>
   </StrictMode>,
 );

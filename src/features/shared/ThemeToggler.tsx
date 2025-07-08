@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@livestore/react";
 import { preference$ } from "@/livestore/user-store/queries";
 import { userEvents } from "@/livestore/user-store/events";
-import { useAppStores } from "@/store/LiveStoreProvider";
+import { useLiveStores } from "@/store/LiveStoreProvider";
 
 export const ThemeToggler = () => {
-  const { userStore } = useAppStores();
+  const { userStore } = useLiveStores();
   const preference = useQuery(preference$, { store: userStore });
 
   const theme = preference.theme ?? "dark";

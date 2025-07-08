@@ -12,7 +12,7 @@ import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
-import { useAppStores } from "@/store/LiveStoreProvider";
+import { useLiveStores } from "@/store/LiveStoreProvider";
 import { LeftPanel } from "./LeftPanel";
 import { RightPanel } from "./RightPanel";
 import {
@@ -27,7 +27,7 @@ import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialo
 import { useLocalStore } from "@/store/app.store";
 
 const Editor: React.FC = () => {
-  const { contextLibraryStore } = useAppStores();
+  const { contextLibraryStore } = useLiveStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [isAddModalOpen] = useRoute("/add");

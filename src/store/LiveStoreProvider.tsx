@@ -29,15 +29,15 @@ type AppStores = {
 
 const AppStoresContext = createContext<AppStores | null>(null);
 
-export const useAppStores = (): AppStores => {
+export const useLiveStores = (): AppStores => {
   const context = useContext(AppStoresContext);
   if (!context) {
-    throw new Error("useAppStores must be used within an AppStoresProvider");
+    throw new Error("useLiveStores must be used within an AppStoresProvider");
   }
   return context;
 };
 
-export const AppStoresProvider = ({ children }: { children: ReactNode }) => {
+export const LiveStoresProvider = ({ children }: { children: ReactNode }) => {
   const [stores, setStores] = useState<AppStores | null>(null);
 
   useEffect(() => {

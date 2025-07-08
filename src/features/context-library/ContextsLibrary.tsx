@@ -13,7 +13,7 @@ import { FocusArea, useLocalStore } from "@/store/app.store";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useAppStores } from "@/store/LiveStoreProvider";
+import { useLiveStores } from "@/store/LiveStoreProvider";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -28,7 +28,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const focusedArea = useLocalStore((state) => state.focusedArea);
 
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useAppStores();
+  const { contextLibraryStore } = useLiveStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
