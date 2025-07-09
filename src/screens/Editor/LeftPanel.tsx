@@ -20,7 +20,7 @@ export const LeftPanel: React.FC = () => {
     <ResizablePanel
       defaultSize={60}
       minSize={30}
-      className={cn("flex flex-col p-4 transition-colors")}
+      className={"flex flex-col p-4 transition-colors h-5/6"}
     >
       <div className="flex flex-row mb-4">
         <LucideAnvil className="h-9 w-9 mr-3" />

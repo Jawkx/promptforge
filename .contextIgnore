@@ -3,4 +3,4 @@
 *.log
 *.tsbuildinfo
 *.json
-src/components/ui/**/*
+src/components/ui/minimal-tiptap/**/*

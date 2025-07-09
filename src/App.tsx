@@ -4,7 +4,9 @@ import Editor from "./screens/Editor/index";
 function App() {
   return (
     <>
-      <Editor />
+      <div className="h-screen w-screen flex flex-col">
+        <Editor />
+      </div>
       <Toaster />
     </>
   );
