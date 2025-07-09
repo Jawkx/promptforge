@@ -6,13 +6,11 @@ import { useEditor } from "@tiptap/react"
 import { Typography } from "@tiptap/extension-typography"
 import { Placeholder } from "@tiptap/extension-placeholder"
 import { Underline } from "@tiptap/extension-underline"
-import { TextStyle } from "@tiptap/extension-text-style"
 import {
   Link,
   HorizontalRule,
   CodeBlockLowlight,
   Selection,
-  Color,
   UnsetAllMarks,
   ResetMarksOnEnter,
 } from "../extensions"
@@ -49,8 +47,6 @@ const createExtensions = ({
     }),
     Link,
     Underline,
-    Color,
-    TextStyle,
     Selection,
     Typography,
     UnsetAllMarks,

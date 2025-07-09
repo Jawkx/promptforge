@@ -8,7 +8,6 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { SectionOne } from "./components/section/one"
 import { SectionTwo } from "./components/section/two"
-import { SectionThree } from "./components/section/three"
 import { SectionFour } from "./components/section/four"
 import { SectionFive } from "./components/section/five"
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu"
@@ -42,10 +41,6 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
         ]}
         mainActionCount={3}
       />
-
-      <Separator orientation="vertical" className="mx-2 h-7" />
-
-      <SectionThree editor={editor} />
 
       <Separator orientation="vertical" className="mx-2 h-7" />
 
