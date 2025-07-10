@@ -369,8 +369,8 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
             className="h-9 w-full pl-10"
           />
         </div>
-        <Button variant="outline" onClick={() => navigate("/labels")}>
-          Manage Labels
+        <Button variant="outline" size="sm" onClick={() => navigate("/labels")}>
+          <LucideTag className="h-4 w-4" />
         </Button>
       </div>
       <ScrollArea

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { toast as sonnerToast } from "sonner";
-import { LucideEdit, LucidePlus, LucideSave, LucideTrash2 } from "lucide-react";
+import { LucideEdit, LucidePlus, LucideTrash2, LucideX } from "lucide-react";
 import { useLiveStores } from "@/store/LiveStoreProvider";
 import { labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -34,14 +34,26 @@ export const ManageLabelsDialog: React.FC = () => {
   const [editingColor, setEditingColor] = useState("");
 
   // Create state
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState(LABEL_COLORS[0]);
+  const [newLabelName, setNewLabelName] = useState("");
+  const [newLabelColor, setNewLabelColor] = useState(LABEL_COLORS[0]);
 
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [labelToDelete, setLabelToDelete] = useState<LabelType | null>(null);
 
-  const handleClose = () => navigate("/");
+  const handleClose = () => {
+    // Auto-save any pending changes before closing
+    if (editingLabelId && editingName.trim()) {
+      contextLibraryStore.commit(
+        contextLibraryEvents.labelUpdated({
+          id: editingLabelId,
+          name: editingName.trim(),
+          color: editingColor,
+        }),
+      );
+    }
+    navigate("/");
+  };
 
   const handleSelectLabelForEdit = (label: LabelType) => {
     setEditingLabelId(label.id);
@@ -49,8 +61,8 @@ export const ManageLabelsDialog: React.FC = () => {
     setEditingColor(label.color);
   };
 
-  const handleUpdateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdateSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const trimmedName = editingName.trim();
     if (!trimmedName) {
       sonnerToast.error("Label name cannot be empty.");
@@ -72,9 +84,17 @@ export const ManageLabelsDialog: React.FC = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleUpdateSubmit();
+    } else if (e.key === "Escape") {
+      setEditingLabelId(null);
+    }
+  };
+
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedName = newTagName.trim();
+    const trimmedName = newLabelName.trim();
     if (!trimmedName) {
       sonnerToast.error("Label name cannot be empty.");
       return;
@@ -84,15 +104,15 @@ export const ManageLabelsDialog: React.FC = () => {
       contextLibraryEvents.labelCreated({
         id: generateLabelId(),
         name: trimmedName,
-        color: newTagColor,
+        color: newLabelColor,
       }),
     );
     sonnerToast.success("Label created", {
       description: `Label "${trimmedName}" has been created.`,
     });
 
-    setNewTagName("");
-    setNewTagColor(LABEL_COLORS[0]);
+    setNewLabelName("");
+    setNewLabelColor(LABEL_COLORS[0]);
   };
 
   const handleDeleteRequest = (label: LabelType) => {
@@ -117,132 +137,193 @@ export const ManageLabelsDialog: React.FC = () => {
   return (
     <>
       <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Manage Tags</DialogTitle>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl font-semibold">
+              Manage Labels
+            </DialogTitle>
           </DialogHeader>
 
-          <ScrollArea className="h-60">
-            <div className="space-y-1 rounded-md border border-dotted p-2">
-              {labels.map((label) =>
-                editingLabelId === label.id ? (
-                  <form
-                    key={label.id}
-                    onSubmit={handleUpdateSubmit}
-                    className="flex items-center gap-2 rounded-md bg-muted/50 p-2"
-                  >
-                    <span
-                      className="h-4 w-4 flex-shrink-0 rounded-full"
-                      style={{ backgroundColor: editingColor }}
-                    />
+          <div className="space-y-6">
+            {/* Create New Label Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Create New Label
+              </h3>
+              <form onSubmit={handleCreateSubmit} className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
                     <Input
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      className="h-8 flex-1"
-                      autoFocus
+                      value={newLabelName}
+                      onChange={(e) => setNewLabelName(e.target.value)}
+                      placeholder="Enter label name..."
+                      className="h-10"
                     />
-                    <div className="flex flex-wrap gap-1.5">
-                      {LABEL_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setEditingColor(c)}
-                          className={cn(
-                            "h-4 w-4 rounded-full border-2 transition-all",
-                            editingColor === c
-                              ? "border-primary"
-                              : "border-transparent hover:border-muted-foreground/50",
-                          )}
-                          style={{ backgroundColor: c }}
-                          aria-label={`Select color ${c}`}
-                        />
-                      ))}
-                    </div>
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                    >
-                      <LucideSave className="h-4 w-4" />
-                    </Button>
-                  </form>
-                ) : (
-                  <div
-                    key={label.id}
-                    className="flex items-center justify-between rounded-md p-2 hover:bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="h-4 w-4 rounded-full"
-                        style={{ backgroundColor: label.color }}
-                      />
-                      <span className="font-medium">{label.name}</span>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleSelectLabelForEdit(label)}
-                      >
-                        <LucideEdit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => handleDeleteRequest(label)}
-                      >
-                        <LucideTrash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
                   </div>
-                ),
-              )}
-              {labels.length === 0 && (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  No tags created yet.
-                </p>
-              )}
+                  <div className="flex flex-wrap gap-2">
+                    {LABEL_COLORS.map((color) => {
+                      const isInputEmpty = !newLabelName.trim();
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => !isInputEmpty && setNewLabelColor(color)}
+                          disabled={isInputEmpty}
+                          className={cn(
+                            "h-6 w-6 rounded-full border-2 transition-all",
+                            isInputEmpty 
+                              ? "opacity-50" 
+                              : "hover:scale-110",
+                            newLabelColor === color && !isInputEmpty
+                              ? "ring-2 ring-offset-2"
+                              : "border-border hover:border-foreground/50",
+                          )}
+                          style={{
+                            backgroundColor: color,
+                            borderColor:
+                              newLabelColor === color && !isInputEmpty
+                                ? `${color}80`
+                                : "transparent",
+                          }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="px-4"
+                    disabled={!newLabelName.trim()}
+                  >
+                    <LucidePlus className="h-4 w-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
+              </form>
             </div>
-          </ScrollArea>
 
-          <Separator />
+            <Separator />
 
-          <form onSubmit={handleCreateSubmit} className="space-y-3 pt-1">
-            <div className="flex items-center gap-2">
-              <Input
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="New tag name"
-                className="h-9"
-              />
-              <Button type="submit" variant="outline" size="icon">
-                <LucidePlus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {LABEL_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setNewTagColor(c)}
-                  className={cn(
-                    "h-5 w-5 rounded-full border-2 transition-all",
-                    newTagColor === c
-                      ? "border-primary ring-1 ring-ring"
-                      : "border-transparent hover:border-muted-foreground/50",
+            {/* Existing Labels Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Existing Labels ({labels.length})
+              </h3>
+
+              <ScrollArea className="h-64">
+                <div className="space-y-2 pr-4">
+                  {labels.map((label) =>
+                    editingLabelId === label.id ? (
+                      <div
+                        key={label.id}
+                        className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3"
+                      >
+                        <div
+                          className="h-5 w-5 flex-shrink-0 rounded-full border border-border"
+                          style={{ backgroundColor: editingColor }}
+                        />
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          className="h-8 flex-1 text-sm"
+                          autoFocus
+                        />
+                        <div className="flex gap-1">
+                          {LABEL_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              onClick={() => setEditingColor(color)}
+                              className={cn(
+                                "h-4 w-4 rounded-full border transition-all",
+                                editingColor === color
+                                  ? "ring-1 ring-offset-1"
+                                  : "border-border hover:border-foreground/50",
+                              )}
+                              style={{
+                                backgroundColor: color,
+                                borderColor:
+                                  editingColor === color
+                                    ? `${color}80`
+                                    : "transparent",
+                              }}
+                              aria-label={`Select color ${color}`}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setEditingLabelId(null)}
+                          >
+                            <LucideX className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        key={label.id}
+                        className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="h-5 w-5 rounded-full border border-border"
+                            style={{ backgroundColor: label.color }}
+                          />
+                          <span className="font-medium text-sm">
+                            {label.name}
+                          </span>
+                        </div>
+                        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleSelectLabelForEdit(label)}
+                          >
+                            <LucideEdit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => handleDeleteRequest(label)}
+                          >
+                            <LucideTrash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ),
                   )}
-                  style={{ backgroundColor: c }}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
+                  {labels.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <LucidePlus className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        No labels created yet
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Create your first label above to get started
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
-          </form>
+          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={handleClose}>
+          <DialogFooter className="pt-6">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              className="w-full sm:w-auto"
+            >
               Done
             </Button>
           </DialogFooter>
