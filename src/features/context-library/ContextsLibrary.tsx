@@ -130,7 +130,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   return (
     <div
-      className="h-5/6 flex flex-col py-5 px-4 gap-4 focus:outline-none"
+      className="h-full flex flex-col py-5 px-4 gap-4 focus:outline-none"
       onClick={handleOnFocus}
       onPaste={handlePaste}
       tabIndex={-1}

@@ -134,9 +134,9 @@ const Editor: React.FC = () => {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex flex-1 justify-center">
+      <div className="flex justify-center h-screen w-screen">
         <div className="h-full w-full max-w-screen-2xl">
-          <ResizablePanelGroup direction="horizontal">
+          <ResizablePanelGroup direction="horizontal" className="h-full">
             <LeftPanel />
 
             <ResizableHandle withHandle />
