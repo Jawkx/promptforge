@@ -29,16 +29,26 @@ const AddContext: React.FC = () => {
     }
 
     const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
+    const contextId = generateId();
 
     contextLibraryStore.commit(
       contextLibraryEvents.contextCreated({
-        id: generateId(),
+        id: contextId,
         title: finalTitle,
         content: finalContent,
         createdAt: Date.now(),
         version: uuid(),
       }),
     );
+
+    if (data.labels && data.labels.length > 0) {
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextLabelsUpdated({
+          contextId,
+          labelIds: data.labels.map(label => label.id),
+        }),
+      );
+    }
 
     sonnerToast.success("Context Added", {
       description: `Context "${finalTitle}" has been added.`,

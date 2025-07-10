@@ -48,6 +48,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         id: foundContext.id,
         title: foundContext.title,
         content: foundContext.content,
+        labels: foundContext.labels,
       });
     } else {
       sonnerToast.error("Context Not Found", {
@@ -88,6 +89,17 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             version: uuid(),
           }),
         );
+
+        // Update labels if they were changed
+        if (data.labels !== undefined) {
+          contextLibraryStore.commit(
+            contextLibraryEvents.contextLabelsUpdated({
+              contextId,
+              labelIds: data.labels.map(label => label.id),
+            }),
+          );
+        }
+
         sonnerToast.success("Context Updated", {
           description: `Context "${trimmedTitle}" has been updated.`,
         });
@@ -100,6 +112,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             ...contextToUpdate,
             title: trimmedTitle,
             content: trimmedContent,
+            labels: data.labels || contextToUpdate.labels,
             tokenCount: estimateTokens(trimmedContent),
             updatedAt: Date.now(),
             version: uuid(),
@@ -135,6 +148,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         id={initialData.id}
         title={initialData.title}
         content={initialData.content}
+        labels={initialData.labels}
         onSubmit={handleSubmit}
         onCancel={handleClose}
         dialogTitle={screenTitle}

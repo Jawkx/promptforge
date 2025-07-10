@@ -24,4 +24,5 @@ export type ContextFormData = {
   id?: string;
   title: string;
   content: string;
+  labels?: readonly Label[];
 };
