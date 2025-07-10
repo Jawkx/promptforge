@@ -2,6 +2,7 @@ import { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { Context } from "../../types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,21 +114,28 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
   return (
     <div
       onDoubleClick={() => setIsEditing(true)}
-      className="flex items-center h-full gap-2"
+      className="flex items-center h-full gap-2 justify-between"
     >
-      <div className="flex items-center gap-1.5 flex-shrink-0">
-        {context.labels?.map((label) => (
-          <span
-            key={label.id}
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: label.color }}
-            title={label.name}
-          />
-        ))}
-      </div>
       <span className="font-medium truncate" title={context.title}>
         {context.title}
       </span>
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {context.labels?.map((label) => (
+          <Badge
+            key={label.id}
+            variant="outline"
+            className="text-xs px-2 py-0.5 h-5 border"
+            style={{ 
+              backgroundColor: label.color + '20',
+              borderColor: label.color,
+              color: label.color
+            }}
+            title={label.name}
+          >
+            {label.name}
+          </Badge>
+        ))}
+      </div>
     </div>
   );
 };
