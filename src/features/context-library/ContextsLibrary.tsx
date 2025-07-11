@@ -5,6 +5,7 @@ import { LucidePlus } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
+import { ContextsTableToolbar } from "./ContextsTableToolbar";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
@@ -140,13 +141,17 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         <ThemeToggler />
       </div>
 
+      <ContextsTableToolbar
+        searchQuery={searchTerm}
+        setSearchQuery={setSearchTerm}
+      />
+
       <ContextsDataTable
         data={contexts}
         onDeleteContext={onDeleteContext}
         onDeleteSelectedContexts={onDeleteSelectedContexts}
         onAddSelectedToPrompt={onAddSelectedToPrompt}
         searchQuery={searchTerm}
-        setSearchQuery={setSearchTerm}
         activeId={activeId}
         setActiveId={setActiveId}
         editingTitleId={editingTitleId}
