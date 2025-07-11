@@ -167,13 +167,13 @@ export const ManageLabelsDialog: React.FC = () => {
                         <button
                           key={color}
                           type="button"
-                          onClick={() => !isInputEmpty && setNewLabelColor(color)}
+                          onClick={() =>
+                            !isInputEmpty && setNewLabelColor(color)
+                          }
                           disabled={isInputEmpty}
                           className={cn(
                             "h-6 w-6 rounded-full border-2 transition-all",
-                            isInputEmpty 
-                              ? "opacity-50" 
-                              : "hover:scale-110",
+                            isInputEmpty ? "opacity-50" : "hover:scale-110",
                             newLabelColor === color && !isInputEmpty
                               ? "ring-2 ring-offset-2"
                               : "border-border hover:border-foreground/50",

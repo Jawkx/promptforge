@@ -131,10 +131,10 @@ const SelectedTitleCell: React.FC<{
             key={label.id}
             variant="outline"
             className="text-xs px-2 py-0.5 h-5 border"
-            style={{ 
-              backgroundColor: label.color + '20',
+            style={{
+              backgroundColor: label.color + "20",
               borderColor: label.color,
-              color: label.color
+              color: label.color,
             }}
             title={label.name}
           >

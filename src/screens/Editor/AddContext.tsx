@@ -45,7 +45,7 @@ const AddContext: React.FC = () => {
       contextLibraryStore.commit(
         contextLibraryEvents.contextLabelsUpdated({
           contextId,
-          labelIds: data.labels.map(label => label.id),
+          labelIds: data.labels.map((label) => label.id),
         }),
       );
     }

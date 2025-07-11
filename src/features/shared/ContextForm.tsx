@@ -41,12 +41,14 @@ interface ContextFormProps {
   labels?: readonly Label[];
   onSubmit: (data: ContextFormData) => void;
   onCancel: () => void;
+  onDataChange?: (data: ContextFormData) => void;
   dialogTitle: string;
   dialogDescription: string;
-  submitButtonText: string;
+  submitButtonText?: string;
   submitButtonIcon?: React.ReactNode;
   isMaximized?: boolean;
   onMaximizeToggle?: () => void;
+  autoSave?: boolean;
 }
 
 const ContextForm: React.FC<ContextFormProps> = ({
@@ -56,12 +58,14 @@ const ContextForm: React.FC<ContextFormProps> = ({
   labels: initialLabels = [],
   onSubmit,
   onCancel,
+  onDataChange,
   dialogTitle,
   dialogDescription,
   submitButtonText,
   submitButtonIcon,
   isMaximized = false,
   onMaximizeToggle,
+  autoSave = false,
 }) => {
   const { contextLibraryStore } = useLiveStores();
   const allLabels = useQuery(labels$, { store: contextLibraryStore });
@@ -78,6 +82,27 @@ const ContextForm: React.FC<ContextFormProps> = ({
     setContent(initialContent);
     setSelectedLabels(initialLabels);
   }, [initialTitle, initialContent, initialLabels]);
+
+  // Call onDataChange when data changes (for auto-save)
+  useEffect(() => {
+    if (
+      onDataChange &&
+      (title !== initialTitle ||
+        content !== initialContent ||
+        selectedLabels !== initialLabels)
+    ) {
+      onDataChange({ id, title, content, labels: selectedLabels });
+    }
+  }, [
+    title,
+    content,
+    selectedLabels,
+    onDataChange,
+    id,
+    initialTitle,
+    initialContent,
+    initialLabels,
+  ]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent) => {
@@ -313,24 +338,26 @@ const ContextForm: React.FC<ContextFormProps> = ({
         </div>
       </form>
 
-      <DialogFooter className="pt-6 gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          className="min-w-[100px]"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          form="context-form"
-          className="min-w-[140px] gap-2"
-        >
-          {submitButtonIcon}
-          {submitButtonText}
-        </Button>
-      </DialogFooter>
+      {!autoSave && (
+        <DialogFooter className="pt-6 gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="min-w-[100px]"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="context-form"
+            className="min-w-[140px] gap-2"
+          >
+            {submitButtonIcon}
+            {submitButtonText}
+          </Button>
+        </DialogFooter>
+      )}
     </DialogContent>
   );
 };

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Context, SelectedContext, ContextFormData } from "@/types";
 import { toast as sonnerToast } from "sonner";
-import { LucideSave } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contexts$ } from "@/livestore/context-library-store/queries";
@@ -30,52 +29,17 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const [initialData, setInitialData] = useState<ContextFormData | null>(null);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [currentData, setCurrentData] = useState<ContextFormData | null>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleClose = useCallback(() => {
-    navigate("/");
-  }, [navigate]);
-
-  useEffect(() => {
-    let foundContext: Context | SelectedContext | undefined;
-    if (type === "library") {
-      foundContext = contexts.find((c) => c.id === contextId);
-    } else if (type === "selected") {
-      foundContext = selectedContexts.find((c) => c.id === contextId);
-    }
-
-    if (foundContext) {
-      setInitialData({
-        id: foundContext.id,
-        title: foundContext.title,
-        content: foundContext.content,
-        labels: foundContext.labels,
-      });
-    } else {
-      sonnerToast.error("Context Not Found", {
-        description:
-          "The context you are trying to edit does not exist or could not be found.",
-      });
-      handleClose();
-    }
-  }, [contextId, type, contexts, selectedContexts, handleClose]);
-
-  const handleSubmit = useCallback(
-    (data: ContextFormData) => {
+  const saveData = useCallback(
+    (data: ContextFormData, showToast = false) => {
       if (!contextId) return;
 
       const trimmedTitle = data.title.trim();
       const trimmedContent = data.content.trim();
 
-      if (!trimmedTitle) {
-        sonnerToast.error("Title Required", {
-          description: "Title cannot be empty.",
-        });
-        return;
-      }
       if (!trimmedContent) {
-        sonnerToast.error("Content Required", {
-          description: "Content cannot be empty.",
-        });
         return;
       }
 
@@ -95,14 +59,16 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           contextLibraryStore.commit(
             contextLibraryEvents.contextLabelsUpdated({
               contextId,
-              labelIds: data.labels.map(label => label.id),
+              labelIds: data.labels.map((label) => label.id),
             }),
           );
         }
 
-        sonnerToast.success("Context Updated", {
-          description: `Context "${trimmedTitle}" has been updated.`,
-        });
+        if (showToast) {
+          sonnerToast.success("Context Updated", {
+            description: `Context "${trimmedTitle}" has been updated.`,
+          });
+        }
       } else if (type === "selected") {
         const contextToUpdate = selectedContexts.find(
           (c) => c.id === contextId,
@@ -118,22 +84,89 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             version: uuid(),
           };
           updateSelectedContext(updatedContext);
-          sonnerToast.success("Selected Context Updated", {
-            description: `Selected context "${trimmedTitle}" has been updated.`,
-          });
+          if (showToast) {
+            sonnerToast.success("Selected Context Updated", {
+              description: `Selected context "${trimmedTitle}" has been updated.`,
+            });
+          }
         }
       }
-      handleClose();
     },
     [
       contextId,
       type,
       contextLibraryStore,
       updateSelectedContext,
-      handleClose,
       selectedContexts,
     ],
   );
+
+  const handleClose = useCallback(() => {
+    // Save current data before closing if there are changes
+    if (currentData && initialData) {
+      const hasChanges =
+        currentData.title !== initialData.title ||
+        currentData.content !== initialData.content ||
+        JSON.stringify(currentData.labels) !==
+          JSON.stringify(initialData.labels);
+
+      if (hasChanges) {
+        saveData(currentData, false);
+      }
+    }
+    navigate("/");
+  }, [navigate, currentData, initialData, saveData]);
+
+  const handleSubmit = useCallback(
+    (data: ContextFormData) => {
+      saveData(data, true);
+      handleClose();
+    },
+    [saveData, handleClose],
+  );
+
+  const handleDataChange = useCallback(
+    (data: ContextFormData) => {
+      setCurrentData(data);
+
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      // Set new timeout for auto-save
+      debounceTimeoutRef.current = setTimeout(() => {
+        saveData(data, false);
+      }, 1000); // 1 second debounce
+    },
+    [saveData],
+  );
+
+  useEffect(() => {
+    let foundContext: Context | SelectedContext | undefined;
+    if (type === "library") {
+      foundContext = contexts.find((c) => c.id === contextId);
+    } else if (type === "selected") {
+      foundContext = selectedContexts.find((c) => c.id === contextId);
+    }
+
+    if (foundContext) {
+      const data = {
+        id: foundContext.id,
+        title: foundContext.title,
+        content: foundContext.content,
+        labels: foundContext.labels,
+      };
+      setInitialData(data);
+      setCurrentData(data);
+    } else {
+      sonnerToast.error("Context Not Found", {
+        description:
+          "The context you are trying to edit does not exist or could not be found.",
+      });
+      handleClose();
+    }
+  }, [contextId, type, contexts, selectedContexts, handleClose]);
 
   if (!initialData) {
     return null;
@@ -151,12 +184,12 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         labels={initialData.labels}
         onSubmit={handleSubmit}
         onCancel={handleClose}
+        onDataChange={handleDataChange}
         dialogTitle={screenTitle}
         dialogDescription="Modify the title or content of your context snippet."
-        submitButtonText="Save Changes"
-        submitButtonIcon={<LucideSave />}
         isMaximized={isMaximized}
         onMaximizeToggle={() => setIsMaximized((p) => !p)}
+        autoSave={true}
       />
     </Dialog>
   );
