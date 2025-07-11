@@ -1,11 +1,11 @@
 # AGENTS.md - Development Guidelines
 
 ## Build/Lint/Test Commands
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run tsc` - TypeScript type checking
-- `npm run preview` - Preview production build
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run lint` - Run ESLint
+- `bun run tsc` - TypeScript type checking
+- `bun run preview` - Preview production build
 
 ## Code Style Guidelines
 - **Imports**: Use `@/` alias for src imports, group external libs first, then internal
