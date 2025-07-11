@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
@@ -15,11 +15,11 @@ const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { contextLibraryStore } = useLiveStores();
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     navigate("/");
-  };
+  }, [navigate]);
 
-  const handleSubmit = (data: ContextFormData) => {
+  const handleSubmit = useCallback((data: ContextFormData) => {
     const finalContent = data.content.trim();
     if (!finalContent) {
       sonnerToast.error("Content Required", {
@@ -55,7 +55,7 @@ const AddContext: React.FC = () => {
     });
 
     handleClose();
-  };
+  }, [contextLibraryStore, handleClose]);
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>

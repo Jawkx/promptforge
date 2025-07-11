@@ -81,28 +81,14 @@ const ContextForm: React.FC<ContextFormProps> = ({
     setTitle(initialTitle);
     setContent(initialContent);
     setSelectedLabels(initialLabels);
-  }, [initialTitle, initialContent, initialLabels]);
+  }, []);
 
   // Call onDataChange when data changes (for auto-save)
   useEffect(() => {
-    if (
-      onDataChange &&
-      (title !== initialTitle ||
-        content !== initialContent ||
-        selectedLabels !== initialLabels)
-    ) {
+    if (onDataChange && autoSave) {
       onDataChange({ id, title, content, labels: selectedLabels });
     }
-  }, [
-    title,
-    content,
-    selectedLabels,
-    onDataChange,
-    id,
-    initialTitle,
-    initialContent,
-    initialLabels,
-  ]);
+  }, [title, content, selectedLabels, onDataChange, id, autoSave]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent) => {
