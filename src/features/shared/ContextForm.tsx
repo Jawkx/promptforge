@@ -300,7 +300,9 @@ const ContextForm: React.FC<ContextFormProps> = ({
                 </Badge>
               ))
             ) : (
-              <span className="text-muted-foreground text-sm">No labels assigned</span>
+              <span className="text-muted-foreground text-sm">
+                No labels assigned
+              </span>
             )}
           </div>
         </div>
