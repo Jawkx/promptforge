@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,25 +80,62 @@ const ContextForm: React.FC<ContextFormProps> = ({
     },
   });
 
-  const { control, handleSubmit, watch, setValue, reset } = form;
-  const watchedValues = watch();
+  const { control, handleSubmit, watch, setValue, reset, getValues } = form;
 
-  // Reset form when initial values change
+  // Use refs to track initial values and prevent unnecessary resets
+  const initialValuesRef = useRef({
+    id,
+    title: initialTitle,
+    content: initialContent,
+    labels: initialLabels,
+  });
+
+  // Only reset when initial values actually change
   useEffect(() => {
-    reset({
+    const newInitialValues = {
       id,
       title: initialTitle,
       content: initialContent,
       labels: initialLabels,
-    });
+    };
+
+    // Check if values have actually changed
+    const hasChanged =
+      initialValuesRef.current.id !== newInitialValues.id ||
+      initialValuesRef.current.title !== newInitialValues.title ||
+      initialValuesRef.current.content !== newInitialValues.content ||
+      JSON.stringify(initialValuesRef.current.labels) !==
+        JSON.stringify(newInitialValues.labels);
+
+    if (hasChanged) {
+      initialValuesRef.current = newInitialValues;
+      reset(newInitialValues);
+    }
   }, [id, initialTitle, initialContent, initialLabels, reset]);
 
-  // Call onDataChange when data changes (for auto-save)
+  // Watch specific fields for auto-save with debouncing
+  const watchedTitle = watch("title");
+  const watchedContent = watch("content");
+  const watchedLabels = watch("labels");
+
+  // Debounced auto-save effect
   useEffect(() => {
-    if (onDataChange && autoSave) {
-      onDataChange(watchedValues);
-    }
-  }, [watchedValues, onDataChange, autoSave]);
+    if (!onDataChange || !autoSave) return;
+
+    const timeoutId = setTimeout(() => {
+      const currentValues = getValues();
+      onDataChange(currentValues);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    watchedTitle,
+    watchedContent,
+    watchedLabels,
+    onDataChange,
+    autoSave,
+    getValues,
+  ]);
 
   const onFormSubmit = useCallback(
     (data: ContextFormData) => {
@@ -109,29 +146,31 @@ const ContextForm: React.FC<ContextFormProps> = ({
 
   const handleLabelToggle = useCallback(
     (label: Label) => {
-      const currentLabels = watchedValues.labels || [];
+      const currentLabels = getValues("labels") || [];
       const isSelected = currentLabels.some((l) => l.id === label.id);
       if (isSelected) {
         setValue(
           "labels",
           currentLabels.filter((l) => l.id !== label.id),
+          { shouldDirty: true },
         );
       } else {
-        setValue("labels", [...currentLabels, label]);
+        setValue("labels", [...currentLabels, label], { shouldDirty: true });
       }
     },
-    [watchedValues.labels, setValue],
+    [getValues, setValue],
   );
 
   const handleRemoveLabel = useCallback(
     (labelId: string) => {
-      const currentLabels = watchedValues.labels || [];
+      const currentLabels = getValues("labels") || [];
       setValue(
         "labels",
         currentLabels.filter((l) => l.id !== labelId),
+        { shouldDirty: true },
       );
     },
-    [watchedValues.labels, setValue],
+    [getValues, setValue],
   );
 
   const [labelSearch, setLabelSearch] = React.useState("");
@@ -247,7 +286,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
                     <CommandEmpty>No labels found.</CommandEmpty>
                     <CommandGroup>
                       {filteredLabels.map((label) => {
-                        const isSelected = (watchedValues.labels || []).some(
+                        const isSelected = (watchedLabels || []).some(
                           (l) => l.id === label.id,
                         );
                         return (
@@ -287,8 +326,8 @@ const ContextForm: React.FC<ContextFormProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
-            {(watchedValues.labels || []).length > 0 ? (
-              (watchedValues.labels || []).map((label) => (
+            {(watchedLabels || []).length > 0 ? (
+              (watchedLabels || []).map((label) => (
                 <Badge
                   key={label.id}
                   variant="secondary"
