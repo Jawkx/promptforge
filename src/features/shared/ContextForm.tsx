@@ -243,6 +243,11 @@ const ContextForm: React.FC<ContextFormProps> = ({
       <form
         id="context-form"
         onSubmit={handleSubmit(onFormSubmit)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && e.target !== e.currentTarget.querySelector('#content')) {
+            e.preventDefault();
+          }
+        }}
         className={cn(
           "space-y-6",
           isMaximized && "flex flex-1 flex-col space-y-6",
@@ -279,7 +284,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
               onOpenChange={setIsLabelPopoverOpen}
             >
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-2">
+                <Button type="button" variant="outline" size="sm" className="h-8 gap-2">
                   <Tag className="h-4 w-4" />
                   Add Label
                 </Button>
