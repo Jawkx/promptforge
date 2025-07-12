@@ -303,6 +303,7 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
       setActiveId,
       editingTitleId,
       setEditingTitleId,
+      onAddSelectedToPrompt,
     }),
     [
       handleEditContext,
@@ -310,6 +311,7 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
       setActiveId,
       editingTitleId,
       setEditingTitleId,
+      onAddSelectedToPrompt,
     ],
   );
 

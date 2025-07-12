@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LucideMoreVertical, LucideEdit3, LucideTrash2 } from "lucide-react";
+import { LucideMoreVertical, LucideEdit3, LucideTrash2, LucideListPlus, LucideCopy, LucideTag } from "lucide-react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
@@ -18,6 +18,12 @@ import { toast as sonnerToast } from "sonner";
 import { formatTokenCount } from "@/lib/utils";
 import { useLiveStores } from "@/store/LiveStoreProvider";
 import { v4 as uuid } from "uuid";
+import {
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { LabelAssignment } from "./LabelAssignment";
 
 export type ContextsTableMeta = {
   onEditContext: (context: Context) => void;
@@ -25,6 +31,7 @@ export type ContextsTableMeta = {
   setActiveId: (id: string | null) => void;
   editingTitleId: string | null;
   setEditingTitleId: (id: string | null) => void;
+  onAddSelectedToPrompt: (contexts: Context[]) => void;
 };
 
 const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
@@ -216,6 +223,22 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
       const context = row.original;
       const meta = table.options.meta as ContextsTableMeta | undefined;
 
+      const handleCopyContent = () => {
+        navigator.clipboard
+          .writeText(context.content)
+          .then(() => {
+            sonnerToast.success("Content Copied", {
+              description: `Content of "${context.title}" copied to clipboard.`,
+            });
+          })
+          .catch((err) => {
+            console.error("Failed to copy content: ", err);
+            sonnerToast.error("Copy Failed", {
+              description: "Could not copy content to clipboard.",
+            });
+          });
+      };
+
       return (
         <div onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
@@ -226,17 +249,34 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => meta?.onAddSelectedToPrompt([context])}>
+                <LucideListPlus className="mr-2 h-4 w-4" />
+                Add to Prompt
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCopyContent}>
+                <LucideCopy className="mr-2 h-4 w-4" />
+                Copy Content
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => meta?.onEditContext(context)}>
                 <LucideEdit3 className="mr-2 h-4 w-4" />
-                Edit
+                Edit "{context.title}"
               </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <LucideTag className="mr-2 h-4 w-4" />
+                  Labels
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="p-0">
+                  <LabelAssignment contextIds={[context.id]} />
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => meta?.onDeleteContext(context.id)}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10"
               >
                 <LucideTrash2 className="mr-2 h-4 w-4" />
-                Delete
+                Delete "{context.title}"
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
