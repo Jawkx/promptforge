@@ -103,13 +103,6 @@ export const CopyAllButton = () => {
 
   return (
     <div className="mt-4 flex gap-2">
-      <Button
-        onClick={onCopyPromptAndContextsClick}
-        className="flex-1"
-        size="lg"
-      >
-        <LucideCopy className="mr-2 h-4 w-4" /> Copy All
-      </Button>
       <div className="flex flex-1">
         {isEditingFilename ? (
           <div className="flex flex-1 items-center">
@@ -163,6 +156,13 @@ export const CopyAllButton = () => {
           </>
         )}
       </div>
+      <Button
+        onClick={onCopyPromptAndContextsClick}
+        className="flex-1"
+        size="lg"
+      >
+        <LucideCopy className="mr-2 h-4 w-4" /> Copy All
+      </Button>
     </div>
   );
 };
