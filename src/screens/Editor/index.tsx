@@ -204,7 +204,7 @@ const Editor: React.FC = () => {
       {isEditModalOpen &&
         params &&
         (params.type === "library" || params.type === "selected") && (
-          <EditContext type={params.type} id={params.id} />
+          <EditContext key={params.id} type={params.type} id={params.id} />
         )}
     </DndContext>
   );

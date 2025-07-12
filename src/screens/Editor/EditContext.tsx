@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Context, SelectedContext, ContextFormData } from "@/types";
+import { SelectedContext, ContextFormData } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -27,9 +27,27 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   );
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
-  const [initialData, setInitialData] = useState<ContextFormData | null>(null);
+  // 1. Find the data right away.
+  const contextToEdit =
+    type === "library"
+      ? contexts.find((c) => c.id === contextId)
+      : selectedContexts.find((c) => c.id === contextId);
+
+  // 3. Initialize state directly and safely. No useEffect needed for this!
+  const [initialData] = useState<ContextFormData | null>(() => {
+    if (!contextToEdit) return null;
+    return {
+      id: contextToEdit.id,
+      title: contextToEdit.title,
+      content: contextToEdit.content,
+      labels: contextToEdit.labels,
+    };
+  });
+
+  const [currentData, setCurrentData] = useState<ContextFormData | null>(
+    initialData,
+  );
   const [isMaximized, setIsMaximized] = useState(false);
-  const [currentData, setCurrentData] = useState<ContextFormData | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveData = useCallback(
@@ -70,7 +88,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           });
         }
       } else if (type === "selected") {
-        // FIX: Get latest state directly from the store to stabilize this callback.
+        // Get latest state directly from the store to stabilize this callback.
         const currentSelectedContexts =
           useLocalStore.getState().selectedContexts;
         const contextToUpdate = currentSelectedContexts.find(
@@ -95,39 +113,24 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         }
       }
     },
-    // REMOVED `selectedContexts` from dependencies
     [contextId, type, contextLibraryStore, updateSelectedContext],
   );
 
-  // Use a ref to hold the data needed by handleClose.
-  // This prevents the callback itself from changing every time the data does.
-  const dataForCloseHandler = useRef({ initialData, currentData, saveData });
-  useEffect(() => {
-    dataForCloseHandler.current = { initialData, currentData, saveData };
-  }, [initialData, currentData, saveData]);
-
   const handleClose = useCallback(() => {
-    // Access the latest data and saveData function from the ref.
-    const {
-      initialData: latestInitial,
-      currentData: latestCurrent,
-      saveData: latestSaveData,
-    } = dataForCloseHandler.current;
-
-    if (latestCurrent && latestInitial) {
+    // Auto-save on close if there are changes
+    if (currentData && initialData) {
       const hasChanges =
-        latestCurrent.title !== latestInitial.title ||
-        latestCurrent.content !== latestInitial.content ||
-        JSON.stringify(latestCurrent.labels) !==
-          JSON.stringify(latestInitial.labels);
+        currentData.title !== initialData.title ||
+        currentData.content !== initialData.content ||
+        JSON.stringify(currentData.labels) !==
+          JSON.stringify(initialData.labels);
 
       if (hasChanges) {
-        latestSaveData(latestCurrent, false);
+        saveData(currentData, false);
       }
     }
     navigate("/");
-    // FIX: Remove state and unstable callbacks from the dependency array.
-  }, [navigate]);
+  }, [currentData, initialData, saveData, navigate]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
@@ -154,34 +157,19 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     [saveData],
   );
 
+  // 2. Handle the "not found" case.
   useEffect(() => {
-    let foundContext: Context | SelectedContext | undefined;
-    if (type === "library") {
-      foundContext = contexts.find((c) => c.id === contextId);
-    } else if (type === "selected") {
-      foundContext = selectedContexts.find((c) => c.id === contextId);
-    }
-
-    if (foundContext) {
-      const data = {
-        id: foundContext.id,
-        title: foundContext.title,
-        content: foundContext.content,
-        labels: foundContext.labels,
-      };
-      setInitialData(data);
-      setCurrentData(data);
-    } else {
+    if (!contextToEdit) {
       sonnerToast.error("Context Not Found", {
         description:
           "The context you are trying to edit does not exist or could not be found.",
       });
-      handleClose();
+      navigate("/");
     }
-  }, [contextId, type, contexts, selectedContexts, handleClose]);
+  }, [contextToEdit, navigate]);
 
-  if (!initialData) {
-    return null;
+  if (!contextToEdit || !initialData) {
+    return null; // Render nothing while we navigate away.
   }
 
   const screenTitle =
