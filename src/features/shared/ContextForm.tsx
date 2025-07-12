@@ -80,7 +80,15 @@ const ContextForm: React.FC<ContextFormProps> = ({
     },
   });
 
-  const { control, handleSubmit, watch, setValue, reset, getValues } = form;
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    getValues,
+    formState: { isDirty },
+  } = form;
 
   // Use refs to track initial values and prevent unnecessary resets
   const initialValuesRef = useRef({
@@ -120,7 +128,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
 
   // Debounced auto-save effect
   useEffect(() => {
-    if (!onDataChange || !autoSave) return;
+    if (!onDataChange || !autoSave || !isDirty) return;
 
     const timeoutId = setTimeout(() => {
       const currentValues = getValues();
@@ -135,6 +143,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
     onDataChange,
     autoSave,
     getValues,
+    isDirty,
   ]);
 
   const onFormSubmit = useCallback(
