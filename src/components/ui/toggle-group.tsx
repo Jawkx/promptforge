@@ -1,21 +1,21 @@
-import * as React from "react"
-import { ToggleGroup as BaseToggleGroup } from "@base-ui-components/react/toggle-group"
-import { type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { ToggleGroup as BaseToggleGroup } from "@base-ui-components/react/toggle-group";
+import { type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
-import { Toggle, toggleVariants } from "@/components/ui/toggle"
+import { cn } from "@/lib/utils";
+import { Toggle, toggleVariants } from "@/components/ui/toggle";
 
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants>
 >({
   size: "default",
   variant: "default",
-})
+});
 
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof BaseToggleGroup>,
   React.ComponentPropsWithoutRef<typeof BaseToggleGroup> &
-  VariantProps<typeof toggleVariants>
+    VariantProps<typeof toggleVariants>
 >(({ className, variant, size, children, ...props }, ref) => (
   <BaseToggleGroup
     ref={ref}
@@ -26,16 +26,16 @@ const ToggleGroup = React.forwardRef<
       {children}
     </ToggleGroupContext.Provider>
   </BaseToggleGroup>
-))
+));
 
-ToggleGroup.displayName = "ToggleGroup"
+ToggleGroup.displayName = "ToggleGroup";
 
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof Toggle>,
   React.ComponentPropsWithoutRef<typeof Toggle> &
-  VariantProps<typeof toggleVariants>
+    VariantProps<typeof toggleVariants>
 >(({ className, children, variant, size, ...props }, ref) => {
-  const context = React.useContext(ToggleGroupContext)
+  const context = React.useContext(ToggleGroupContext);
 
   return (
     <Toggle
@@ -45,15 +45,15 @@ const ToggleGroupItem = React.forwardRef<
           variant: context.variant || variant,
           size: context.size || size,
         }),
-        className
+        className,
       )}
       {...props}
     >
       {children}
     </Toggle>
-  )
-})
+  );
+});
 
-ToggleGroupItem.displayName = "ToggleGroupItem"
+ToggleGroupItem.displayName = "ToggleGroupItem";
 
-export { ToggleGroup, ToggleGroupItem }
+export { ToggleGroup, ToggleGroupItem };

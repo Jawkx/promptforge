@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Dialog as BaseDialog } from "@base-ui-components/react/dialog"
-import { Maximize2, Minimize2, X } from "lucide-react"
+import * as React from "react";
+import { Dialog as BaseDialog } from "@base-ui-components/react/dialog";
+import { Maximize2, Minimize2, X } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-const Dialog = BaseDialog.Root
-const DialogTrigger = BaseDialog.Trigger
-const DialogPortal = BaseDialog.Portal
-const DialogClose = BaseDialog.Close
+const Dialog = BaseDialog.Root;
+const DialogTrigger = BaseDialog.Trigger;
+const DialogPortal = BaseDialog.Portal;
+const DialogClose = BaseDialog.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof BaseDialog.Backdrop>,
@@ -19,12 +19,12 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50 bg-black/80 transition-opacity duration-150 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0",
-      className
+      className,
     )}
     {...props}
   />
-))
-DialogOverlay.displayName = "DialogOverlay"
+));
+DialogOverlay.displayName = "DialogOverlay";
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof BaseDialog.Popup>,
@@ -41,7 +41,7 @@ const DialogContent = React.forwardRef<
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
         "transition-all duration-200 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 data-[ending-style]:scale-90 data-[ending-style]:opacity-0",
         isMaximized && "flex h-[95vh] w-[95vw] max-w-none flex-col",
-        className
+        className,
       )}
       {...props}
     >
@@ -67,8 +67,8 @@ const DialogContent = React.forwardRef<
       </div>
     </BaseDialog.Popup>
   </DialogPortal>
-))
-DialogContent.displayName = "DialogContent"
+));
+DialogContent.displayName = "DialogContent";
 
 const DialogHeader = ({
   className,
@@ -77,12 +77,12 @@ const DialogHeader = ({
   <div
     className={cn(
       "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
+      className,
     )}
     {...props}
   />
-)
-DialogHeader.displayName = "DialogHeader"
+);
+DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
@@ -91,12 +91,12 @@ const DialogFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
+      className,
     )}
     {...props}
   />
-)
-DialogFooter.displayName = "DialogFooter"
+);
+DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof BaseDialog.Title>,
@@ -106,12 +106,12 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      className
+      className,
     )}
     {...props}
   />
-))
-DialogTitle.displayName = "DialogTitle"
+));
+DialogTitle.displayName = "DialogTitle";
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof BaseDialog.Description>,
@@ -122,8 +122,8 @@ const DialogDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-DialogDescription.displayName = "DialogDescription"
+));
+DialogDescription.displayName = "DialogDescription";
 
 export {
   Dialog,
@@ -136,4 +136,4 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-}
+};

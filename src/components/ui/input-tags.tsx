@@ -1,47 +1,47 @@
 // Written by [tomfanhm](https://github.com/shadcn-ui/ui/issues/3647#issuecomment-2926857409)
-import * as React from "react"
-import { XIcon } from "lucide-react"
+import * as React from "react";
+import { XIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type InputTagsProps = Omit<
   React.ComponentProps<"input">,
   "value" | "onChange"
 > & {
-  value: string[]
-  onChange: React.Dispatch<React.SetStateAction<string[]>>
-}
+  value: string[];
+  onChange: React.Dispatch<React.SetStateAction<string[]>>;
+};
 
 const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
   ({ className, value, onChange, ...props }, ref) => {
-    const [pendingDataPoint, setPendingDataPoint] = React.useState("")
+    const [pendingDataPoint, setPendingDataPoint] = React.useState("");
 
     React.useEffect(() => {
       if (pendingDataPoint.includes(",")) {
         const newDataPoints = new Set([
           ...value,
           ...pendingDataPoint.split(",").map((chunk) => chunk.trim()),
-        ])
-        onChange(Array.from(newDataPoints))
-        setPendingDataPoint("")
+        ]);
+        onChange(Array.from(newDataPoints));
+        setPendingDataPoint("");
       }
-    }, [pendingDataPoint, onChange, value])
+    }, [pendingDataPoint, onChange, value]);
 
     const addPendingDataPoint = () => {
       if (pendingDataPoint) {
-        const newDataPoints = new Set([...value, pendingDataPoint])
-        onChange(Array.from(newDataPoints))
-        setPendingDataPoint("")
+        const newDataPoints = new Set([...value, pendingDataPoint]);
+        onChange(Array.from(newDataPoints));
+        setPendingDataPoint("");
       }
-    }
+    };
 
     return (
       <div
         className={cn(
           "border-input focus-within:border-foreground flex min-h-10 w-full flex-wrap items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50",
-          className
+          className,
         )}
       >
         {value.map((item) => (
@@ -52,7 +52,7 @@ const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
               size="icon"
               className="ml-2 size-4 p-0"
               onClick={() => {
-                onChange(value.filter((i) => i !== item))
+                onChange(value.filter((i) => i !== item));
               }}
             >
               <XIcon />
@@ -65,25 +65,25 @@ const InputTags = React.forwardRef<HTMLInputElement, InputTagsProps>(
           onChange={(e) => setPendingDataPoint(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault()
-              addPendingDataPoint()
+              e.preventDefault();
+              addPendingDataPoint();
             } else if (
               e.key === "Backspace" &&
               pendingDataPoint.length === 0 &&
               value.length > 0
             ) {
-              e.preventDefault()
-              onChange(value.slice(0, -1))
+              e.preventDefault();
+              onChange(value.slice(0, -1));
             }
           }}
           {...props}
           ref={ref}
         />
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-InputTags.displayName = "InputTags"
+InputTags.displayName = "InputTags";
 
-export { InputTags }
+export { InputTags };

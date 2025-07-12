@@ -10,7 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LucideMoreVertical, LucideEdit3, LucideTrash2, LucideListPlus, LucideCopy, LucideTag } from "lucide-react";
+import {
+  LucideMoreVertical,
+  LucideEdit3,
+  LucideTrash2,
+  LucideListPlus,
+  LucideCopy,
+  LucideTag,
+} from "lucide-react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
@@ -249,7 +256,9 @@ export const contextsTableColumn: ColumnDef<Context>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => meta?.onAddSelectedToPrompt([context])}>
+              <DropdownMenuItem
+                onClick={() => meta?.onAddSelectedToPrompt([context])}
+              >
                 <LucideListPlus className="mr-2 h-4 w-4" />
                 Add to Prompt
               </DropdownMenuItem>

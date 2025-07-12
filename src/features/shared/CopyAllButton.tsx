@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { useLocalStore } from "@/store/localStore";
-import { LucideCopy, Download } from "lucide-react";
+import { LucideCopy, Download, Edit3 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export const CopyAllButton = () => {
+  const [filename, setFilename] = useState("prompt-and-contexts.md");
+  const [isEditingFilename, setIsEditingFilename] = useState(false);
+
   const generateMarkdownContent = () => {
     const { prompt, selectedContexts } = useLocalStore.getState();
 
@@ -57,7 +62,7 @@ export const CopyAllButton = () => {
       });
   };
 
-  const onDownloadMarkdownClick = () => {
+  const onDownloadMarkdownClick = (customFilename?: string) => {
     const markdownContent = generateMarkdownContent();
 
     if (!markdownContent.trim()) {
@@ -72,7 +77,7 @@ export const CopyAllButton = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "prompt-and-contexts.md";
+      a.download = customFilename || filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -98,14 +103,58 @@ export const CopyAllButton = () => {
       >
         <LucideCopy className="mr-2 h-4 w-4" /> Copy All
       </Button>
-      <Button
-        onClick={onDownloadMarkdownClick}
-        className="flex-1"
-        size="lg"
-        variant="outline"
-      >
-        <Download className="mr-2 h-4 w-4" /> Download
-      </Button>
+      <div className="flex flex-1">
+        {isEditingFilename ? (
+          <div className="flex flex-1">
+            <Input
+              value={filename}
+              onChange={(e) => setFilename(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setIsEditingFilename(false);
+                  onDownloadMarkdownClick(filename);
+                } else if (e.key === "Escape") {
+                  setIsEditingFilename(false);
+                }
+              }}
+              onBlur={() => setIsEditingFilename(false)}
+              placeholder="Enter filename..."
+              className="rounded-r-none border-r-0 h-10"
+              autoFocus
+            />
+            <Button
+              onClick={() => {
+                setIsEditingFilename(false);
+                onDownloadMarkdownClick(filename);
+              }}
+              className="px-3 rounded-l-none"
+              size="lg"
+              variant="outline"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Button
+              onClick={() => onDownloadMarkdownClick()}
+              className="flex-1 rounded-r-none border-r-0"
+              size="lg"
+              variant="outline"
+            >
+              <Download className="mr-2 h-4 w-4" /> Download
+            </Button>
+            <Button
+              onClick={() => setIsEditingFilename(true)}
+              className="px-3 rounded-l-none"
+              size="lg"
+              variant="outline"
+            >
+              <Edit3 className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
