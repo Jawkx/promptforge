@@ -3,11 +3,18 @@ import { toast as sonnerToast } from "sonner";
 import { useLocalStore } from "@/store/localStore";
 import { LucideCopy, Download, Edit3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export const CopyAllButton = () => {
   const [filename, setFilename] = useState("prompt-and-contexts.md");
   const [isEditingFilename, setIsEditingFilename] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditingFilename && inputRef.current) {
+      inputRef.current.select();
+    }
+  }, [isEditingFilename]);
 
   const generateMarkdownContent = () => {
     const { prompt, selectedContexts } = useLocalStore.getState();
@@ -107,6 +114,7 @@ export const CopyAllButton = () => {
         {isEditingFilename ? (
           <div className="flex flex-1 items-center">
             <Input
+              ref={inputRef}
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
               onKeyDown={(e) => {
