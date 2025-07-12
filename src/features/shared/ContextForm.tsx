@@ -271,9 +271,9 @@ const ContextForm: React.FC<ContextFormProps> = ({
             </Popover>
           </div>
 
-          {selectedLabels.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border">
-              {selectedLabels.map((label) => (
+          <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
+            {selectedLabels.length > 0 ? (
+              selectedLabels.map((label) => (
                 <Badge
                   key={label.id}
                   variant="secondary"
@@ -298,9 +298,11 @@ const ContextForm: React.FC<ContextFormProps> = ({
                     <X className="h-3 w-3" />
                   </Button>
                 </Badge>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <span className="text-muted-foreground text-sm">No labels assigned</span>
+            )}
+          </div>
         </div>
 
         <div className={cn("space-y-2", isMaximized && "flex-1 flex flex-col")}>
