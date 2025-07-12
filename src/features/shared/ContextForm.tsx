@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -70,62 +71,71 @@ const ContextForm: React.FC<ContextFormProps> = ({
   const { contextLibraryStore } = useLiveStores();
   const allLabels = useQuery(labels$, { store: contextLibraryStore });
 
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
-  const [selectedLabels, setSelectedLabels] =
-    useState<readonly Label[]>(initialLabels);
-  const [labelSearch, setLabelSearch] = useState("");
-  const [isLabelPopoverOpen, setIsLabelPopoverOpen] = useState(false);
+  const form = useForm<ContextFormData>({
+    defaultValues: {
+      id,
+      title: initialTitle,
+      content: initialContent,
+      labels: initialLabels,
+    },
+  });
 
+  const { control, handleSubmit, watch, setValue, reset } = form;
+  const watchedValues = watch();
+
+  // Reset form when initial values change
   useEffect(() => {
-    setTitle(initialTitle);
-    setContent(initialContent);
-    setSelectedLabels(initialLabels);
-  }, []);
+    reset({
+      id,
+      title: initialTitle,
+      content: initialContent,
+      labels: initialLabels,
+    });
+  }, [id, initialTitle, initialContent, initialLabels, reset]);
 
   // Call onDataChange when data changes (for auto-save)
   useEffect(() => {
     if (onDataChange && autoSave) {
-      onDataChange({ id, title, content, labels: selectedLabels });
+      onDataChange(watchedValues);
     }
-  }, [title, content, selectedLabels, onDataChange, id, autoSave]);
+  }, [watchedValues, onDataChange, autoSave]);
 
-  const handleSubmit = useCallback(
-    (event: React.FormEvent) => {
-      event.preventDefault();
-      onSubmit({ id, title, content, labels: selectedLabels });
+  const onFormSubmit = useCallback(
+    (data: ContextFormData) => {
+      onSubmit(data);
     },
-    [id, title, content, selectedLabels, onSubmit],
+    [onSubmit],
   );
 
-  const handleTitleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setTitle(e.target.value);
-    },
-    [],
-  );
-
-  const handleContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setContent(e.target.value);
-    },
-    [],
-  );
-
-  const handleLabelToggle = useCallback((label: Label) => {
-    setSelectedLabels((prev) => {
-      const isSelected = prev.some((l) => l.id === label.id);
+  const handleLabelToggle = useCallback(
+    (label: Label) => {
+      const currentLabels = watchedValues.labels || [];
+      const isSelected = currentLabels.some((l) => l.id === label.id);
       if (isSelected) {
-        return prev.filter((l) => l.id !== label.id);
+        setValue(
+          "labels",
+          currentLabels.filter((l) => l.id !== label.id),
+        );
       } else {
-        return [...prev, label];
+        setValue("labels", [...currentLabels, label]);
       }
-    });
-  }, []);
+    },
+    [watchedValues.labels, setValue],
+  );
 
-  const handleRemoveLabel = useCallback((labelId: string) => {
-    setSelectedLabels((prev) => prev.filter((l) => l.id !== labelId));
-  }, []);
+  const handleRemoveLabel = useCallback(
+    (labelId: string) => {
+      const currentLabels = watchedValues.labels || [];
+      setValue(
+        "labels",
+        currentLabels.filter((l) => l.id !== labelId),
+      );
+    },
+    [watchedValues.labels, setValue],
+  );
+
+  const [labelSearch, setLabelSearch] = React.useState("");
+  const [isLabelPopoverOpen, setIsLabelPopoverOpen] = React.useState(false);
 
   const handleCreateLabel = useCallback(
     (labelName: string) => {
@@ -184,7 +194,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
 
       <form
         id="context-form"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onFormSubmit)}
         className={cn(
           "space-y-6",
           isMaximized && "flex flex-1 flex-col space-y-6",
@@ -197,12 +207,17 @@ const ContextForm: React.FC<ContextFormProps> = ({
           >
             Title
           </label>
-          <Input
-            id="title"
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Enter a title (optional, will be auto-generated if blank)"
-            className="h-10"
+          <Controller
+            name="title"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="title"
+                {...field}
+                placeholder="Enter a title (optional, will be auto-generated if blank)"
+                className="h-10"
+              />
+            )}
           />
         </div>
 
@@ -232,7 +247,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
                     <CommandEmpty>No labels found.</CommandEmpty>
                     <CommandGroup>
                       {filteredLabels.map((label) => {
-                        const isSelected = selectedLabels.some(
+                        const isSelected = (watchedValues.labels || []).some(
                           (l) => l.id === label.id,
                         );
                         return (
@@ -272,8 +287,8 @@ const ContextForm: React.FC<ContextFormProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
-            {selectedLabels.length > 0 ? (
-              selectedLabels.map((label) => (
+            {(watchedValues.labels || []).length > 0 ? (
+              (watchedValues.labels || []).map((label) => (
                 <Badge
                   key={label.id}
                   variant="secondary"
@@ -314,16 +329,21 @@ const ContextForm: React.FC<ContextFormProps> = ({
           >
             Content
           </label>
-          <Textarea
-            id="content"
-            value={content}
-            onChange={handleContentChange}
-            className={cn(
-              "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
-              "border-2 focus:border-primary/50 transition-colors",
-              isMaximized && "flex-1",
+          <Controller
+            name="content"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                id="content"
+                {...field}
+                className={cn(
+                  "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
+                  "border-2 focus:border-primary/50 transition-colors",
+                  isMaximized && "flex-1",
+                )}
+                placeholder="Paste your context content here..."
+              />
             )}
-            placeholder="Paste your context content here..."
           />
         </div>
       </form>

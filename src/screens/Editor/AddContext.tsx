@@ -19,43 +19,46 @@ const AddContext: React.FC = () => {
     navigate("/");
   }, [navigate]);
 
-  const handleSubmit = useCallback((data: ContextFormData) => {
-    const finalContent = data.content.trim();
-    if (!finalContent) {
-      sonnerToast.error("Content Required", {
-        description: "The context content cannot be empty.",
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    (data: ContextFormData) => {
+      const finalContent = data.content.trim();
+      if (!finalContent) {
+        sonnerToast.error("Content Required", {
+          description: "The context content cannot be empty.",
+        });
+        return;
+      }
 
-    const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
-    const contextId = generateId();
+      const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
+      const contextId = generateId();
 
-    contextLibraryStore.commit(
-      contextLibraryEvents.contextCreated({
-        id: contextId,
-        title: finalTitle,
-        content: finalContent,
-        createdAt: Date.now(),
-        version: uuid(),
-      }),
-    );
-
-    if (data.labels && data.labels.length > 0) {
       contextLibraryStore.commit(
-        contextLibraryEvents.contextLabelsUpdated({
-          contextId,
-          labelIds: data.labels.map((label) => label.id),
+        contextLibraryEvents.contextCreated({
+          id: contextId,
+          title: finalTitle,
+          content: finalContent,
+          createdAt: Date.now(),
+          version: uuid(),
         }),
       );
-    }
 
-    sonnerToast.success("Context Added", {
-      description: `Context "${finalTitle}" has been added.`,
-    });
+      if (data.labels && data.labels.length > 0) {
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextLabelsUpdated({
+            contextId,
+            labelIds: data.labels.map((label) => label.id),
+          }),
+        );
+      }
 
-    handleClose();
-  }, [contextLibraryStore, handleClose]);
+      sonnerToast.success("Context Added", {
+        description: `Context "${finalTitle}" has been added.`,
+      });
+
+      handleClose();
+    },
+    [contextLibraryStore, handleClose],
+  );
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
