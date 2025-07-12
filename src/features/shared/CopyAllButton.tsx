@@ -105,7 +105,7 @@ export const CopyAllButton = () => {
       </Button>
       <div className="flex flex-1">
         {isEditingFilename ? (
-          <div className="flex flex-1">
+          <div className="flex flex-1 items-center">
             <Input
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
@@ -119,7 +119,7 @@ export const CopyAllButton = () => {
               }}
               onBlur={() => setIsEditingFilename(false)}
               placeholder="Enter filename..."
-              className="rounded-r-none border-r-0 h-10"
+              className="rounded-r-none border-r-0 h-[38px] py-2"
               autoFocus
             />
             <Button
