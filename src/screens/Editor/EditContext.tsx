@@ -70,7 +70,10 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           });
         }
       } else if (type === "selected") {
-        const contextToUpdate = selectedContexts.find(
+        // FIX: Get latest state directly from the store to stabilize this callback.
+        const currentSelectedContexts =
+          useLocalStore.getState().selectedContexts;
+        const contextToUpdate = currentSelectedContexts.find(
           (c) => c.id === contextId,
         );
         if (contextToUpdate) {
@@ -92,30 +95,39 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         }
       }
     },
-    [
-      contextId,
-      type,
-      contextLibraryStore,
-      updateSelectedContext,
-      selectedContexts,
-    ],
+    // REMOVED `selectedContexts` from dependencies
+    [contextId, type, contextLibraryStore, updateSelectedContext],
   );
 
+  // Use a ref to hold the data needed by handleClose.
+  // This prevents the callback itself from changing every time the data does.
+  const dataForCloseHandler = useRef({ initialData, currentData, saveData });
+  useEffect(() => {
+    dataForCloseHandler.current = { initialData, currentData, saveData };
+  }, [initialData, currentData, saveData]);
+
   const handleClose = useCallback(() => {
-    // Save current data before closing if there are changes
-    if (currentData && initialData) {
+    // Access the latest data and saveData function from the ref.
+    const {
+      initialData: latestInitial,
+      currentData: latestCurrent,
+      saveData: latestSaveData,
+    } = dataForCloseHandler.current;
+
+    if (latestCurrent && latestInitial) {
       const hasChanges =
-        currentData.title !== initialData.title ||
-        currentData.content !== initialData.content ||
-        JSON.stringify(currentData.labels) !==
-          JSON.stringify(initialData.labels);
+        latestCurrent.title !== latestInitial.title ||
+        latestCurrent.content !== latestInitial.content ||
+        JSON.stringify(latestCurrent.labels) !==
+          JSON.stringify(latestInitial.labels);
 
       if (hasChanges) {
-        saveData(currentData, false);
+        latestSaveData(latestCurrent, false);
       }
     }
     navigate("/");
-  }, [navigate, currentData, initialData, saveData]);
+    // FIX: Remove state and unstable callbacks from the dependency array.
+  }, [navigate]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
