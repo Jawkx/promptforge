@@ -162,17 +162,38 @@ LiveStore integration enables:
 
 ## Deployment
 
-The application is configured for Firebase Hosting:
+This project is configured for automatic deployment to **Cloudflare Pages** via GitHub Actions.
 
-1. Build the project:
-```bash
-bun run build
-```
+### Setup Steps
 
-2. Deploy to Firebase:
-```bash
-bun run deploy
-```
+1. **Cloudflare Configuration**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
+   - Create a new Pages project
+   - Note your **Account ID** from the right sidebar
+
+2. **GitHub Secrets**
+   Add these secrets to your GitHub repository:
+   - `CLOUDFLARE_API_TOKEN`: Create at [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+     - Use template "Cloudflare Pages"
+     - Permissions: `Cloudflare Pages:Edit`
+   - `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
+
+3. **Manual Deployment (Optional)**
+   ```bash
+   # Install Wrangler CLI
+   bun add -D wrangler
+   
+   # Login to Cloudflare
+   bunx wrangler login
+   
+   # Deploy manually
+   bunx wrangler pages deploy dist --project-name=promptforge
+   ```
+
+### Deployment Workflow
+- **Push to main**: Automatic deployment to production
+- **Pull requests**: Build and test only (no deployment)
+- **Build artifacts**: Cached for faster CI runs
 
 ## License
 
