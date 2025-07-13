@@ -9,8 +9,17 @@ interface AuthProps {
 export const Auth = ({ isOpen, onOpenChange }: AuthProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex w-[25rem] p-0 border-none">
-        <SignIn routing="hash" signUpUrl="/sign-up" />
+      <DialogContent className="w-[25rem] overflow-visible p-0 border-b-2">
+        <SignIn
+          routing="hash"
+          withSignUp={false}
+          appearance={{
+            elements: {
+              headerSubtitle: "hidden",
+              footer: "hidden",
+            },
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
