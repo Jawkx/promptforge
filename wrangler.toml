@@ -1,31 +1,8 @@
 name = "prompt-forge"
 compatibility_date = "2024-07-13"
-compatibility_flags = ["nodejs_compat"]
-
-[build]
-command = "bun run build"
-
-[build.upload]
-format = "service-worker"
 
 [env.production]
 name = "prompt-forge"
 
-# Static assets configuration for SPA
 [site]
 bucket = "./dist"
-entry-point = "./dist"
-
-# Headers for SPA routing
-[[env.production.routes]]
-pattern = "*"
-custom_domain = true
-
-# Cache static assets
-[[env.production.routes]]
-pattern = "/assets/*"
-custom_domain = true
-
-# Environment variables (will be set via GitHub secrets)
-[vars]
-NODE_ENV = "production"
