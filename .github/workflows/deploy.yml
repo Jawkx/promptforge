@@ -40,6 +40,8 @@ jobs:
         run: bun run tsc
 
       - name: Build project
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
         run: bun run build
 
       - name: Upload build artifacts
