@@ -1,9 +1,5 @@
 name = "prompt-forge"
 compatibility_date = "2024-07-13"
-pages_build_output_dir = "dist"
 
-[env.production]
-name = "prompt-forge"
-
-[site]
-bucket = "./dist"
+[assets]
+directory = "./dist/client/"

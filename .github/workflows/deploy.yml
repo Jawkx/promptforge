@@ -51,12 +51,10 @@ jobs:
           retention-days: 1
 
       - name: Deploy to Cloudflare Pages
-        if: github.ref == 'refs/heads/master'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ vars.PROJECT_NAME }}
 
   build-only:
     runs-on: ubuntu-latest
