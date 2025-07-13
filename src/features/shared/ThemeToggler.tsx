@@ -6,7 +6,7 @@ import { preference$ } from "@/livestore/user-store/queries";
 import { userEvents } from "@/livestore/user-store/events";
 import { useLiveStores } from "@/store/LiveStoreProvider";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import Auth from "./Auth";
+import { Auth } from "./Auth";
 
 export const ThemeToggler = () => {
   const { userStore } = useLiveStores();
@@ -39,7 +39,7 @@ export const ThemeToggler = () => {
   return (
     <div className="flex items-center gap-2">
       <SignedOut>
-        <Button variant="ghost" size="sm" onClick={() => setIsAuthOpen(true)}>
+        <Button variant="outline" onClick={() => setIsAuthOpen(true)}>
           Sign In
         </Button>
       </SignedOut>
@@ -48,7 +48,7 @@ export const ThemeToggler = () => {
       </SignedIn>
 
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         onClick={handleToggleTheme}
         aria-label="Toggle theme"

@@ -1,7 +1,4 @@
 import { SignIn } from "@clerk/clerk-react";
-import { useQuery } from "@livestore/react";
-import { preference$ } from "@/livestore/user-store/queries";
-import { useLiveStores } from "@/store/LiveStoreProvider";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface AuthProps {
@@ -9,16 +6,12 @@ interface AuthProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function Auth({ isOpen, onOpenChange }: AuthProps) {
-  const { userStore } = useLiveStores();
-  const preference = useQuery(preference$, { store: userStore });
-  const theme = preference.theme ?? "dark";
-
+export const Auth = ({ isOpen, onOpenChange }: AuthProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 border-0">
+      <DialogContent className="flex w-[25rem] p-0 border-none">
         <SignIn routing="hash" signUpUrl="/sign-up" />
       </DialogContent>
     </Dialog>
   );
-}
+};
