@@ -3,101 +3,102 @@
 @tailwind utilities;
 
 @layer base {
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9216%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9216%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9216%;
-  --primary: 0 0% 45.0980%;
-  --primary-foreground: 0 0% 98.0392%;
-  --secondary: 0 0% 96.0784%;
-  --secondary-foreground: 0 0% 9.0196%;
-  --muted: 0 0% 96.0784%;
-  --muted-foreground: 0 0% 44.3137%;
-  --accent: 0 0% 96.0784%;
-  --accent-foreground: 0 0% 9.0196%;
-  --destructive: 357.1429 100% 45.2941%;
-  --destructive-foreground: 0 0% 96.0784%;
-  --border: 0 0% 89.8039%;
-  --input: 0 0% 89.8039%;
-  --ring: 0 0% 63.1373%;
-  --chart-1: 0 0% 45.0980%;
-  --chart-2: 0 0% 45.0980%;
-  --chart-3: 0 0% 45.0980%;
-  --chart-4: 0 0% 45.0980%;
-  --chart-5: 0 0% 45.0980%;
-  --sidebar: 0 0% 98.0392%;
-  --sidebar-foreground: 0 0% 3.9216%;
-  --sidebar-primary: 0 0% 9.0196%;
-  --sidebar-primary-foreground: 0 0% 98.0392%;
-  --sidebar-accent: 0 0% 96.0784%;
-  --sidebar-accent-foreground: 0 0% 9.0196%;
-  --sidebar-border: 0 0% 89.8039%;
-  --sidebar-ring: 0 0% 63.1373%;
-  --font-sans: Geist Mono, monospace;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
-  --radius: 0rem;
-  --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-  --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-  --shadow-sm: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
-  --shadow: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
-  --shadow-md: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 2px 4px -1px hsl(0 0% 0% / 0.00);
-  --shadow-lg: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 4px 6px -1px hsl(0 0% 0% / 0.00);
-  --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 8px 10px -1px hsl(0 0% 0% / 0.00);
-  --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
-}
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9216%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9216%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9216%;
+    --primary: 0 0% 45.0980%;
+    --primary-foreground: 0 0% 98.0392%;
+    --secondary: 0 0% 96.0784%;
+    --secondary-foreground: 0 0% 9.0196%;
+    --muted: 0 0% 96.0784%;
+    --muted-foreground: 0 0% 44.3137%;
+    --accent: 0 0% 96.0784%;
+    --accent-foreground: 0 0% 9.0196%;
+    --destructive: 357.1429 100% 45.2941%;
+    --destructive-foreground: 0 0% 96.0784%;
+    --border: 0 0% 89.8039%;
+    --input: 0 0% 89.8039%;
+    --ring: 0 0% 63.1373%;
+    --chart-1: 0 0% 45.0980%;
+    --chart-2: 0 0% 45.0980%;
+    --chart-3: 0 0% 45.0980%;
+    --chart-4: 0 0% 45.0980%;
+    --chart-5: 0 0% 45.0980%;
+    --sidebar: 0 0% 98.0392%;
+    --sidebar-foreground: 0 0% 3.9216%;
+    --sidebar-primary: 0 0% 9.0196%;
+    --sidebar-primary-foreground: 0 0% 98.0392%;
+    --sidebar-accent: 0 0% 96.0784%;
+    --sidebar-accent-foreground: 0 0% 9.0196%;
+    --sidebar-border: 0 0% 89.8039%;
+    --sidebar-ring: 0 0% 63.1373%;
+    --font-sans: Geist Mono, monospace;
+    --font-serif: Geist Mono, monospace;
+    --font-mono: Geist Mono, monospace;
+    --radius: 0rem;
+    --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+    --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+    --shadow-sm: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
+    --shadow: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
+    --shadow-md: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 2px 4px -1px hsl(0 0% 0% / 0.00);
+    --shadow-lg: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 4px 6px -1px hsl(0 0% 0% / 0.00);
+    --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 8px 10px -1px hsl(0 0% 0% / 0.00);
+    --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
+  }
 
-.dark {
-  --background: 0 0% 3.9216%;
-  --foreground: 0 0% 98.0392%;
-  --card: 0 0% 9.8039%;
-  --card-foreground: 0 0% 98.0392%;
-  --popover: 0 0% 14.9020%;
-  --popover-foreground: 0 0% 98.0392%;
-  --primary: 0 0% 45.0980%;
-  --primary-foreground: 0 0% 98.0392%;
-  --secondary: 0 0% 14.9020%;
-  --secondary-foreground: 0 0% 98.0392%;
-  --muted: 0 0% 14.9020%;
-  --muted-foreground: 0 0% 63.1373%;
-  --accent: 0 0% 25.0980%;
-  --accent-foreground: 0 0% 98.0392%;
-  --destructive: 358.8387 100% 69.6078%;
-  --destructive-foreground: 0 0% 14.9020%;
-  --border: 0 0% 21.9608%;
-  --input: 0 0% 32.1569%;
-  --ring: 0 0% 45.0980%;
-  --chart-1: 0 0% 45.0980%;
-  --chart-2: 0 0% 45.0980%;
-  --chart-3: 0 0% 45.0980%;
-  --chart-4: 0 0% 45.0980%;
-  --chart-5: 0 0% 45.0980%;
-  --sidebar: 0 0% 9.0196%;
-  --sidebar-foreground: 0 0% 98.0392%;
-  --sidebar-primary: 0 0% 98.0392%;
-  --sidebar-primary-foreground: 0 0% 9.0196%;
-  --sidebar-accent: 0 0% 14.9020%;
-  --sidebar-accent-foreground: 0 0% 98.0392%;
-  --sidebar-border: 0 0% 100%;
-  --sidebar-ring: 0 0% 32.1569%;
-  --font-sans: Geist Mono, monospace;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
-  --radius: 0rem;
-  --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-  --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-  --shadow-sm: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
-  --shadow: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
-  --shadow-md: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 2px 4px -1px hsl(0 0% 0% / 0.00);
-  --shadow-lg: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 4px 6px -1px hsl(0 0% 0% / 0.00);
-  --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 8px 10px -1px hsl(0 0% 0% / 0.00);
-  --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
-}}
+  .dark {
+    --background: 0 0% 3.9216%;
+    --foreground: 0 0% 98.0392%;
+    --card: 0 0% 9.8039%;
+    --card-foreground: 0 0% 98.0392%;
+    --popover: 0 0% 14.9020%;
+    --popover-foreground: 0 0% 98.0392%;
+    --primary: 0 0% 45.0980%;
+    --primary-foreground: 0 0% 98.0392%;
+    --secondary: 0 0% 14.9020%;
+    --secondary-foreground: 0 0% 98.0392%;
+    --muted: 0 0% 14.9020%;
+    --muted-foreground: 0 0% 63.1373%;
+    --accent: 0 0% 25.0980%;
+    --accent-foreground: 0 0% 98.0392%;
+    --destructive: 358.8387 100% 69.6078%;
+    --destructive-foreground: 0 0% 14.9020%;
+    --border: 0 0% 21.9608%;
+    --input: 0 0% 32.1569%;
+    --ring: 0 0% 45.0980%;
+    --chart-1: 0 0% 45.0980%;
+    --chart-2: 0 0% 45.0980%;
+    --chart-3: 0 0% 45.0980%;
+    --chart-4: 0 0% 45.0980%;
+    --chart-5: 0 0% 45.0980%;
+    --sidebar: 0 0% 9.0196%;
+    --sidebar-foreground: 0 0% 98.0392%;
+    --sidebar-primary: 0 0% 98.0392%;
+    --sidebar-primary-foreground: 0 0% 9.0196%;
+    --sidebar-accent: 0 0% 14.9020%;
+    --sidebar-accent-foreground: 0 0% 98.0392%;
+    --sidebar-border: 0 0% 100%;
+    --sidebar-ring: 0 0% 32.1569%;
+    --font-sans: Geist Mono, monospace;
+    --font-serif: Geist Mono, monospace;
+    --font-mono: Geist Mono, monospace;
+    --radius: 0rem;
+    --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+    --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+    --shadow-sm: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
+    --shadow: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
+    --shadow-md: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 2px 4px -1px hsl(0 0% 0% / 0.00);
+    --shadow-lg: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 4px 6px -1px hsl(0 0% 0% / 0.00);
+    --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00), 0px 8px 10px -1px hsl(0 0% 0% / 0.00);
+    --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0.00);
+  }
+}
 
 @layer base {
   .root {
@@ -127,4 +128,251 @@
 ::-webkit-scrollbar-thumb {
     @apply rounded-full bg-muted-foreground border-[1px] border-transparent border-solid bg-clip-padding;
 }
- 
+
+.cl-button,
+.cl-input,
+.cl-menuList {
+  @apply !shadow-none;
+}
+
+.cl-formButtonPrimary {
+  @apply inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-primary px-3  font-medium text-primary-foreground !shadow-none ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+}
+
+.cl-formButtonPrimary {
+  @apply inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-primary px-3  font-medium text-primary-foreground !shadow-none ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+}
+
+.cl-card,
+.cl-socialButtonsBlockButton,
+.cl-alert,
+.cl-phoneInputBox,
+.cl-userButtonPopoverCard,
+.cl-organizationSwitcherPopoverCard {
+  @apply rounded-lg border border-input bg-background;
+}
+
+.cl-headerTitle,
+.cl-socialButtonsBlockButtonText,
+.cl-loading,
+.cl-formFieldLabel,
+.cl-formHeaderTitle,
+.cl-selectButton__countryCode,
+.cl-selectButton__countryCode p,
+.cl-selectOption p,
+.cl-selectOption div,
+.cl-modalCloseButton,
+.cl-navbarButton,
+.cl-breadcrumbsItem.cl-breadcrumbsItem__currentPage,
+.cl-profileSectionTitle p,
+.cl-userPreviewTextContainer,
+.cl-organizationPreviewTextContainer,
+.cl-profileSectionContent p,
+.cl-form p,
+.cl-accordionTriggerButton,
+.cl-organizationSwitcherTrigger {
+  @apply text-foreground;
+}
+
+.cl-formFieldErrorText {
+  @apply !text-destructive;
+}
+
+.cl-headerSubtitle,
+.cl-dividerText,
+.cl-footerActionText,
+.cl-alertText,
+.cl-formFieldInfoText,
+.cl-formFieldSuccessText,
+.cl-identityPreviewText,
+.cl-userButtonPopoverActionButton,
+.cl-userButtonPopoverActionButton svg,
+.cl-userButtonPopoverActionButtonText,
+.cl-organizationSwitcherPopoverActionButton,
+.cl-organizationSwitcherPopoverActionButton svg,
+.cl-organizationSwitcherPopoverActionButtonText,
+.cl-userButtonPopoverFooter p,
+.cl-userButtonPopoverFooter a,
+.cl-formHeaderSubtitle,
+.cl-breadcrumbsItem,
+.cl-breadcrumbsItemDivider,
+.cl-fileDropAreaHint,
+.cl-fileDropAreaFooterHint,
+.cl-form
+  p[data-localization-key="userProfile.emailAddressPage.emailCode.formHint"],
+p[data-localization-key="userProfile.profilePage.successMessage"] {
+  @apply text-muted-foreground;
+}
+
+.cl-dividerLine {
+  @apply bg-border;
+}
+
+.cl-formFieldInput[type="text"],
+.cl-formFieldInput[type="email"],
+.cl-formFieldInput[type="password"] {
+  @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.cl-footerActionLink {
+  @apply text-accent-foreground underline hover:text-accent-foreground/90;
+}
+
+.cl-otpCodeFieldInput {
+  @apply !border !border-input text-foreground;
+}
+
+.cl-formResendCodeLink {
+  @apply text-primary disabled:opacity-90;
+}
+
+.cl-selectSearchInput__countryCode {
+  @apply flex h-10 w-full rounded-md border border-b border-input bg-background text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.cl-selectOptionsContainer__countryCode {
+  @apply border border-input bg-background;
+}
+
+.cl-internal-icon,
+.cl-userPreviewSecondaryIdentifier__userButton {
+  @apply text-foreground;
+}
+
+button[data-localization-key="userProfile.start.dangerSection.deleteAccountButton"] {
+  @apply bg-destructive text-white  hover:text-white hover:bg-destructive;
+}
+
+.cl-fileDropAreaBox {
+  @apply dark:bg-gray-900;
+}
+
+.cl-fileDropAreaIconBox {
+  @apply dark:bg-gray-800;
+}
+
+.cl-fileDropAreaIcon {
+  @apply dark:text-gray-400;
+}
+
+.cl-fileDropAreaButtonPrimary {
+  @apply h-10 px-4 py-2 text-foreground transition-colors hover:bg-secondary hover:text-accent-foreground;
+}
+
+.cl-userButtonPopoverActionButton,
+.cl-organizationSwitcherPopoverActionButton,
+.cl-profileSectionPrimaryButton,
+.cl-accordionTriggerButton,
+.cl-navbarButton {
+  @apply hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+}
+
+.cl-navbarButton[data-active="true"] {
+  @apply bg-sidebar-accent text-sidebar-accent-foreground;
+}
+
+.cl-card {
+  @apply rounded-lg;
+}
+
+.cl-userButtonPopoverCard {
+  @apply rounded-md;
+}
+
+.cl-userButtonPopoverFooter a {
+  @apply hover:text-muted-foreground;
+}
+
+.cl-badge {
+  @apply rounded-full border border-input bg-background px-2.5 py-0.5 text-xs text-foreground !shadow-none;
+}
+
+.cl-badge[data-localization-key="badge__unverified"] {
+  @apply border bg-transparent text-destructive dark:text-red-500;
+}
+
+.cl-formButtonReset {
+  @apply text-foreground hover:bg-secondary;
+}
+
+.cl-footer {
+  @apply rounded-b-lg border-x border-b bg-background bg-gradient-to-t from-background to-background  text-muted-foreground;
+}
+.cl-userButtonPopoverFooter,
+.cl-organizationSwitcherPopoverFooter {
+  @apply rounded-b-lg bg-gradient-to-t from-background to-background;
+}
+
+.cl-signIn-start,
+.cl-signUp-start,
+.cl-signIn-password,
+.cl-signIn-alternativeMethods,
+.cl-signIn-emailCode {
+  @apply rounded-b-none border-b-0;
+}
+
+.cl-cardBox {
+  @apply rounded-lg shadow-sm;
+}
+
+.cl-socialButtonsBlockButton {
+  @apply h-10 !border;
+}
+
+.cl-alternativeMethods .cl-alternativeMethodsBlockButton {
+  @apply h-10 !border border-input text-muted-foreground;
+}
+
+.cl-alternativeMethodsBlockButton {
+  @apply h-10 !shadow-none;
+}
+
+.cl-navbar {
+  @apply rounded-lg border-y border-l bg-gradient-to-t from-background to-background;
+}
+
+.cl-scrollBox {
+  @apply rounded-lg rounded-l-none border border-input bg-gradient-to-t from-background to-background;
+}
+
+h1[data-localization-key="userProfile.navbar.title"] {
+  @apply text-foreground;
+}
+
+.cl-profilePage > .cl-header {
+  @apply border-b;
+}
+
+.cl-profileSection__profile,
+.cl-profileSection__emailAddresses {
+  @apply border-b;
+}
+
+.cl-menuButton {
+  @apply text-foreground hover:text-foreground;
+}
+
+.cl-menuList {
+  @apply border border-input bg-background;
+}
+
+.cl-actionCard {
+  @apply border border-input bg-background !shadow-none;
+}
+
+.cl-menuItem[data-color="neutral"] {
+  @apply text-foreground hover:bg-muted;
+}
+
+.cl-avatarImageActionsUpload {
+  @apply !border border-input text-foreground;
+}
+
+.cl-userButtonPopoverMain,
+.cl-organizationSwitcherPopoverMain {
+  @apply rounded-lg border-input bg-background;
+}
+
+.cl-selectButton {
+  @apply !border !border-input;
+}

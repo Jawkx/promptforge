@@ -1,13 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"], // This tells Tailwind to use the class strategy for dark mode
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}", // Ensure this covers your App.tsx and other components
+    "./src/**/*.{ts,tsx}",
   ],
-  prefix: "", // If you have a prefix, ensure it's consistent
+  prefix: "",
   theme: {
     container: {
       center: true,
@@ -52,6 +52,20 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: {
+            DEFAULT: "hsl(var(--sidebar-primary))",
+            foreground: "hsl(var(--sidebar-primary-foreground))",
+          },
+          accent: {
+            DEFAULT: "hsl(var(--sidebar-accent))",
+            foreground: "hsl(var(--sidebar-accent-foreground))",
+          },
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -77,7 +91,7 @@ module.exports = {
         },
         'bounce-sm': {
           '0%, 100%': {
-            transform: 'translateY(-5%)', // Smaller bounce, e.g., 5%
+            transform: 'translateY(-5%)',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
           },
           '50%': {
@@ -93,5 +107,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")], // Or any other plugins you use
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
