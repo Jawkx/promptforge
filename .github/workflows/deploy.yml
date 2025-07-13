@@ -7,8 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  NODE_VERSION: '18'
-  BUN_VERSION: '1.1.0'
+  BUN_VERSION: ${{ vars.BUN_VERSION }}
 
 jobs:
   build-and-deploy:
@@ -57,7 +56,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=prompt-forge
+          command: pages deploy dist --project-name=${{ vars.PROJECT_NAME }}
 
   build-only:
     runs-on: ubuntu-latest
