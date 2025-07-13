@@ -2,4 +2,4 @@ name = "prompt-forge"
 compatibility_date = "2024-07-13"
 
 [assets]
-directory = "./dist/client/"
+directory = "./dist/"
