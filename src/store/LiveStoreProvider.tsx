@@ -2,8 +2,8 @@ import { Store, createStorePromise } from "@livestore/livestore";
 import { makePersistedAdapter } from "@livestore/adapter-web";
 import { userSchema } from "@/livestore/user-store/schema";
 import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
+import { useUser } from "@clerk/clerk-react";
+import { v4 as uuidv4 } from "uuid";
 import {
   createContext,
   ReactNode,
@@ -38,29 +38,50 @@ export const useLiveStores = (): AppStores => {
 };
 
 export const LiveStoresProvider = ({ children }: { children: ReactNode }) => {
+  const { user, isLoaded } = useUser();
   const [stores, setStores] = useState<AppStores | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
-      if (user) {
-        // Adapters for each store
-        const userAdapter = makePersistedAdapter({
-          storage: { type: "opfs" },
-          worker: UserLiveStoreWorker,
-          sharedWorker: UserLiveStoreSharedWorker,
-        });
-        const contextLibraryAdapter = makePersistedAdapter({
-          storage: { type: "opfs" },
-          worker: ContextLibraryLiveStoreWorker,
-          sharedWorker: ContextLibraryLiveStoreSharedWorker,
-        });
+    const initializeStores = async () => {
+      if (!isLoaded) return;
 
-        // Create both stores in parallel
+      let userId: string;
+
+      if (user) {
+        userId = user.id;
+
+        const anonymousId = sessionStorage.getItem("anonymousUserId");
+        if (anonymousId && anonymousId !== userId) {
+          console.log("Data migration needed from", anonymousId, "to", userId);
+          sessionStorage.removeItem("anonymousUserId");
+        }
+      } else {
+        const existingAnonymousId = sessionStorage.getItem("anonymousUserId");
+        if (existingAnonymousId) {
+          userId = existingAnonymousId;
+        } else {
+          userId = uuidv4();
+          sessionStorage.setItem("anonymousUserId", userId);
+        }
+      }
+
+      const userAdapter = makePersistedAdapter({
+        storage: { type: "opfs" },
+        worker: UserLiveStoreWorker,
+        sharedWorker: UserLiveStoreSharedWorker,
+      });
+      const contextLibraryAdapter = makePersistedAdapter({
+        storage: { type: "opfs" },
+        worker: ContextLibraryLiveStoreWorker,
+        sharedWorker: ContextLibraryLiveStoreSharedWorker,
+      });
+
+      try {
         const [userStore, contextLibraryStore] = await Promise.all([
           createStorePromise({
             schema: userSchema,
             adapter: userAdapter,
-            storeId: user.uid,
+            storeId: userId,
             batchUpdates,
           }),
           createStorePromise({
@@ -72,17 +93,13 @@ export const LiveStoresProvider = ({ children }: { children: ReactNode }) => {
         ]);
 
         setStores({ userStore, contextLibraryStore });
-      } else {
-        signInAnonymously(auth).catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.error(`Firebase auth error: ${errorCode}`, errorMessage);
-        });
+      } catch (error) {
+        console.error("Error initializing stores:", error);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    initializeStores();
+  }, [user, isLoaded]);
 
   if (!stores) {
     return <LoadingScreen />;
