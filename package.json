@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "tsc": "tsc --noEmit",
-    "preview": "vite preview",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@base-ui-components/react": "^1.0.0-beta.0",
