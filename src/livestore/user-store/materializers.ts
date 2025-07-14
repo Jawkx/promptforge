@@ -11,4 +11,20 @@ export const userMaterializers = State.SQLite.materializers(userEvents, {
     const insertOp = userTables.preferences.insert({ id: "main", theme });
     return [deleteOp, insertOp];
   },
+  "v1.ContextLibraryCreated": ({ libraryId }) => {
+    // This transactionally safe operation prevents UNIQUE constraint errors.
+    const deleteOp = userTables.user_context_libraries
+      .delete()
+      .where({ libraryId });
+    const insertOp = userTables.user_context_libraries.insert({ libraryId });
+    return [deleteOp, insertOp];
+  },
+  "v1.ContextLibraryJoined": ({ libraryId }) => {
+    // Also make the join operation idempotent for future safety.
+    const deleteOp = userTables.user_context_libraries
+      .delete()
+      .where({ libraryId });
+    const insertOp = userTables.user_context_libraries.insert({ libraryId });
+    return [deleteOp, insertOp];
+  },
 });
