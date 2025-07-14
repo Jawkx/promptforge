@@ -5,7 +5,7 @@ export const userTables = {
     name: "preferences",
     columns: {
       id: State.SQLite.text({ primaryKey: true }),
-      theme: State.SQLite.text({ default: "'dark'" }), // Default theme set to 'dark'
+      theme: State.SQLite.text({ default: "dark" }), // Default theme set to 'dark'
     },
   }),
 };
