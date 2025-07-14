@@ -369,7 +369,7 @@ export const SelectedContextsDataTable: React.FC<
             isFocused && "border-primary",
           )}
         >
-          <Table className={cn("h-full", isDragging && "overflow-hidden")}>
+          <Table className="overflow-clip">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="border-b-muted">
