@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { Dialog } from "@/components/ui/dialog";
@@ -13,6 +14,7 @@ import { v4 as uuid } from "uuid";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
+  const { user } = useUser();
   const { contextLibraryStore } = useLiveStores();
 
   const handleClose = useCallback(() => {
@@ -32,6 +34,20 @@ const AddContext: React.FC = () => {
       const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
       const contextId = generateId();
 
+      // Get user ID (either authenticated user or anonymous user from session storage)
+      let userId: string;
+      if (user) {
+        userId = user.id;
+      } else {
+        const anonymousId = sessionStorage.getItem("anonymousUserId");
+        if (anonymousId) {
+          userId = anonymousId;
+        } else {
+          // This shouldn't happen if LiveStoreProvider is working correctly
+          userId = "anonymous";
+        }
+      }
+
       contextLibraryStore.commit(
         contextLibraryEvents.contextCreated({
           id: contextId,
@@ -39,6 +55,7 @@ const AddContext: React.FC = () => {
           content: finalContent,
           createdAt: Date.now(),
           version: uuid(),
+          creatorId: userId,
         }),
       );
 
@@ -57,7 +74,7 @@ const AddContext: React.FC = () => {
 
       handleClose();
     },
-    [contextLibraryStore, handleClose],
+    [contextLibraryStore, handleClose, user],
   );
 
   return (
