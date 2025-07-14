@@ -11,6 +11,14 @@ const contextLivewireColumns = {
 };
 
 export const contextLibraryTables = {
+  library: State.SQLite.table({
+    name: "library",
+    columns: {
+      id: State.SQLite.text({ primaryKey: true }),
+      name: State.SQLite.text(),
+      creatorId: State.SQLite.text(),
+    },
+  }),
   contexts: State.SQLite.table({
     name: "contextsLibrary",
     columns: contextLivewireColumns,
@@ -34,5 +42,11 @@ export const contextLibraryTables = {
     // through application logic (delete all then insert new).
     // For performance, indices could be added if necessary.
     // e.g. using `indices: (t) => [t.contextId(), t.labelId()]` if API supported it.
+  }),
+  members: State.SQLite.table({
+    name: "members",
+    columns: {
+      userId: State.SQLite.text({ primaryKey: true }),
+    },
   }),
 };
