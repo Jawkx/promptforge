@@ -13,7 +13,7 @@ export const ThemeToggler = () => {
   const preference = useQuery(preference$, { store: userStore });
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  const theme = preference.theme ?? "dark";
+  const theme = preference?.theme ?? "dark";
 
   const [currentIcon, setCurrentIcon] = useState(
     theme === "dark" ? "moon" : "sun",
@@ -30,7 +30,7 @@ export const ThemeToggler = () => {
 
   const handleToggleTheme = () => {
     userStore.commit(
-      userEvents.preferenceStateSet({
+      userEvents.preferenceUpdated({
         theme: theme === "dark" ? "light" : "dark",
       }),
     );
