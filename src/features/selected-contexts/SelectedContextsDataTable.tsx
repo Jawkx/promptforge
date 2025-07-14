@@ -355,7 +355,7 @@ export const SelectedContextsDataTable: React.FC<
   const contextIds = data.map((context) => context.id);
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -365,11 +365,11 @@ export const SelectedContextsDataTable: React.FC<
       >
         <ScrollArea
           className={cn(
-            "flex h-full rounded-md border flex-grow relative transition-all",
+            "flex-1 rounded-md border transition-all",
             isFocused && "border-primary",
           )}
         >
-          <Table className="h-full">
+          <Table className={cn("h-full", isDragging && "overflow-hidden")}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="border-b-muted">
@@ -441,6 +441,6 @@ export const SelectedContextsDataTable: React.FC<
           {table.getRowModel().rows.length} row(s) selected.
         </div>
       )}
-    </>
+    </div>
   );
 };
