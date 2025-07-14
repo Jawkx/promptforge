@@ -4,7 +4,7 @@ import { SelectedContext } from "../../types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, LucideLink2Off, LucideSave } from "lucide-react";
+import { X, LucideLink2Off, LucideSave, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -148,6 +148,20 @@ const SelectedTitleCell: React.FC<{
 
 export const getSelectedContextsTableColumns =
   (): ColumnDef<SelectedContext>[] => [
+    {
+      id: "drag-handle",
+      header: "",
+      cell: () => (
+        <div className="flex h-full items-center justify-center cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      size: 30,
+      minSize: 30,
+      maxSize: 30,
+    },
     {
       id: "select",
       header: ({ table }) => {

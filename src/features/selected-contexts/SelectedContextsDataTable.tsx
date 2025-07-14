@@ -11,6 +11,22 @@ import {
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   LucideCopy,
   LucideTrash,
   LucideListX,
@@ -47,6 +63,7 @@ interface SelectedContextsDataTableProps {
   onDeleteMultipleFromPrompt: (ids: string[]) => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
+  onReorderContexts: (activeId: string, overId: string) => void;
 }
 
 interface MemoizedDataTableRowProps {
@@ -56,8 +73,53 @@ interface MemoizedDataTableRowProps {
   activeId: string | null;
 }
 
+interface SortableRowProps extends MemoizedDataTableRowProps {
+  id: string;
+}
+
+const SortableRow = React.memo(
+  ({ id, row, table, isSelected, activeId }: SortableRowProps) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+      <MemoizedDataTableRow
+        row={row}
+        table={table}
+        isSelected={isSelected}
+        activeId={activeId}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        sortableProps={{ ref: setNodeRef, style }}
+      />
+    );
+  },
+);
+SortableRow.displayName = "SortableRow";
+
 const MemoizedDataTableRow = React.memo(
-  ({ row, table, isSelected, activeId }: MemoizedDataTableRowProps) => {
+  ({
+    row,
+    table,
+    isSelected,
+    activeId,
+    dragHandleProps,
+    sortableProps,
+  }: MemoizedDataTableRowProps & {
+    dragHandleProps?: Record<string, unknown>;
+    sortableProps?: { ref: any; style: any };
+  }) => {
     const meta = table.options.meta as
       | (SelectedContextsTableMeta & {
           onDeleteMultipleFromPrompt?: (ids: string[]) => void;
@@ -128,6 +190,8 @@ const MemoizedDataTableRow = React.memo(
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow
+            ref={sortableProps?.ref}
+            style={sortableProps?.style}
             data-state={
               (isSelected || row.original.id === activeId) && "selected"
             }
@@ -148,6 +212,7 @@ const MemoizedDataTableRow = React.memo(
                       ? cell.column.getSize()
                       : undefined,
                 }}
+                {...(cell.column.id === "drag-handle" ? dragHandleProps : {})}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </TableCell>
@@ -210,12 +275,41 @@ export const SelectedContextsDataTable: React.FC<
   onDeleteMultipleFromPrompt,
   activeId,
   setActiveId,
+  onReorderContexts,
 }) => {
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.SELECTED_CONTEXTS,
   );
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (over && active.id !== over.id) {
+        onReorderContexts(String(active.id), String(over.id));
+      }
+      setIsDragging(false);
+    },
+    [onReorderContexts],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   const extendedTableMeta = useMemo(
     () => ({
@@ -258,69 +352,89 @@ export const SelectedContextsDataTable: React.FC<
     );
   }
 
+  const contextIds = data.map((context) => context.id);
+
   return (
     <>
-      <ScrollArea
-        className={cn(
-          "flex rounded-md border flex-grow relative transition-all",
-          isFocused && "border-primary",
-        )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
-        <Table className="h-full">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b-muted">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className={cn(
-                      "py-2 bg-background sticky top-0 z-[1]",
-                      header.id === "select" ? "px-2" : "px-3",
-                    )}
-                    style={{
-                      width:
-                        header.getSize() !== 150 ? header.getSize() : undefined,
-                    }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
-                  <MemoizedDataTableRow
-                    key={row.id}
-                    row={row}
-                    table={table}
-                    isSelected={row.getIsSelected()}
-                    activeId={activeId}
-                  />
-                ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={initialColumns.length}
-                  className="h-full text-center py-10"
-                >
-                  No contexts selected. Add from the library.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+        <ScrollArea
+          className={cn(
+            "flex h-full rounded-md border flex-grow relative transition-all",
+            isFocused && "border-primary",
+          )}
+        >
+          <Table className="h-full">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="border-b-muted">
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className={cn(
+                        "py-2 bg-background sticky top-0 z-[1]",
+                        header.id === "select" || header.id === "drag-handle"
+                          ? "px-2"
+                          : "px-3",
+                      )}
+                      style={{
+                        width:
+                          header.getSize() !== 150
+                            ? header.getSize()
+                            : undefined,
+                      }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              <SortableContext
+                items={contextIds}
+                strategy={verticalListSortingStrategy}
+              >
+                {table.getRowModel().rows?.length ? (
+                  table
+                    .getRowModel()
+                    .rows.map((row) => (
+                      <SortableRow
+                        key={row.id}
+                        id={row.id}
+                        row={row}
+                        table={table}
+                        isSelected={row.getIsSelected()}
+                        activeId={activeId}
+                      />
+                    ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={initialColumns.length}
+                      className="h-full text-center py-10"
+                    >
+                      No contexts selected. Add from the library.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </SortableContext>
+            </TableBody>
+          </Table>
+          {!isDragging && <ScrollBar orientation="horizontal" />}
+        </ScrollArea>
+      </DndContext>
       {table.getRowModel().rows?.length > 0 && (
         <div className="flex items-center justify-end space-x-2 py-2 text-xs text-muted-foreground pr-2">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}

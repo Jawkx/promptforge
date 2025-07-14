@@ -26,6 +26,9 @@ export const SelectedContexts: React.FC = () => {
     (state) => state.updateSelectedContext,
   );
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
+  const reorderSelectedContexts = useLocalStore(
+    (state) => state.reorderSelectedContexts,
+  );
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const focusedArea = useLocalStore((state) => state.focusedArea);
   const isFocused = focusedArea === FocusArea.SELECTED_CONTEXTS;
@@ -292,6 +295,7 @@ export const SelectedContexts: React.FC = () => {
         onDeleteMultipleFromPrompt={onDeleteMultipleFromPrompt}
         activeId={activeId}
         setActiveId={setActiveId}
+        onReorderContexts={reorderSelectedContexts}
       />
     </div>
   );
