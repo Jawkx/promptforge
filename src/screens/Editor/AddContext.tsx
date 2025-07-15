@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
@@ -16,6 +16,7 @@ const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { user } = useUser();
   const contextLibraryStore = useContextLibraryStore();
+  const [isMaximized, setIsMaximized] = useState(false);
 
   const handleClose = useCallback(() => {
     navigate("/");
@@ -88,6 +89,8 @@ const AddContext: React.FC = () => {
         dialogDescription="Create a new context snippet to use in your prompts."
         submitButtonText="Add Context"
         submitButtonIcon={<LucideSave />}
+        isMaximized={isMaximized}
+        onMaximizeToggle={() => setIsMaximized((prev) => !prev)}
       />
     </Dialog>
   );
