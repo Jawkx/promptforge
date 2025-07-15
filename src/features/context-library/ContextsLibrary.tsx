@@ -13,8 +13,10 @@ import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
-import { contexts$ } from "@/livestore/context-library-store/queries";
+import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
 import { useLiveStores } from "@/store/LiveStoreProvider";
+import { ContextBackup } from "./ContextBackup";
+import { useAuth } from "@clerk/clerk-react";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -28,9 +30,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const focusedArea = useLocalStore((state) => state.focusedArea);
 
+  const { userId } = useAuth();
   const [, navigate] = useLocation();
   const { contextLibraryStore } = useLiveStores();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const labels = useQuery(labels$, { store: contextLibraryStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -112,6 +116,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
                 content: pastedText,
                 createdAt: Date.now(),
                 version: uuid(),
+                creatorId: userId ? userId : "user",
               }),
             );
             sonnerToast.success("Context Added", {
@@ -126,7 +131,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         }
       }
     },
-    [isFocused, contextLibraryStore, activeId, contexts],
+    [isFocused, contextLibraryStore, activeId, contexts, userId],
   );
 
   return (
@@ -140,12 +145,10 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         <h1 className="font-medium text-lg">Context Library</h1>
         <ThemeToggler />
       </div>
-
       <ContextsTableToolbar
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
       />
-
       <ContextsDataTable
         data={contexts}
         onDeleteContext={onDeleteContext}
@@ -157,11 +160,20 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         editingTitleId={editingTitleId}
         setEditingTitleId={setEditingTitleId}
       />
+      <div className="flex flex-col gap-2">
+        <Button variant="default" onClick={handleAddContext}>
+          <LucidePlus className="mr-2 h-4 w-4" />
+          Add Context
+        </Button>
 
-      <Button variant="default" onClick={handleAddContext}>
-        <LucidePlus className="mr-2 h-4 w-4" />
-        Add Context
-      </Button>
+        <div className="flex justify-end">
+          <ContextBackup
+            contexts={contexts}
+            labels={labels}
+            contextLibraryStore={contextLibraryStore}
+          />
+        </div>
+      </div>{" "}
     </div>
   );
 };
