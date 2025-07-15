@@ -14,7 +14,7 @@ import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { ContextBackup } from "./ContextBackup";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -32,7 +32,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 
   const { userId } = useAuth();
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
   const labels = useQuery(labels$, { store: contextLibraryStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);

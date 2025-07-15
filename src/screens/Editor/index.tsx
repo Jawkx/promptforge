@@ -12,7 +12,7 @@ import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { LeftPanel } from "./LeftPanel";
 import { RightPanel } from "./RightPanel";
 import {
@@ -28,7 +28,7 @@ import { useLocalStore } from "@/store/localStore";
 import { useAutoCreateContextLibrary } from "@/hooks/useAutoCreateContextLibrary";
 
 const Editor: React.FC = () => {
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   // Auto-create context library for new users

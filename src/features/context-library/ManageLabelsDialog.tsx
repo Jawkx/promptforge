@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { toast as sonnerToast } from "sonner";
 import { LucideEdit, LucidePlus, LucideTrash2, LucideX } from "lucide-react";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Label as LabelType } from "@/types";
@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 
 export const ManageLabelsDialog: React.FC = () => {
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const labels = useQuery(labels$, { store: contextLibraryStore });
 
   // Edit state

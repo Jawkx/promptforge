@@ -29,7 +29,7 @@ import { Check, PlusCircle, X, Tag } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { ContextFormData, Label } from "@/types";
 import { LABEL_COLORS } from "@/constants/labelColors";
 import { generateLabelId } from "@/lib/utils";
@@ -68,7 +68,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
   onMaximizeToggle,
   autoSave = false,
 }) => {
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const allLabels = useQuery(labels$, { store: contextLibraryStore });
 
   const form = useForm<ContextFormData>({

@@ -9,13 +9,13 @@ import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/lib/utils";
 import ContextForm from "@/features/shared/ContextForm";
 import { ContextFormData } from "@/types";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { v4 as uuid } from "uuid";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { user } = useUser();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
 
   const handleClose = useCallback(() => {
     navigate("/");

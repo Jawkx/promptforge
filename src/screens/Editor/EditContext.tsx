@@ -8,7 +8,7 @@ import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 
@@ -19,7 +19,7 @@ interface EditContextProps {
 
 const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
 
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(

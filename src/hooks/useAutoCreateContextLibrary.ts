@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@livestore/react";
 import { useUser } from "@clerk/clerk-react";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useUserStore } from "@/store/UserLiveStoreProvider";
 import { userContextLibraries$ } from "@/livestore/user-store/queries";
 import { userEvents } from "@/livestore/user-store/events";
 
 export const useAutoCreateContextLibrary = () => {
   const { isLoaded } = useUser();
-  const { userStore } = useLiveStores();
+  const userStore = useUserStore();
   const userContextLibraries = useQuery(userContextLibraries$, {
     store: userStore,
   });

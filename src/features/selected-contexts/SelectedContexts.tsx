@@ -15,7 +15,7 @@ import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
 import { generateId, estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -33,7 +33,7 @@ export const SelectedContexts: React.FC = () => {
   const focusedArea = useLocalStore((state) => state.focusedArea);
   const isFocused = focusedArea === FocusArea.SELECTED_CONTEXTS;
 
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const libraryContexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const [, navigate] = useLocation();
@@ -224,6 +224,7 @@ export const SelectedContexts: React.FC = () => {
           content: selectedContext.content,
           createdAt: selectedContext.createdAt,
           version: newVersion,
+          creatorId: "user",
         }),
       );
 

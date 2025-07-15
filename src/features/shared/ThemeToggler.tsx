@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@livestore/react";
 import { preference$ } from "@/livestore/user-store/queries";
 import { userEvents } from "@/livestore/user-store/events";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useUserStore } from "@/store/UserLiveStoreProvider";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Auth } from "./Auth";
 
 export const ThemeToggler = () => {
-  const { userStore } = useLiveStores();
+  const userStore = useUserStore();
   const preference = useQuery(preference$, { store: userStore });
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
