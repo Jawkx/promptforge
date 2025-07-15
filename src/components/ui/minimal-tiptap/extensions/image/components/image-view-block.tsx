@@ -78,10 +78,10 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
   const maxWidth = MAX_HEIGHT * aspectRatio;
   const containerMaxWidth = containerRef.current
     ? parseFloat(
-        getComputedStyle(containerRef.current).getPropertyValue(
-          "--editor-width",
-        ),
-      )
+      getComputedStyle(containerRef.current).getPropertyValue(
+        "--editor-width",
+      ),
+    )
     : Infinity;
 
   const { isLink, onView, onDownload, onCopy, onCopyLink, onRemoveImg } =
@@ -204,7 +204,7 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
         }));
 
         updateAttributes(normalizedData);
-      } catch (error) {
+      } catch {
         setImageState((prev) => ({
           ...prev,
           error: true,
