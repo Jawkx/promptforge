@@ -5,6 +5,7 @@
 - `bun run dev` - Start development server
 - `bun run build` - Build for production
 - `bun run lint` - Run ESLint
+- `bun run format` - Run Prettier
 - `bun run tsc` - TypeScript type checking
 - `bun run preview` - Preview production build
 

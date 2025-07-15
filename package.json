@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "oxlint .",
     "tsc": "tsgo --noEmit -p tsconfig.app.json",
+    "format": "prettier --write .",
     "preview": "vite preview",
     "worker:tsc": "tsgo --noEmit -p tsconfig.worker.json",
     "worker:dev": "wrangler dev",
