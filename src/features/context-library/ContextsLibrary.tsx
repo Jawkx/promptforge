@@ -87,49 +87,58 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         targetElement.tagName === "INPUT" ||
         targetElement.tagName === "TEXTAREA";
 
-      if (isFocused && !isPastingIntoInput) {
-        event.preventDefault();
-        const pastedText = event.clipboardData.getData("text");
-        if (pastedText.trim()) {
-          if (activeId) {
-            const contextToUpdate = contexts.find((c) => c.id === activeId);
-            contextLibraryStore.commit(
-              contextLibraryEvents.contextUpdated({
-                id: activeId,
-                title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
-                content: pastedText,
-                updatedAt: Date.now(),
-                version: uuid(),
-              }),
-            );
-            sonnerToast.success("Context Updated", {
-              description: `Context content was updated via paste.`,
-            });
-            setActiveId(null);
-          } else {
-            const placeholderTitle = getRandomUntitledPlaceholder();
-            const newId = generateId();
-            contextLibraryStore.commit(
-              contextLibraryEvents.contextCreated({
-                id: newId,
-                title: placeholderTitle,
-                content: pastedText,
-                createdAt: Date.now(),
-                version: uuid(),
-                creatorId: userId ? userId : "user",
-              }),
-            );
-            sonnerToast.success("Context Added", {
-              description: `Context "${placeholderTitle}" has been added.`,
-            });
-            setEditingTitleId(newId);
-          }
-        } else {
-          sonnerToast.error("Paste Error", {
-            description: "Pasted content is empty.",
-          });
-        }
+      // Guard clause: Exit if not the right context for pasting
+      if (!isFocused || isPastingIntoInput) {
+        return;
       }
+
+      event.preventDefault();
+      const pastedText = event.clipboardData.getData("text").trim();
+
+      // Guard clause: Exit if pasted content is empty
+      if (!pastedText) {
+        sonnerToast.error("Paste Error", {
+          description: "Pasted content is empty.",
+        });
+        return;
+      }
+
+      // Main logic: Update existing context if one is active
+      if (activeId) {
+        const contextToUpdate = contexts.find((c) => c.id === activeId);
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextUpdated({
+            id: activeId,
+            title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
+            content: pastedText,
+            updatedAt: Date.now(),
+            version: uuid(),
+          }),
+        );
+        sonnerToast.success("Context Updated", {
+          description: `Context content was updated via paste.`,
+        });
+        setActiveId(null);
+        return;
+      }
+
+      // Main logic: Create a new context
+      const placeholderTitle = getRandomUntitledPlaceholder();
+      const newId = generateId();
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextCreated({
+          id: newId,
+          title: placeholderTitle,
+          content: pastedText,
+          createdAt: Date.now(),
+          version: uuid(),
+          creatorId: userId ? userId : "user",
+        }),
+      );
+      sonnerToast.success("Context Added", {
+        description: `Context "${placeholderTitle}" has been added.`,
+      });
+      setEditingTitleId(newId);
     },
     [isFocused, contextLibraryStore, activeId, contexts, userId],
   );
