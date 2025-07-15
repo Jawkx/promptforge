@@ -9,6 +9,7 @@
     "lint": "oxlint .",
     "tsc": "tsgo --noEmit -p tsconfig.app.json",
     "preview": "vite preview",
+    "worker:tsc": "tsgo --noEmit -p tsconfig.worker.json",
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
     "worker:tail": "wrangler tail"
