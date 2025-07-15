@@ -4,6 +4,7 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { LucideFile, LucideFiles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -195,11 +196,44 @@ const Editor: React.FC = () => {
             ) : (
               <LucideFile className="h-5 w-5 text-primary" />
             )}
-            <span className="max-w-xs truncate font-medium text-foreground">
-              {activeDraggedContexts.length > 1
-                ? `${activeDraggedContexts.length} contexts`
-                : activeDraggedContexts[0].title}
-            </span>
+            <div className="flex flex-col gap-1 max-w-xs">
+              <span className="truncate font-medium text-foreground">
+                {activeDraggedContexts.length > 1
+                  ? `${activeDraggedContexts.length} contexts`
+                  : activeDraggedContexts[0].title}
+              </span>
+              {(() => {
+                // Collect all unique labels from all contexts
+                const allLabels = activeDraggedContexts.flatMap(
+                  (context) => context.labels || [],
+                );
+                const uniqueLabels = allLabels.filter(
+                  (label, index, arr) =>
+                    arr.findIndex((l) => l.id === label.id) === index,
+                );
+
+                return (
+                  uniqueLabels.length > 0 && (
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {uniqueLabels.map((label) => (
+                        <Badge
+                          key={label.id}
+                          variant="outline"
+                          className="text-xs px-1.5 py-0.5 h-4 border"
+                          style={{
+                            backgroundColor: label.color + "20",
+                            borderColor: label.color,
+                            color: label.color,
+                          }}
+                        >
+                          {label.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  )
+                );
+              })()}
+            </div>
           </div>
         ) : null}
       </DragOverlay>
