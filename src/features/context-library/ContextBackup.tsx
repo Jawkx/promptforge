@@ -102,91 +102,113 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
     return true;
   };
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const readAndParseFile = async (file: File): Promise<ContextBackupData> => {
+    const text = await file.text();
+    const backupData = JSON.parse(text);
 
-    try {
-      const text = await file.text();
-      const backupData = JSON.parse(text);
+    if (!validateBackupData(backupData)) {
+      throw new Error("Invalid backup file format");
+    }
 
-      if (!validateBackupData(backupData)) {
-        sonnerToast.error("Invalid File", {
-          description: "The selected file is not a valid context backup.",
-        });
-        return;
+    return backupData;
+  };
+
+  const importLabels = (
+    labelsToImport: readonly Label[],
+    existingLabels: Set<string>,
+  ): number => {
+    let newLabelsCount = 0;
+
+    for (const label of labelsToImport) {
+      if (!existingLabels.has(label.id)) {
+        contextLibraryStore.commit(
+          contextLibraryEvents.labelCreated({
+            id: label.id,
+            name: label.name,
+            color: label.color,
+          }),
+        );
+        newLabelsCount++;
       }
+    }
 
-      // Import labels first
-      const existingLabels = new Set(labels.map((l) => l.id));
-      let newLabelsCount = 0;
+    return newLabelsCount;
+  };
 
-      for (const label of backupData.labels) {
-        if (!existingLabels.has(label.id)) {
-          contextLibraryStore.commit(
-            contextLibraryEvents.labelCreated({
-              id: label.id,
-              name: label.name,
-              color: label.color,
-            }),
-          );
-          newLabelsCount++;
-        }
-      }
+  const importContexts = (
+    contextsToImport: readonly Context[],
+    existingContexts: Set<string>,
+  ): { newContextsCount: number; updatedContextsCount: number } => {
+    let newContextsCount = 0;
+    let updatedContextsCount = 0;
 
-      // Import contexts
-      const existingContexts = new Set(contexts.map((c) => c.id));
-      let newContextsCount = 0;
-      let updatedContextsCount = 0;
+    for (const context of contextsToImport) {
+      if (existingContexts.has(context.id)) {
+        // Update existing context
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextUpdated({
+            id: context.id,
+            title: context.title,
+            content: context.content,
+            updatedAt: Date.now(),
+            version: uuid(),
+          }),
+        );
 
-      for (const context of backupData.contexts) {
-        if (existingContexts.has(context.id)) {
-          // Update existing context
-          contextLibraryStore.commit(
-            contextLibraryEvents.contextUpdated({
-              id: context.id,
-              title: context.title,
-              content: context.content,
-              updatedAt: Date.now(),
-              version: uuid(),
-            }),
-          );
+        // Update labels for this context
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextLabelsUpdated({
+            contextId: context.id,
+            labelIds: context.labels.map((l) => l.id),
+          }),
+        );
 
-          // Update labels for this context
+        updatedContextsCount++;
+      } else {
+        // Create new context
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextCreated({
+            id: context.id,
+            title: context.title,
+            content: context.content,
+            createdAt: context.createdAt,
+            version: context.version,
+            creatorId: "imported", // Mark as imported
+          }),
+        );
+
+        // Add labels for this context
+        if (context.labels.length > 0) {
           contextLibraryStore.commit(
             contextLibraryEvents.contextLabelsUpdated({
               contextId: context.id,
               labelIds: context.labels.map((l) => l.id),
             }),
           );
-
-          updatedContextsCount++;
-        } else {
-          // Create new context
-          contextLibraryStore.commit(
-            contextLibraryEvents.contextCreated({
-              id: context.id,
-              title: context.title,
-              content: context.content,
-              createdAt: context.createdAt,
-              version: context.version,
-              creatorId: "imported", // Mark as imported
-            }),
-          );
-
-          // Add labels for this context
-          if (context.labels.length > 0) {
-            contextLibraryStore.commit(
-              contextLibraryEvents.contextLabelsUpdated({
-                contextId: context.id,
-                labelIds: context.labels.map((l) => l.id),
-              }),
-            );
-          }
-
-          newContextsCount++;
         }
+
+        newContextsCount++;
       }
+    }
+
+    return { newContextsCount, updatedContextsCount };
+  };
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const backupData = await readAndParseFile(file);
+
+      const existingLabels = new Set(labels.map((l) => l.id));
+      const existingContexts = new Set(contexts.map((c) => c.id));
+
+      const newLabelsCount = importLabels(backupData.labels, existingLabels);
+      const { newContextsCount, updatedContextsCount } = importContexts(
+        backupData.contexts,
+        existingContexts,
+      );
 
       const messages = [];
       if (newContextsCount > 0)
@@ -204,7 +226,11 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
     } catch (error) {
       console.error("Upload error:", error);
       sonnerToast.error("Import Failed", {
-        description: "Failed to import contexts. Please check the file format.",
+        description:
+          error instanceof Error &&
+          error.message === "Invalid backup file format"
+            ? "The selected file is not a valid context backup."
+            : "Failed to import contexts. Please check the file format.",
       });
     } finally {
       // Reset file input
