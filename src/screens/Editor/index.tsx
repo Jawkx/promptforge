@@ -192,12 +192,12 @@ const Editor: React.FC = () => {
         {activeDraggedContexts ? (
           <div className="pointer-events-none flex items-center gap-3 rounded-lg border bg-background p-3 shadow-xl">
             {activeDraggedContexts.length > 1 ? (
-              <LucideFiles className="h-5 w-5 text-primary" />
+              <LucideFiles className="h-5 w-5 text-primary flex-shrink-0" />
             ) : (
-              <LucideFile className="h-5 w-5 text-primary" />
+              <LucideFile className="h-5 w-5 text-primary flex-shrink-0" />
             )}
-            <div className="flex flex-col gap-1 max-w-xs">
-              <span className="truncate font-medium text-foreground">
+            <div className="flex items-center justify-between w-full">
+              <span className="truncate font-medium text-foreground max-w-[150px]">
                 {activeDraggedContexts.length > 1
                   ? `${activeDraggedContexts.length} contexts`
                   : activeDraggedContexts[0].title}
@@ -213,24 +213,24 @@ const Editor: React.FC = () => {
                 );
 
                 return (
-                  uniqueLabels.length > 0 && (
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {uniqueLabels.map((label) => (
-                        <Badge
-                          key={label.id}
-                          variant="outline"
-                          className="text-xs px-1.5 py-0.5 h-4 border"
-                          style={{
-                            backgroundColor: label.color + "20",
-                            borderColor: label.color,
-                            color: label.color,
-                          }}
-                        >
-                          {label.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  )
+                  <div className="flex items-center gap-1 flex-wrap justify-end ml-auto">
+                    {uniqueLabels.length > 0
+                      ? uniqueLabels.map((label) => (
+                          <Badge
+                            key={label.id}
+                            variant="outline"
+                            className="text-xs px-1.5 py-0.5 h-4 border flex-shrink-0"
+                            style={{
+                              backgroundColor: label.color + "20",
+                              borderColor: label.color,
+                              color: label.color,
+                            }}
+                          >
+                            {label.name}
+                          </Badge>
+                        ))
+                      : null}
+                  </div>
                 );
               })()}
             </div>
