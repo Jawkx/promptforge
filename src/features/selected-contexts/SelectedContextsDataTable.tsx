@@ -355,7 +355,12 @@ export const SelectedContextsDataTable: React.FC<
   const contextIds = data.map((context) => context.id);
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className={cn(
+        "flex flex-col h-full border",
+        isFocused && "border-primary",
+      )}
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -363,84 +368,68 @@ export const SelectedContextsDataTable: React.FC<
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <ScrollArea
-          className={cn(
-            "flex-1 rounded-md border transition-all",
-            isFocused && "border-primary",
-          )}
-        >
-          <Table className="overflow-clip">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b-muted">
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={cn(
-                        "py-2 bg-background sticky top-0 z-[1]",
-                        header.id === "select" || header.id === "drag-handle"
-                          ? "px-2"
-                          : "px-3",
-                      )}
-                      style={{
-                        width:
-                          header.getSize() !== 150
-                            ? header.getSize()
-                            : undefined,
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  ))}
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="border-b-muted">
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={cn(
+                      "py-2 bg-background sticky top-0 z-[1]",
+                      header.id === "select" || header.id === "drag-handle"
+                        ? "px-2"
+                        : "px-3",
+                    )}
+                    style={{
+                      width:
+                        header.getSize() !== 150 ? header.getSize() : undefined,
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            <SortableContext
+              items={contextIds}
+              strategy={verticalListSortingStrategy}
+            >
+              {table.getRowModel().rows?.length ? (
+                table
+                  .getRowModel()
+                  .rows.map((row) => (
+                    <SortableRow
+                      key={row.id}
+                      id={row.id}
+                      row={row}
+                      table={table}
+                      isSelected={row.getIsSelected()}
+                      activeId={activeId}
+                    />
+                  ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={initialColumns.length}
+                    className="h-full text-center py-10"
+                  >
+                    No contexts selected. Add from the library.
+                  </TableCell>
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              <SortableContext
-                items={contextIds}
-                strategy={verticalListSortingStrategy}
-              >
-                {table.getRowModel().rows?.length ? (
-                  table
-                    .getRowModel()
-                    .rows.map((row) => (
-                      <SortableRow
-                        key={row.id}
-                        id={row.id}
-                        row={row}
-                        table={table}
-                        isSelected={row.getIsSelected()}
-                        activeId={activeId}
-                      />
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={initialColumns.length}
-                      className="h-full text-center py-10"
-                    >
-                      No contexts selected. Add from the library.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </SortableContext>
-            </TableBody>
-          </Table>
-          {!isDragging && <ScrollBar orientation="horizontal" />}
-        </ScrollArea>
+              )}
+            </SortableContext>
+          </TableBody>
+        </Table>
       </DndContext>
-      {table.getRowModel().rows?.length > 0 && (
-        <div className="flex items-center justify-end space-x-2 py-2 text-xs text-muted-foreground pr-2">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getRowModel().rows.length} row(s) selected.
-        </div>
-      )}
     </div>
   );
 };
