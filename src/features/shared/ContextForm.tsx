@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { useDialogAnimation } from "@/hooks/useDialogAnimation";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,7 +118,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
       initialValuesRef.current.title !== newInitialValues.title ||
       initialValuesRef.current.content !== newInitialValues.content ||
       JSON.stringify(initialValuesRef.current.labels) !==
-      JSON.stringify(newInitialValues.labels);
+        JSON.stringify(newInitialValues.labels);
 
     if (hasChanged) {
       initialValuesRef.current = newInitialValues;
@@ -229,22 +230,19 @@ const ContextForm: React.FC<ContextFormProps> = ({
     [allLabels, labelSearch],
   );
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  useDialogAnimation(dialogRef, contentWrapperRef, isMaximized);
+
   return (
     <DialogContent
+      ref={dialogRef}
       className={cn(
-        "sm:max-w-3xl max-h-[90vh] w-[95vw] flex flex-col",
-        isMaximized ? "h-[95vh]" : "h-auto",
+        "sm:max-w-3xl max-h-[90vh] w-[95vw] flex flex-col overflow-hidden",
+        isMaximized ? "max-w-none" : "",
       )}
     >
-      <DialogHeader className="space-y-3 pb-6">
-        <DialogTitle className="text-xl font-semibold">
-          {dialogTitle}
-        </DialogTitle>
-        <DialogDescription className="text-muted-foreground">
-          {dialogDescription}
-        </DialogDescription>
-      </DialogHeader>
-
       <div className="absolute right-10 top-4">
         <button
           onClick={handleMaximizeToggle}
@@ -259,195 +257,210 @@ const ContextForm: React.FC<ContextFormProps> = ({
         </button>
       </div>
 
-      <form
-        id="context-form"
-        onSubmit={handleSubmit(onFormSubmit)}
-        onKeyDown={(e) => {
-          if (
-            e.key === "Enter" &&
-            e.target !== e.currentTarget.querySelector("#content")
-          ) {
-            e.preventDefault();
-          }
-        }}
-        className={cn(
-          "space-y-6",
-          isMaximized && "flex flex-1 flex-col space-y-6",
-        )}
-      >
-        <div className="space-y-2">
-          <label
-            htmlFor="title"
-            className="text-sm font-medium text-foreground"
-          >
-            Title
-          </label>
-          <Controller
-            name="title"
-            control={control}
-            render={({ field }) => (
-              <Input
-                id="title"
-                {...field}
-                placeholder="Enter a title (optional, will be auto-generated if blank)"
-                className="h-10"
-              />
-            )}
-          />
-        </div>
+      <div ref={contentWrapperRef}>
+        <DialogHeader className="space-y-3 pb-6">
+          <DialogTitle className="text-xl font-semibold">
+            {dialogTitle}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            {dialogDescription}
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground">
-              Labels
-            </label>
-            <Popover
-              open={isLabelPopoverOpen}
-              onOpenChange={setIsLabelPopoverOpen}
+        <form
+          id="context-form"
+          onSubmit={handleSubmit(onFormSubmit)}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              e.target !== e.currentTarget.querySelector("#content")
+            ) {
+              e.preventDefault();
+            }
+          }}
+          className={cn(
+            "space-y-6",
+            isMaximized && "flex flex-1 flex-col space-y-6",
+          )}
+        >
+          <div className="space-y-2">
+            <label
+              htmlFor="title"
+              className="text-sm font-medium text-foreground"
             >
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 gap-2"
-                >
-                  <Tag className="h-4 w-4" />
-                  Add Label
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-0" align="end">
-                <Command>
-                  <CommandInput
-                    placeholder="Search or create label..."
-                    value={labelSearch}
-                    onValueChange={setLabelSearch}
-                  />
-                  <CommandList>
-                    <CommandEmpty>No labels found.</CommandEmpty>
-                    <CommandGroup>
-                      {filteredLabels.map((label) => {
-                        const isSelected = (watchedLabels || []).some(
-                          (l) => l.id === label.id,
-                        );
-                        return (
-                          <CommandItem
-                            key={label.id}
-                            onSelect={() => {
-                              handleLabelToggle(label);
-                              setIsLabelPopoverOpen(false);
-                            }}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="h-2 w-2 rounded-full"
-                                style={{ backgroundColor: label.color }}
-                              />
-                              <span>{label.name}</span>
-                            </div>
-                            {isSelected && <Check className="h-4 w-4" />}
-                          </CommandItem>
-                        );
-                      })}
-                      {showCreateOption && (
-                        <CommandItem
-                          onSelect={() => handleCreateLabel(labelSearch.trim())}
-                          className="flex items-center gap-2 text-muted-foreground"
-                        >
-                          <PlusCircle className="h-4 w-4" />
-                          <span>Create "{labelSearch.trim()}"</span>
-                        </CommandItem>
-                      )}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+              Title
+            </label>
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="title"
+                  {...field}
+                  placeholder="Enter a title (optional, will be auto-generated if blank)"
+                  className="h-10"
+                />
+              )}
+            />
           </div>
 
-          <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
-            {(watchedLabels || []).length > 0 ? (
-              (watchedLabels || []).map((label) => (
-                <Badge
-                  key={label.id}
-                  variant="secondary"
-                  className="flex items-center gap-1.5 pr-1 py-1 text-xs"
-                  style={{
-                    backgroundColor: `${label.color}15`,
-                    borderColor: `${label.color}40`,
-                    color: label.color,
-                  }}
-                >
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: label.color }}
-                  />
-                  <span>{label.name}</span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground">
+                Labels
+              </label>
+              <Popover
+                open={isLabelPopoverOpen}
+                onOpenChange={setIsLabelPopoverOpen}
+              >
+                <PopoverTrigger asChild>
                   <Button
-                    variant="ghost"
+                    type="button"
+                    variant="outline"
                     size="sm"
-                    className="h-4 w-4 p-0 hover:bg-transparent opacity-70 hover:opacity-100"
-                    onClick={() => handleRemoveLabel(label.id)}
+                    className="h-8 gap-2"
                   >
-                    <X className="h-3 w-3" />
+                    <Tag className="h-4 w-4" />
+                    Add Label
                   </Button>
-                </Badge>
-              ))
-            ) : (
-              <span className="text-muted-foreground text-sm">
-                No labels assigned
-              </span>
-            )}
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="end">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or create label..."
+                      value={labelSearch}
+                      onValueChange={setLabelSearch}
+                    />
+                    <CommandList>
+                      <CommandEmpty>No labels found.</CommandEmpty>
+                      <CommandGroup>
+                        {filteredLabels.map((label) => {
+                          const isSelected = (watchedLabels || []).some(
+                            (l) => l.id === label.id,
+                          );
+                          return (
+                            <CommandItem
+                              key={label.id}
+                              onSelect={() => {
+                                handleLabelToggle(label);
+                                setIsLabelPopoverOpen(false);
+                              }}
+                              className="flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: label.color }}
+                                />
+                                <span>{label.name}</span>
+                              </div>
+                              {isSelected && <Check className="h-4 w-4" />}
+                            </CommandItem>
+                          );
+                        })}
+                        {showCreateOption && (
+                          <CommandItem
+                            onSelect={() =>
+                              handleCreateLabel(labelSearch.trim())
+                            }
+                            className="flex items-center gap-2 text-muted-foreground"
+                          >
+                            <PlusCircle className="h-4 w-4" />
+                            <span>Create "{labelSearch.trim()}"</span>
+                          </CommandItem>
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
+              {(watchedLabels || []).length > 0 ? (
+                (watchedLabels || []).map((label) => (
+                  <Badge
+                    key={label.id}
+                    variant="secondary"
+                    className="flex items-center gap-1.5 pr-1 py-1 text-xs"
+                    style={{
+                      backgroundColor: `${label.color}15`,
+                      borderColor: `${label.color}40`,
+                      color: label.color,
+                    }}
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: label.color }}
+                    />
+                    <span>{label.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-transparent opacity-70 hover:opacity-100"
+                      onClick={() => handleRemoveLabel(label.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-muted-foreground text-sm">
+                  No labels assigned
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className={cn("space-y-2", isMaximized && "flex-1 flex flex-col")}>
-          <label
-            htmlFor="content"
-            className="text-sm font-medium text-foreground"
+          <div
+            className={cn("space-y-2", isMaximized && "flex-1 flex flex-col")}
           >
-            Content
-          </label>
-          <Controller
-            name="content"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                id="content"
-                {...field}
-                className={cn(
-                  "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
-                  "border-2 focus:border-primary/50 transition-colors",
-                  isMaximized && "flex-1",
-                )}
-                placeholder="Paste your context content here..."
-              />
-            )}
-          />
-        </div>
-      </form>
+            <label
+              htmlFor="content"
+              className="text-sm font-medium text-foreground"
+            >
+              Content
+            </label>
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="content"
+                  {...field}
+                  className={cn(
+                    "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
+                    "border-2 focus:border-primary/50 transition-colors",
+                    isMaximized && "flex-1",
+                  )}
+                  placeholder="Paste your context content here..."
+                />
+              )}
+            />
+          </div>
+        </form>
 
-      {!autoSave && (
-        <DialogFooter className="pt-6 gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="min-w-[100px]"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="context-form"
-            className="min-w-[140px] gap-2"
-          >
-            {submitButtonIcon}
-            {submitButtonText}
-          </Button>
-        </DialogFooter>
-      )}
+        {!autoSave && (
+          <DialogFooter className="pt-6 gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className="min-w-[100px]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="context-form"
+              className="min-w-[140px] gap-2"
+            >
+              {submitButtonIcon}
+              {submitButtonText}
+            </Button>
+          </DialogFooter>
+        )}
+      </div>
     </DialogContent>
   );
 };
