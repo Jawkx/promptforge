@@ -232,8 +232,8 @@ const ContextForm: React.FC<ContextFormProps> = ({
   return (
     <DialogContent
       className={cn(
-        "sm:max-w-3xl max-h-[90vh]",
-        isMaximized && "flex h-[95vh] w-[95vw] max-w-none flex-col",
+        "sm:max-w-3xl max-h-[90vh] w-[95vw] flex flex-col",
+        isMaximized ? "h-[95vh]" : "h-auto",
       )}
     >
       <DialogHeader className="space-y-3 pb-6">
