@@ -35,6 +35,7 @@ import { FocusArea, useLocalStore } from "@/store/localStore";
 import { useDraggable } from "@dnd-kit/core";
 import { ContextRowMenu } from "./ContextRowMenu";
 import { TablePagination } from "./TablePagination";
+import { TableEmptyState } from "./TableEmptyState";
 
 const DataTableRow = React.memo(
   ({
@@ -293,22 +294,11 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
                 );
               })
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={contextsTableColumn.length}
-                  className="h-24 text-center"
-                >
-                  No contexts found.
-                  {searchQuery && totalDataCount > 0 && (
-                    <p className="text-xs">Try a different search term.</p>
-                  )}
-                  {totalDataCount === 0 && !searchQuery && (
-                    <p className="text-xs">
-                      Click the 'Add Context' button to create one.
-                    </p>
-                  )}
-                </TableCell>
-              </TableRow>
+              <TableEmptyState
+                searchQuery={searchQuery}
+                totalDataCount={totalDataCount}
+                columnCount={contextsTableColumn.length}
+              />
             )}
           </TableBody>
         </Table>
