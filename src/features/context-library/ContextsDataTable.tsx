@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Context } from "../../types";
 import {
@@ -34,6 +34,7 @@ import { useLocation } from "wouter";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { useDraggable } from "@dnd-kit/core";
 import { ContextRowMenu } from "./ContextRowMenu";
+import { TablePagination } from "./TablePagination";
 
 const DataTableRow = React.memo(
   ({
@@ -313,35 +314,12 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      <div className="flex items-center justify-between space-x-2 py-2 text-sm text-muted-foreground">
-        <div>
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {displayedDataCount} row(s) selected.
-          {searchQuery && ` (Filtered from ${totalDataCount})`}
-        </div>
-        <div className="flex items-center space-x-2">
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount() || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      <TablePagination
+        table={table}
+        displayedDataCount={displayedDataCount}
+        totalDataCount={totalDataCount}
+        searchQuery={searchQuery}
+      />
     </div>
   );
 };
