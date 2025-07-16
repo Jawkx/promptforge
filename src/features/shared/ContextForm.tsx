@@ -114,7 +114,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
       initialValuesRef.current.title !== newInitialValues.title ||
       initialValuesRef.current.content !== newInitialValues.content ||
       JSON.stringify(initialValuesRef.current.labels) !==
-        JSON.stringify(newInitialValues.labels);
+      JSON.stringify(newInitialValues.labels);
 
     if (hasChanged) {
       initialValuesRef.current = newInitialValues;
@@ -234,28 +234,27 @@ const ContextForm: React.FC<ContextFormProps> = ({
       )}
     >
       <DialogHeader className="space-y-3 pb-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <DialogTitle className="text-xl font-semibold">
-              {dialogTitle}
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              {dialogDescription}
-            </DialogDescription>
-          </div>
-          <button
-            onClick={handleMaximizeToggle}
-            className="rounded-sm p-0.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            aria-label={isMaximized ? "Minimize" : "Maximize"}
-          >
-            {isMaximized ? (
-              <Minimize2 className="h-4 w-4" />
-            ) : (
-              <Maximize2 className="h-4 w-4" />
-            )}
-          </button>
-        </div>
+        <DialogTitle className="text-xl font-semibold">
+          {dialogTitle}
+        </DialogTitle>
+        <DialogDescription className="text-muted-foreground">
+          {dialogDescription}
+        </DialogDescription>
       </DialogHeader>
+
+      <div className="absolute right-10 top-4">
+        <button
+          onClick={handleMaximizeToggle}
+          className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          aria-label={isMaximized ? "Minimize" : "Maximize"}
+        >
+          {isMaximized ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
+        </button>
+      </div>
 
       <form
         id="context-form"
