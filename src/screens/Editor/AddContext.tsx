@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
@@ -17,9 +17,17 @@ const AddContext: React.FC = () => {
   const { user } = useUser();
   const contextLibraryStore = useContextLibraryStore();
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsOpen(true);
+  }, []);
 
   const handleClose = useCallback(() => {
-    navigate("/");
+    setIsOpen(false);
+    setTimeout(() => {
+      navigate("/");
+    }, 200);
   }, [navigate]);
 
   const handleSubmit = useCallback(
@@ -79,7 +87,7 @@ const AddContext: React.FC = () => {
   );
 
   return (
-    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <ContextForm
         title=""
         content=""
