@@ -48,6 +48,8 @@ interface ContextFormProps {
   submitButtonText?: string;
   submitButtonIcon?: React.ReactNode;
   autoSave?: boolean;
+  isMaximized?: boolean;
+  onMaximizeToggle?: () => void;
 }
 
 const ContextForm: React.FC<ContextFormProps> = ({
@@ -63,14 +65,15 @@ const ContextForm: React.FC<ContextFormProps> = ({
   submitButtonText,
   submitButtonIcon,
   autoSave = false,
+  isMaximized = false,
+  onMaximizeToggle,
 }) => {
-  const [isMaximized, setIsMaximized] = React.useState(false);
   const contextLibraryStore = useContextLibraryStore();
   const allLabels = useQuery(labels$, { store: contextLibraryStore });
 
   const handleMaximizeToggle = useCallback(() => {
-    setIsMaximized((prev) => !prev);
-  }, []);
+    onMaximizeToggle?.();
+  }, [onMaximizeToggle]);
 
   const form = useForm<ContextFormData>({
     defaultValues: {

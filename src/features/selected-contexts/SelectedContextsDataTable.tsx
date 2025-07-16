@@ -42,7 +42,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 import { SelectedContext } from "../../types";
 import { SelectedContextsTableMeta } from "./SelectedContextsTableColumns";
 import {
@@ -282,7 +282,7 @@ export const SelectedContextsDataTable: React.FC<
   );
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const [isDragging, setIsDragging] = React.useState(false);
+  const [, setIsDragging] = React.useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
