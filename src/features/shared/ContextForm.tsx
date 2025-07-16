@@ -240,7 +240,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
       ref={dialogRef}
       className={cn(
         "sm:max-w-3xl max-h-[90vh] w-[95vw] flex flex-col overflow-hidden",
-        isMaximized ? "max-w-none" : "",
+        isMaximized ? "max-w-none h-[95vh] flex flex-col" : "",
       )}
     >
       <div className="absolute right-10 top-4">
@@ -257,8 +257,11 @@ const ContextForm: React.FC<ContextFormProps> = ({
         </button>
       </div>
 
-      <div ref={contentWrapperRef}>
-        <DialogHeader className="space-y-3 pb-6">
+      <div
+        ref={contentWrapperRef}
+        className={cn("flex flex-col", isMaximized && "flex-1 min-h-0")}
+      >
+        <DialogHeader className="space-y-3 pb-6 flex-shrink-0">
           <DialogTitle className="text-xl font-semibold">
             {dialogTitle}
           </DialogTitle>
@@ -280,10 +283,10 @@ const ContextForm: React.FC<ContextFormProps> = ({
           }}
           className={cn(
             "space-y-6",
-            isMaximized && "flex flex-1 flex-col space-y-6",
+            isMaximized && "flex flex-1 flex-col min-h-0 space-y-6",
           )}
         >
-          <div className="space-y-2">
+          <div className="space-y-2 flex-shrink-0">
             <label
               htmlFor="title"
               className="text-sm font-medium text-foreground"
@@ -304,7 +307,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-foreground">
                 Labels
@@ -413,7 +416,10 @@ const ContextForm: React.FC<ContextFormProps> = ({
           </div>
 
           <div
-            className={cn("space-y-2", isMaximized && "flex-1 flex flex-col")}
+            className={cn(
+              "space-y-2",
+              isMaximized && "flex-1 flex flex-col min-h-0",
+            )}
           >
             <label
               htmlFor="content"
@@ -431,9 +437,19 @@ const ContextForm: React.FC<ContextFormProps> = ({
                   className={cn(
                     "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
                     "border-2 focus:border-primary/50 transition-colors",
-                    isMaximized && "flex-1",
+                    isMaximized &&
+                      "flex-grow flex-shrink basis-0 h-full min-h-0",
                   )}
                   placeholder="Paste your context content here..."
+                  style={
+                    isMaximized
+                      ? {
+                          display: "flex",
+                          flexDirection: "column",
+                          flexGrow: 1,
+                        }
+                      : undefined
+                  }
                 />
               )}
             />
@@ -441,7 +457,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
         </form>
 
         {!autoSave && (
-          <DialogFooter className="pt-6 gap-3">
+          <DialogFooter className="pt-6 gap-3 flex-shrink-0">
             <Button
               type="button"
               variant="outline"
