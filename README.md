@@ -37,7 +37,7 @@ A powerful, real-time collaborative prompt engineering tool built with React, Ty
 ### 📱 **Cross-Platform**
 
 - Web-based application
-- Firebase hosting for reliable deployment
+- Cloudflare Pages hosting for reliable deployment
 - Progressive Web App capabilities
 
 ## Tech Stack
@@ -50,15 +50,15 @@ A powerful, real-time collaborative prompt engineering tool built with React, Ty
 - **Data Tables**: TanStack Table
 - **Drag & Drop**: dnd-kit
 - **Build Tool**: Vite
-- **Deployment**: Firebase Hosting
-- **Code Quality**: ESLint + Prettier + TypeScript
+- **Deployment**: Cloudflare Pages + Workers
+- **Code Quality**: oxlint + Prettier + TypeScript
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ or Bun
-- Firebase CLI (for deployment)
+- Wrangler CLI (for deployment)
 
 ### Installation
 
@@ -91,10 +91,11 @@ npm run dev
 
 - `bun run dev` - Start development server
 - `bun run build` - Build for production
-- `bun run lint` - Run ESLint
+- `bun run lint` - Run oxlint
 - `bun run tsc` - TypeScript type checking
 - `bun run preview` - Preview production build
-- `bun run deploy` - Build and deploy to Firebase
+- `bun run worker:dev` - Start Cloudflare Worker dev server
+- `bun run worker:deploy` - Deploy Cloudflare Worker
 
 ## Project Structure
 
@@ -184,25 +185,28 @@ This project is configured for automatic deployment to **Cloudflare Pages** via 
 ### Setup Steps
 
 1. **Cloudflare Configuration**
+
    - Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
    - Create a new Pages project
    - Note your **Account ID** from the right sidebar
 
 2. **GitHub Secrets**
    Add these secrets to your GitHub repository:
+
    - `CLOUDFLARE_API_TOKEN`: Create at [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens)
      - Use template "Cloudflare Pages"
      - Permissions: `Cloudflare Pages:Edit`
    - `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
 
 3. **Manual Deployment (Optional)**
+
    ```bash
    # Install Wrangler CLI
    bun add -D wrangler
-   
+
    # Login to Cloudflare
    bunx wrangler login
-   
+
    # Deploy manually
    bunx wrangler pages deploy dist --project-name=promptforge
    ```
