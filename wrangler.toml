@@ -19,3 +19,7 @@ new_classes = ["WebSocketServer"]
 binding = "DB"
 database_name = "promptforge-store"
 database_id = "6961b5fe-6734-4129-a5eb-83412941264c"
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["DB"]
