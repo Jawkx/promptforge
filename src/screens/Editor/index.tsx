@@ -4,6 +4,7 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { LucideFile, LucideFiles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -12,7 +13,7 @@ import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { LeftPanel } from "./LeftPanel";
 import { RightPanel } from "./RightPanel";
 import {
@@ -25,10 +26,14 @@ import {
 import { useDragAndDrop } from "./useDragAndDrop";
 import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialog";
 import { useLocalStore } from "@/store/localStore";
+import { useAutoCreateContextLibrary } from "@/hooks/useAutoCreateContextLibrary";
 
 const Editor: React.FC = () => {
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
+
+  // Auto-create context library for new users
+  useAutoCreateContextLibrary();
 
   const [isAddModalOpen] = useRoute("/add");
   const [isLabelsModalOpen] = useRoute("/labels");
@@ -187,15 +192,48 @@ const Editor: React.FC = () => {
         {activeDraggedContexts ? (
           <div className="pointer-events-none flex items-center gap-3 rounded-lg border bg-background p-3 shadow-xl">
             {activeDraggedContexts.length > 1 ? (
-              <LucideFiles className="h-5 w-5 text-primary" />
+              <LucideFiles className="h-5 w-5 text-primary flex-shrink-0" />
             ) : (
-              <LucideFile className="h-5 w-5 text-primary" />
+              <LucideFile className="h-5 w-5 text-primary flex-shrink-0" />
             )}
-            <span className="max-w-xs truncate font-medium text-foreground">
-              {activeDraggedContexts.length > 1
-                ? `${activeDraggedContexts.length} contexts`
-                : activeDraggedContexts[0].title}
-            </span>
+            <div className="flex items-center justify-between w-full">
+              <span className="truncate font-medium text-foreground max-w-[150px]">
+                {activeDraggedContexts.length > 1
+                  ? `${activeDraggedContexts.length} contexts`
+                  : activeDraggedContexts[0].title}
+              </span>
+              {(() => {
+                // Collect all unique labels from all contexts
+                const allLabels = activeDraggedContexts.flatMap(
+                  (context) => context.labels || [],
+                );
+                const uniqueLabels = allLabels.filter(
+                  (label, index, arr) =>
+                    arr.findIndex((l) => l.id === label.id) === index,
+                );
+
+                return (
+                  <div className="flex items-center gap-1 flex-wrap justify-end ml-auto">
+                    {uniqueLabels.length > 0
+                      ? uniqueLabels.map((label) => (
+                          <Badge
+                            key={label.id}
+                            variant="outline"
+                            className="text-xs px-1.5 py-0.5 h-4 border flex-shrink-0"
+                            style={{
+                              backgroundColor: label.color + "20",
+                              borderColor: label.color,
+                              color: label.color,
+                            }}
+                          >
+                            {label.name}
+                          </Badge>
+                        ))
+                      : null}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         ) : null}
       </DragOverlay>

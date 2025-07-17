@@ -1,13 +1,16 @@
 # AGENTS.md - Development Guidelines
 
 ## Build/Lint/Test Commands
+
 - `bun run dev` - Start development server
 - `bun run build` - Build for production
-- `bun run lint` - Run ESLint
+- `bun run lint` - Run linters
+- `bun run format` - Run formatters
 - `bun run tsc` - TypeScript type checking
 - `bun run preview` - Preview production build
 
 ## Code Style Guidelines
+
 - **Imports**: Use `@/` alias for src imports, group external libs first, then internal
 - **Formatting**: Prettier with 80 char line width, ESLint with TypeScript rules
 - **Types**: Use TypeScript strictly, prefer interfaces over types for objects
@@ -19,6 +22,7 @@
 - **Styling**: Tailwind CSS with className prop, use clsx/cn for conditional classes
 
 ## Architecture Notes
+
 - React + TypeScript + Vite project with LiveStore for real-time data
 - UI built with Radix UI primitives and custom components
 - TipTap editor for rich text editing

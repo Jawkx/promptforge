@@ -8,13 +8,15 @@ import { ContextsDataTable } from "./ContextsDataTable";
 import { ContextsTableToolbar } from "./ContextsTableToolbar";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
-import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { ContextBackup } from "./ContextBackup";
+import { useAuth } from "@clerk/clerk-react";
 
 interface ContextsLibraryProps {
   onDeleteContext: (id: string) => void;
@@ -28,9 +30,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const focusedArea = useLocalStore((state) => state.focusedArea);
 
+  const { userId } = useAuth();
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const labels = useQuery(labels$, { store: contextLibraryStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -83,50 +87,60 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         targetElement.tagName === "INPUT" ||
         targetElement.tagName === "TEXTAREA";
 
-      if (isFocused && !isPastingIntoInput) {
-        event.preventDefault();
-        const pastedText = event.clipboardData.getData("text");
-        if (pastedText.trim()) {
-          if (activeId) {
-            const contextToUpdate = contexts.find((c) => c.id === activeId);
-            contextLibraryStore.commit(
-              contextLibraryEvents.contextUpdated({
-                id: activeId,
-                title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
-                content: pastedText,
-                updatedAt: Date.now(),
-                version: uuid(),
-              }),
-            );
-            sonnerToast.success("Context Updated", {
-              description: `Context content was updated via paste.`,
-            });
-            setActiveId(null);
-          } else {
-            const placeholderTitle = getRandomUntitledPlaceholder();
-            const newId = generateId();
-            contextLibraryStore.commit(
-              contextLibraryEvents.contextCreated({
-                id: newId,
-                title: placeholderTitle,
-                content: pastedText,
-                createdAt: Date.now(),
-                version: uuid(),
-              }),
-            );
-            sonnerToast.success("Context Added", {
-              description: `Context "${placeholderTitle}" has been added.`,
-            });
-            setEditingTitleId(newId);
-          }
-        } else {
-          sonnerToast.error("Paste Error", {
-            description: "Pasted content is empty.",
-          });
-        }
+      // Guard clause: Exit if not the right context for pasting
+      if (!isFocused || isPastingIntoInput) {
+        return;
       }
+
+      event.preventDefault();
+      const pastedText = event.clipboardData.getData("text").trim();
+
+      // Guard clause: Exit if pasted content is empty
+      if (!pastedText) {
+        sonnerToast.error("Paste Error", {
+          description: "Pasted content is empty.",
+        });
+        return;
+      }
+
+      // Main logic: Update existing context if one is active
+      if (activeId) {
+        const contextToUpdate = contexts.find((c) => c.id === activeId);
+        contextLibraryStore.commit(
+          contextLibraryEvents.contextUpdated({
+            id: activeId,
+            title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
+            content: pastedText,
+            updatedAt: Date.now(),
+            version: uuid(),
+          }),
+        );
+        sonnerToast.success("Context Updated", {
+          description: `Context content was updated via paste.`,
+        });
+        setActiveId(null);
+        return;
+      }
+
+      // Main logic: Create a new context
+      const placeholderTitle = getRandomUntitledPlaceholder();
+      const newId = generateId();
+      contextLibraryStore.commit(
+        contextLibraryEvents.contextCreated({
+          id: newId,
+          title: placeholderTitle,
+          content: pastedText,
+          createdAt: Date.now(),
+          version: uuid(),
+          creatorId: userId ? userId : "user",
+        }),
+      );
+      sonnerToast.success("Context Added", {
+        description: `Context "${placeholderTitle}" has been added.`,
+      });
+      setEditingTitleId(newId);
     },
-    [isFocused, contextLibraryStore, activeId, contexts],
+    [isFocused, contextLibraryStore, activeId, contexts, userId],
   );
 
   return (
@@ -140,12 +154,10 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         <h1 className="font-medium text-lg">Context Library</h1>
         <ThemeToggler />
       </div>
-
       <ContextsTableToolbar
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
       />
-
       <ContextsDataTable
         data={contexts}
         onDeleteContext={onDeleteContext}
@@ -157,11 +169,20 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         editingTitleId={editingTitleId}
         setEditingTitleId={setEditingTitleId}
       />
+      <div className="flex flex-col gap-2">
+        <Button variant="default" onClick={handleAddContext}>
+          <LucidePlus className="mr-2 h-4 w-4" />
+          Add Context
+        </Button>
 
-      <Button variant="default" onClick={handleAddContext}>
-        <LucidePlus className="mr-2 h-4 w-4" />
-        Add Context
-      </Button>
+        <div className="flex justify-end">
+          <ContextBackup
+            contexts={contexts}
+            labels={labels}
+            contextLibraryStore={contextLibraryStore}
+          />
+        </div>
+      </div>{" "}
     </div>
   );
 };

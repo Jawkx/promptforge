@@ -11,7 +11,7 @@ import { Check, PlusCircle } from "lucide-react";
 import { useQuery } from "@livestore/react";
 import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { Label } from "@/types";
 import { LABEL_COLORS } from "@/constants/labelColors";
 import { generateLabelId } from "@/lib/utils";
@@ -24,7 +24,7 @@ interface LabelAssignmentProps {
 export const LabelAssignment: React.FC<LabelAssignmentProps> = ({
   contextIds,
 }) => {
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const allLabels = useQuery(labels$, { store: contextLibraryStore });
   const allContexts = useQuery(contexts$, { store: contextLibraryStore });
   const [search, setSearch] = useState("");

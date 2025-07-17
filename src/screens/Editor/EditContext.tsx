@@ -8,7 +8,7 @@ import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextForm from "@/features/shared/ContextForm";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 
@@ -19,7 +19,7 @@ interface EditContextProps {
 
 const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const [, navigate] = useLocation();
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
 
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(
@@ -48,6 +48,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     initialData,
   );
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveData = useCallback(
@@ -129,7 +130,10 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         saveData(currentData, false);
       }
     }
-    navigate("/");
+    setIsOpen(false);
+    setTimeout(() => {
+      navigate("/");
+    }, 200);
   }, [currentData, initialData, saveData, navigate]);
 
   const handleSubmit = useCallback(
@@ -157,6 +161,10 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     [saveData],
   );
 
+  useEffect(() => {
+    setIsOpen(true);
+  }, []);
+
   // 2. Handle the "not found" case.
   useEffect(() => {
     if (!contextToEdit) {
@@ -176,7 +184,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     type === "library" ? "Edit Library Context" : "Edit Selected Context";
 
   return (
-    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <ContextForm
         id={initialData.id}
         title={initialData.title}

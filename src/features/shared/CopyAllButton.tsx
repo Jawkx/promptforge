@@ -4,9 +4,10 @@ import { useLocalStore } from "@/store/localStore";
 import { LucideCopy, Download, Edit3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect } from "react";
+import { getRandomFoodFilename } from "@/constants/randomNames";
 
 export const CopyAllButton = () => {
-  const [filename, setFilename] = useState("prompt-and-contexts.md");
+  const [filename, setFilename] = useState(getRandomFoodFilename());
   const [isEditingFilename, setIsEditingFilename] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -93,6 +94,9 @@ export const CopyAllButton = () => {
       sonnerToast.success("Downloaded!", {
         description: "Markdown file has been downloaded.",
       });
+
+      // Set a new random filename for next download
+      setFilename(getRandomFoodFilename());
     } catch (err) {
       console.error("Failed to download file: ", err);
       sonnerToast.error("Download Failed", {

@@ -1,5 +1,18 @@
 name = "prompt-forge"
-compatibility_date = "2024-07-13"
+compatibility_date = "2024-07-17"
 
 [assets]
 directory = "./dist/"
+
+[[durable_objects.bindings]]
+name = "WEBSOCKET_SERVER"
+class_name = "WebSocketServer"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["WebSocketServer"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "promptforge-store"
+database_id = "1c9b5dae-f1fa-49d8-83fa-7bd5b39c4121"

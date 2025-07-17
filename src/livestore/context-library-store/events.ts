@@ -1,6 +1,16 @@
 import { Events, Schema } from "@livestore/livestore";
 
 export const contextLibraryEvents = {
+  // This event initializes the entire library.
+  libraryCreated: Events.synced({
+    name: "v1.LibraryCreated",
+    schema: Schema.Struct({
+      libraryId: Schema.String,
+      name: Schema.String,
+      creatorId: Schema.String,
+    }),
+  }),
+  // This event adds a new item to an existing library.
   contextCreated: Events.synced({
     name: "v1.ContextCreated",
     schema: Schema.Struct({
@@ -9,6 +19,7 @@ export const contextLibraryEvents = {
       content: Schema.String,
       createdAt: Schema.Number,
       version: Schema.String,
+      creatorId: Schema.String,
     }),
   }),
   contextUpdated: Events.synced({
@@ -52,6 +63,13 @@ export const contextLibraryEvents = {
     schema: Schema.Struct({
       contextId: Schema.String,
       labelIds: Schema.Array(Schema.String),
+    }),
+  }),
+  // User Events
+  userJoined: Events.synced({
+    name: "v1.UserJoined",
+    schema: Schema.Struct({
+      userId: Schema.String,
     }),
   }),
 };

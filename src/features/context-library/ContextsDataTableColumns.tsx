@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { formatTokenCount } from "@/lib/utils";
-import { useLiveStores } from "@/store/LiveStoreProvider";
+import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { v4 as uuid } from "uuid";
 import {
   DropdownMenuSub,
@@ -45,7 +45,7 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
   row,
   table,
 }) => {
-  const { contextLibraryStore } = useLiveStores();
+  const contextLibraryStore = useContextLibraryStore();
   const context = row.original;
   const meta = table.options.meta as ContextsTableMeta | undefined;
   const { editingTitleId, setEditingTitleId } = meta || {};
