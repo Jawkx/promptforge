@@ -2,7 +2,6 @@
 @import "./partials/placeholder.css";
 @import "./partials/lists.css";
 @import "./partials/typography.css";
-/* @import "./partials/zoom.css"; */ /* Removed zoom.css import */
 
 :root {
   --mt-overlay: rgba(251, 251, 251, 0.75);
@@ -164,8 +163,6 @@
 .minimal-tiptap-editor .ProseMirror .ProseMirror-hideselection {
   @apply caret-transparent;
 }
-
-/* Removed .minimal-tiptap-editor .ProseMirror.resize-cursor rule as it was for image resizing */
 
 .minimal-tiptap-editor .ProseMirror .selection {
   @apply inline-block;
