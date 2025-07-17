@@ -24,7 +24,7 @@ export const LeftPanel: React.FC = () => {
     >
       <div className="flex flex-row mb-4">
         <LucideAnvil className="h-9 w-9 mr-3" />
-        <h1 className="font-semibold text-3xl"> {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}</h1>
+        <h1 className="font-semibold text-3xl">Prompt Forge</h1>
       </div>
       <div
         ref={setNodeRef}
