@@ -42,6 +42,7 @@ jobs:
       - name: Build project
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_SYNC_URL: ${{ secrets.VITE_SYNC_URL }}
         run: bun run build
 
       - name: Upload build artifacts
