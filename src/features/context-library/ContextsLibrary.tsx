@@ -8,7 +8,7 @@ import { ContextsDataTable } from "./ContextsDataTable";
 import { ContextsTableToolbar } from "./ContextsTableToolbar";
 import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";

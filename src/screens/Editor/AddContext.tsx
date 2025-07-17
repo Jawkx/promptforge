@@ -4,7 +4,7 @@ import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/lib/utils";
 import ContextForm from "@/features/shared/ContextForm";

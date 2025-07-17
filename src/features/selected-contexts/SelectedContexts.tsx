@@ -12,7 +12,7 @@ import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
-import { getRandomUntitledPlaceholder } from "@/constants/titlePlaceholders";
+import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { generateId, estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
