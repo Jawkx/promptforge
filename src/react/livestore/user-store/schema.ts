@@ -12,3 +12,5 @@ export const userSchema: LiveStoreSchema = makeSchema({
   events: userEvents,
   state,
 });
+
+export const schema = userSchema;

@@ -2,7 +2,7 @@ import { makeCfSync } from "@livestore/sync-cf";
 import { makeWorker } from "@livestore/adapter-web/worker";
 import { userSchema } from "./user-store/schema.ts";
 
-const url = self.location.origin;
+const url = import.meta.env.VITE_LIVESTORE_SYNC_URL;
 
 makeWorker({
   schema: userSchema,
