@@ -48,6 +48,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     initialData,
   );
   const [isMaximized, setIsMaximized] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

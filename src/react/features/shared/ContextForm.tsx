@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { useDialogAnimation } from "@/hooks/useDialogAnimation";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
 import {
   DialogContent,
   DialogDescription,
@@ -230,14 +230,8 @@ const ContextForm: React.FC<ContextFormProps> = ({
     [allLabels, labelSearch],
   );
 
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const contentWrapperRef = useRef<HTMLDivElement>(null);
-
-  useDialogAnimation(dialogRef, contentWrapperRef, isMaximized);
-
   return (
     <DialogContent
-      ref={dialogRef}
       className={cn(
         "sm:max-w-3xl max-h-[90vh] w-[95vw] flex flex-col overflow-hidden",
         isMaximized ? "max-w-none h-[95vh] flex flex-col" : "",
@@ -257,10 +251,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
         </button>
       </div>
 
-      <div
-        ref={contentWrapperRef}
-        className={cn("flex flex-col", isMaximized && "flex-1 min-h-0")}
-      >
+      <div className={cn("flex flex-col", isMaximized && "flex-1 min-h-0")}>
         <DialogHeader className="space-y-3 pb-6 flex-shrink-0">
           <DialogTitle className="text-xl font-semibold">
             {dialogTitle}
@@ -441,15 +432,6 @@ const ContextForm: React.FC<ContextFormProps> = ({
                       "flex-grow flex-shrink basis-0 h-full min-h-0",
                   )}
                   placeholder="Paste your context content here..."
-                  style={
-                    isMaximized
-                      ? {
-                          display: "flex",
-                          flexDirection: "column",
-                          flexGrow: 1,
-                        }
-                      : undefined
-                  }
                 />
               )}
             />

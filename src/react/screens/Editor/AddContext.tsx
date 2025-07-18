@@ -17,6 +17,7 @@ const AddContext: React.FC = () => {
   const { user } = useUser();
   const contextLibraryStore = useContextLibraryStore();
   const [isMaximized, setIsMaximized] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
