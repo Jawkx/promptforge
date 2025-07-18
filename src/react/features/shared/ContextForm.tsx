@@ -92,6 +92,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
     setValue,
     reset,
     getValues,
+    setFocus,
     formState: { isDirty },
   } = form;
 
@@ -118,7 +119,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
       initialValuesRef.current.title !== newInitialValues.title ||
       initialValuesRef.current.content !== newInitialValues.content ||
       JSON.stringify(initialValuesRef.current.labels) !==
-        JSON.stringify(newInitialValues.labels);
+      JSON.stringify(newInitialValues.labels);
 
     if (hasChanged) {
       initialValuesRef.current = newInitialValues;
@@ -150,6 +151,15 @@ const ContextForm: React.FC<ContextFormProps> = ({
     getValues,
     isDirty,
   ]);
+
+  useEffect(() => {
+    // focus on title input when dialog opens wait for the transition to finish
+    const timer = setTimeout(() => {
+      setFocus("title")
+    }, 200);
+
+    return () => clearTimeout(timer);
+  })
 
   const onFormSubmit = useCallback(
     (data: ContextFormData) => {
@@ -429,7 +439,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
                     "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
                     "border-2 focus:border-primary/50 transition-colors",
                     isMaximized &&
-                      "flex-grow flex-shrink basis-0 h-full min-h-0",
+                    "flex-grow flex-shrink basis-0 h-full min-h-0",
                   )}
                   placeholder="Paste your context content here..."
                 />
