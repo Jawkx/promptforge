@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,14 +27,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Check, PlusCircle, X, Tag, Maximize2, Minimize2 } from "lucide-react";
-import { useQuery } from "@livestore/react";
-import { labels$ } from "@/livestore/context-library-store/queries";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { ContextFormData, Label } from "@/types";
-import { LABEL_COLORS } from "@/constants/labelColors";
-import { generateLabelId } from "@/lib/utils";
-import { toast as sonnerToast } from "sonner";
+import { useLabelManagement } from "./useLabelManagement";
 
 interface ContextFormProps {
   id?: string;
@@ -70,7 +65,6 @@ const ContextForm: React.FC<ContextFormProps> = ({
   onMaximizeToggle,
 }) => {
   const contextLibraryStore = useContextLibraryStore();
-  const allLabels = useQuery(labels$, { store: contextLibraryStore });
 
   const handleMaximizeToggle = useCallback(() => {
     onMaximizeToggle?.();
@@ -85,14 +79,25 @@ const ContextForm: React.FC<ContextFormProps> = ({
     },
   });
 
+  // Use the label management hook
+  const {
+    labelSearch,
+    setLabelSearch,
+    isLabelPopoverOpen,
+    setIsLabelPopoverOpen,
+    filteredLabels,
+    showCreateOption,
+    handleLabelToggle,
+    handleRemoveLabel,
+    handleCreateLabel,
+  } = useLabelManagement({ form, contextLibraryStore });
+
   const {
     control,
     handleSubmit,
     watch,
-    setValue,
     reset,
     getValues,
-    setFocus,
     formState: { isDirty },
   } = form;
 
@@ -152,92 +157,11 @@ const ContextForm: React.FC<ContextFormProps> = ({
     isDirty,
   ]);
 
-  useEffect(() => {
-    // focus on title input when dialog opens wait for the transition to finish
-    const timer = setTimeout(() => {
-      setFocus("title")
-    }, 200);
-
-    return () => clearTimeout(timer);
-  })
-
   const onFormSubmit = useCallback(
     (data: ContextFormData) => {
       onSubmit(data);
     },
     [onSubmit],
-  );
-
-  const handleLabelToggle = useCallback(
-    (label: Label) => {
-      const currentLabels = getValues("labels") || [];
-      const isSelected = currentLabels.some((l) => l.id === label.id);
-      if (isSelected) {
-        setValue(
-          "labels",
-          currentLabels.filter((l) => l.id !== label.id),
-          { shouldDirty: true },
-        );
-      } else {
-        setValue("labels", [...currentLabels, label], { shouldDirty: true });
-      }
-    },
-    [getValues, setValue],
-  );
-
-  const handleRemoveLabel = useCallback(
-    (labelId: string) => {
-      const currentLabels = getValues("labels") || [];
-      setValue(
-        "labels",
-        currentLabels.filter((l) => l.id !== labelId),
-        { shouldDirty: true },
-      );
-    },
-    [getValues, setValue],
-  );
-
-  const [labelSearch, setLabelSearch] = React.useState("");
-  const [isLabelPopoverOpen, setIsLabelPopoverOpen] = React.useState(false);
-
-  const handleCreateLabel = useCallback(
-    (labelName: string) => {
-      const newLabelId = generateLabelId();
-      const newColor =
-        LABEL_COLORS[allLabels.length % LABEL_COLORS.length] || "#888888";
-      const newLabel: Label = {
-        id: newLabelId,
-        name: labelName,
-        color: newColor,
-      };
-
-      contextLibraryStore.commit(contextLibraryEvents.labelCreated(newLabel));
-      sonnerToast.success("Label Created", {
-        description: `Label "${labelName}" has been created.`,
-      });
-      handleLabelToggle(newLabel);
-      setLabelSearch("");
-      setIsLabelPopoverOpen(false);
-    },
-    [allLabels.length, handleLabelToggle, contextLibraryStore],
-  );
-
-  const filteredLabels = useMemo(
-    () =>
-      allLabels.filter((label) =>
-        label.name.toLowerCase().includes(labelSearch.toLowerCase()),
-      ),
-    [allLabels, labelSearch],
-  );
-
-  const showCreateOption = useMemo(
-    () =>
-      labelSearch.trim().length > 0 &&
-      !allLabels.some(
-        (label) =>
-          label.name.toLowerCase() === labelSearch.trim().toLowerCase(),
-      ),
-    [allLabels, labelSearch],
   );
 
   return (
