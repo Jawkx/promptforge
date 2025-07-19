@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 45 29% 97%;
     --foreground: 0 0% 3.9216%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9216%;
@@ -138,6 +138,7 @@
   @apply rounded-full bg-muted-foreground border-[1px] border-transparent border-solid bg-clip-padding;
 }
 
+/* Clerk */
 .cl-button,
 .cl-input,
 .cl-menuList {
