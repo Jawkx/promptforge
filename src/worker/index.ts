@@ -7,6 +7,6 @@ export class WebSocketServer extends makeDurableObject({
   onPull: async (message) => {
     console.log("onPull", message);
   },
-}) { }
+}) {}
 
 export default makeWorker({ enableCORS: true });
