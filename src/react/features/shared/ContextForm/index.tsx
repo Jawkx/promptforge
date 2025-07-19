@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useCallback, useEffect } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { useDebouncedCallback } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -92,70 +93,26 @@ const ContextForm: React.FC<ContextFormProps> = ({
     handleCreateLabel,
   } = useLabelManagement({ form, contextLibraryStore });
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    reset,
-    getValues,
-    formState: { isDirty },
-  } = form;
+  const { control, handleSubmit } = form;
 
-  // Use refs to track initial values and prevent unnecessary resets
-  const initialValuesRef = useRef({
-    id,
-    title: initialTitle,
-    content: initialContent,
-    labels: initialLabels,
-  });
+  // Watch form values for auto-save and label display
+  const formValues = useWatch({ control });
+  const watchedLabels = formValues.labels || [];
 
-  // Only reset when initial values actually change
-  useEffect(() => {
-    const newInitialValues = {
-      id,
-      title: initialTitle,
-      content: initialContent,
-      labels: initialLabels,
-    };
-
-    // Check if values have actually changed
-    const hasChanged =
-      initialValuesRef.current.id !== newInitialValues.id ||
-      initialValuesRef.current.title !== newInitialValues.title ||
-      initialValuesRef.current.content !== newInitialValues.content ||
-      JSON.stringify(initialValuesRef.current.labels) !==
-      JSON.stringify(newInitialValues.labels);
-
-    if (hasChanged) {
-      initialValuesRef.current = newInitialValues;
-      reset(newInitialValues);
+  // Auto-save with useDebouncedCallback
+  const debouncedSave = useDebouncedCallback((values: ContextFormData) => {
+    if (autoSave && onDataChange) {
+      onDataChange(values);
     }
-  }, [id, initialTitle, initialContent, initialLabels, reset]);
+  }, 500);
 
-  // Watch specific fields for auto-save with debouncing
-  const watchedTitle = watch("title");
-  const watchedContent = watch("content");
-  const watchedLabels = watch("labels");
-
-  // Debounced auto-save effect
   useEffect(() => {
-    if (!onDataChange || !autoSave || !isDirty) return;
-
-    const timeoutId = setTimeout(() => {
-      const currentValues = getValues();
-      onDataChange(currentValues);
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [
-    watchedTitle,
-    watchedContent,
-    watchedLabels,
-    onDataChange,
-    autoSave,
-    getValues,
-    isDirty,
-  ]);
+    if (autoSave) {
+      debouncedSave(formValues as ContextFormData);
+    } else {
+      debouncedSave.cancel();
+    }
+  }, [formValues, autoSave, debouncedSave]);
 
   const onFormSubmit = useCallback(
     (data: ContextFormData) => {
@@ -326,7 +283,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
                       variant="ghost"
                       size="sm"
                       className="h-4 w-4 p-0 hover:bg-transparent opacity-70 hover:opacity-100"
-                      onClick={() => handleRemoveLabel(label.id)}
+                      onClick={() => handleRemoveLabel(label.id!)}
                     >
                       <X className="h-3 w-3" />
                     </Button>
