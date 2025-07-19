@@ -1,16 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { SelectedContext, ContextFormData } from "@/types";
+import { SelectedContext, Label } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
-import ContextForm from "@/features/shared/ContextForm";
+import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
+import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
+import { useDebouncedCallback } from "use-debounce";
 
 interface EditContextProps {
   type: "library" | "selected";
@@ -35,31 +37,32 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     }
   }, [contextId, contexts, selectedContexts, type]);
 
-  // 3. Initialize state directly and safely. No useEffect needed for this!
-  const [initialData] = useState<ContextFormData | null>(() => {
-    if (!contextToEdit) return null;
-    return {
-      id: contextToEdit.id,
-      title: contextToEdit.title,
-      content: contextToEdit.content,
-      labels: contextToEdit.labels,
-    };
-  });
-
-  const [currentData, setCurrentData] = useState<ContextFormData | null>(
-    initialData,
+  // Initialize form state directly and safely
+  const [title, setTitle] = useState(() => contextToEdit?.title || "");
+  const [content, setContent] = useState(() => contextToEdit?.content || "");
+  const [labels, setLabels] = useState<readonly Label[]>(
+    () => contextToEdit?.labels || [],
   );
+
+  // Track initial values for change detection
+  const [initialTitle] = useState(() => contextToEdit?.title || "");
+  const [initialContent] = useState(() => contextToEdit?.content || "");
+  const [initialLabels] = useState(() => contextToEdit?.labels || []);
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveData = useCallback(
-    (data: ContextFormData, showToast = false) => {
+    (
+      titleValue: string,
+      contentValue: string,
+      labelsValue: readonly Label[],
+      showToast = false,
+    ) => {
       if (!contextId) return;
 
-      const trimmedTitle = data.title.trim();
-      const trimmedContent = data.content.trim();
+      const trimmedTitle = titleValue.trim();
+      const trimmedContent = contentValue.trim();
 
       if (!trimmedContent) {
         return;
@@ -77,11 +80,11 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         );
 
         // Update labels if they were changed
-        if (data.labels !== undefined) {
+        if (labelsValue !== undefined) {
           contextLibraryStore.commit(
             contextLibraryEvents.contextLabelsUpdated({
               contextId,
-              labelIds: data.labels.map((label) => label.id),
+              labelIds: labelsValue.map((label) => label.id),
             }),
           );
         }
@@ -103,7 +106,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             ...contextToUpdate,
             title: trimmedTitle,
             content: trimmedContent,
-            labels: data.labels || contextToUpdate.labels,
+            labels: labelsValue || contextToUpdate.labels,
             tokenCount: estimateTokens(trimmedContent),
             updatedAt: Date.now(),
             version: uuid(),
@@ -122,46 +125,73 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const handleClose = useCallback(() => {
     // Auto-save on close if there are changes
-    if (currentData && initialData) {
-      const hasChanges =
-        currentData.title !== initialData.title ||
-        currentData.content !== initialData.content ||
-        JSON.stringify(currentData.labels) !==
-        JSON.stringify(initialData.labels);
+    const hasChanges =
+      title !== initialTitle ||
+      content !== initialContent ||
+      JSON.stringify(labels) !== JSON.stringify(initialLabels);
 
-      if (hasChanges) {
-        saveData(currentData, false);
-      }
+    if (hasChanges) {
+      saveData(title, content, labels, false);
     }
+
     setIsOpen(false);
     setTimeout(() => {
       navigate("/");
     }, 200);
-  }, [currentData, initialData, saveData, navigate]);
-
+  }, [
+    title,
+    content,
+    labels,
+    initialTitle,
+    initialContent,
+    initialLabels,
+    saveData,
+    navigate,
+  ]);
   const handleSubmit = useCallback(
-    (data: ContextFormData) => {
-      saveData(data, true);
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      saveData(title, content, labels, true);
       handleClose();
     },
-    [saveData, handleClose],
+    [title, content, labels, saveData, handleClose],
   );
 
-  const handleDataChange = useCallback(
-    (data: ContextFormData) => {
-      setCurrentData(data);
-
-      // Clear existing timeout
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-
-      // Set new timeout for auto-save
-      debounceTimeoutRef.current = setTimeout(() => {
-        saveData(data, false);
-      }, 1000); // 1 second debounce
+  // Auto-save with debouncing
+  const debouncedSave = useDebouncedCallback(
+    (
+      titleValue: string,
+      contentValue: string,
+      labelsValue: readonly Label[],
+    ) => {
+      saveData(titleValue, contentValue, labelsValue, false);
     },
-    [saveData],
+    1000,
+  );
+
+  // Handle form field changes with auto-save
+  const handleTitleChange = useCallback(
+    (value: string) => {
+      setTitle(value);
+      debouncedSave(value, content, labels);
+    },
+    [content, labels, debouncedSave],
+  );
+
+  const handleContentChange = useCallback(
+    (value: string) => {
+      setContent(value);
+      debouncedSave(title, value, labels);
+    },
+    [title, labels, debouncedSave],
+  );
+
+  const handleLabelsChange = useCallback(
+    (value: readonly Label[]) => {
+      setLabels(value);
+      debouncedSave(title, content, value);
+    },
+    [title, content, debouncedSave],
   );
 
   useEffect(() => {
@@ -179,28 +209,37 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     }
   }, [contextToEdit, navigate]);
 
-  if (!contextToEdit || !initialData) {
+  if (!contextToEdit) {
     return null; // Render nothing while we navigate away.
   }
 
   const screenTitle =
     type === "library" ? "Edit Library Context" : "Edit Selected Context";
 
+  const labelSelector = (
+    <LabelSelector
+      selectedLabels={labels}
+      onLabelsChange={handleLabelsChange}
+      contextLibraryStore={contextLibraryStore}
+    />
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <ContextForm
-        id={initialData.id}
-        title={initialData.title}
-        content={initialData.content}
-        labels={initialData.labels}
+      <ContextFormUI
+        title={title}
+        content={content}
+        labels={labels}
+        onTitleChange={handleTitleChange}
+        onContentChange={handleContentChange}
         onSubmit={handleSubmit}
         onCancel={handleClose}
-        onDataChange={handleDataChange}
         dialogTitle={screenTitle}
         dialogDescription="Modify the title or content of your context snippet."
         isMaximized={isMaximized}
         onMaximizeToggle={() => setIsMaximized((p) => !p)}
         autoSave={true}
+        labelSelector={labelSelector}
       />
     </Dialog>
   );

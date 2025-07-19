@@ -7,8 +7,9 @@ import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/lib/utils";
-import ContextForm from "@/features/shared/ContextForm";
-import { ContextFormData } from "@/types";
+import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
+import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
+import { Label } from "@/types";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { v4 as uuid } from "uuid";
 
@@ -19,6 +20,11 @@ const AddContext: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // Form state
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [labels, setLabels] = useState<readonly Label[]>([]);
 
   useEffect(() => {
     setIsOpen(true);
@@ -32,8 +38,10 @@ const AddContext: React.FC = () => {
   }, [navigate]);
 
   const handleSubmit = useCallback(
-    (data: ContextFormData) => {
-      const finalContent = data.content.trim();
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      const finalContent = content.trim();
       if (!finalContent) {
         sonnerToast.error("Content Required", {
           description: "The context content cannot be empty.",
@@ -41,7 +49,7 @@ const AddContext: React.FC = () => {
         return;
       }
 
-      const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
+      const finalTitle = title.trim() || getRandomUntitledPlaceholder();
       const contextId = generateId();
 
       // Get user ID (either authenticated user or anonymous user from session storage)
@@ -69,11 +77,11 @@ const AddContext: React.FC = () => {
         }),
       );
 
-      if (data.labels && data.labels.length > 0) {
+      if (labels && labels.length > 0) {
         contextLibraryStore.commit(
           contextLibraryEvents.contextLabelsUpdated({
             contextId,
-            labelIds: data.labels.map((label) => label.id),
+            labelIds: labels.map((label) => label.id),
           }),
         );
       }
@@ -84,14 +92,25 @@ const AddContext: React.FC = () => {
 
       handleClose();
     },
-    [contextLibraryStore, handleClose, user],
+    [content, title, labels, contextLibraryStore, handleClose, user],
+  );
+
+  const labelSelector = (
+    <LabelSelector
+      selectedLabels={labels}
+      onLabelsChange={setLabels}
+      contextLibraryStore={contextLibraryStore}
+    />
   );
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <ContextForm
-        title=""
-        content=""
+      <ContextFormUI
+        title={title}
+        content={content}
+        labels={labels}
+        onTitleChange={setTitle}
+        onContentChange={setContent}
         onSubmit={handleSubmit}
         onCancel={handleClose}
         dialogTitle="Add New Context"
@@ -100,6 +119,7 @@ const AddContext: React.FC = () => {
         submitButtonIcon={<LucideSave />}
         isMaximized={isMaximized}
         onMaximizeToggle={() => setIsMaximized((prev) => !prev)}
+        labelSelector={labelSelector}
       />
     </Dialog>
   );

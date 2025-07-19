@@ -320,7 +320,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
                     "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
                     "border-2 focus:border-primary/50 transition-colors",
                     isMaximized &&
-                    "flex-grow flex-shrink basis-0 h-full min-h-0",
+                      "flex-grow flex-shrink basis-0 h-full min-h-0",
                   )}
                   placeholder="Paste your context content here..."
                 />
