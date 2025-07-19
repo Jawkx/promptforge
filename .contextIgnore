@@ -1,6 +1,0 @@
-.*
-*.lock
-*.log
-*.tsbuildinfo
-*.json
-src/components/ui/**/*
