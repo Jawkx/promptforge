@@ -27,11 +27,13 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   );
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
-  // 1. Find the data right away.
-  const contextToEdit =
-    type === "library"
-      ? contexts.find((c) => c.id === contextId)
-      : selectedContexts.find((c) => c.id === contextId);
+  const contextToEdit = React.useMemo(() => {
+    if (type === "library") {
+      return contexts.find((c) => c.id === contextId);
+    } else if (type === "selected") {
+      return selectedContexts.find((c) => c.id === contextId);
+    }
+  }, [contextId, contexts, selectedContexts, type]);
 
   // 3. Initialize state directly and safely. No useEffect needed for this!
   const [initialData] = useState<ContextFormData | null>(() => {
@@ -125,7 +127,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         currentData.title !== initialData.title ||
         currentData.content !== initialData.content ||
         JSON.stringify(currentData.labels) !==
-          JSON.stringify(initialData.labels);
+        JSON.stringify(initialData.labels);
 
       if (hasChanges) {
         saveData(currentData, false);
