@@ -48,7 +48,12 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     },
   });
 
-  const { control, handleSubmit: formHandleSubmit, setValue } = form;
+  const {
+    control,
+    handleSubmit: formHandleSubmit,
+    setValue,
+    formState: { isDirty },
+  } = form;
 
   // Watch form values for auto-save
   const formValues = useWatch({ control });
@@ -169,10 +174,12 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   // Auto-save effect using useWatch + useEffect pattern
   useEffect(() => {
+    if (!isDirty) return; // Only save if user made changes
+
     if (formValues) {
       debouncedSave(formValues as ContextFormData);
     }
-  }, [formValues, debouncedSave]);
+  }, [formValues, debouncedSave, isDirty]);
 
   const handleClose = useCallback(() => {
     // Auto-save on close if there are changes
