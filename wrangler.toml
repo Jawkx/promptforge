@@ -7,7 +7,7 @@ main = "src/worker/index.ts"
 [assets]
 directory = "./dist/"
 not_found_handling = "single-page-application"
-run_worker_first = ["/ws/*"]
+run_worker_first = ["/ws/*", "/wss/*"]
 
 [[durable_objects.bindings]]
 name = "WEBSOCKET_SERVER"
