@@ -1,6 +1,4 @@
-import React, { useCallback, useEffect } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { useDebouncedCallback } from "use-debounce";
+import React, { useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -13,33 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Check, PlusCircle, X, Tag, Maximize2, Minimize2 } from "lucide-react";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
-import { ContextFormData, Label } from "@/types";
-import { useLabelManagement } from "./useLabelManagement";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 interface ContextFormProps {
-  id?: string;
   title: string;
   content: string;
-  labels?: readonly Label[];
-  onSubmit: (data: ContextFormData) => void;
+  onTitleChange: (value: string) => void;
+  onContentChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
-  onDataChange?: (data: ContextFormData) => void;
   dialogTitle: string;
   dialogDescription: string;
   submitButtonText?: string;
@@ -47,16 +27,16 @@ interface ContextFormProps {
   autoSave?: boolean;
   isMaximized?: boolean;
   onMaximizeToggle?: () => void;
+  labelSelector: React.ReactNode;
 }
 
 const ContextForm: React.FC<ContextFormProps> = ({
-  id,
-  title: initialTitle,
-  content: initialContent,
-  labels: initialLabels = [],
+  title,
+  content,
+  onTitleChange,
+  onContentChange,
   onSubmit,
   onCancel,
-  onDataChange,
   dialogTitle,
   dialogDescription,
   submitButtonText,
@@ -64,62 +44,11 @@ const ContextForm: React.FC<ContextFormProps> = ({
   autoSave = false,
   isMaximized = false,
   onMaximizeToggle,
+  labelSelector,
 }) => {
-  const contextLibraryStore = useContextLibraryStore();
-
   const handleMaximizeToggle = useCallback(() => {
     onMaximizeToggle?.();
   }, [onMaximizeToggle]);
-
-  const form = useForm<ContextFormData>({
-    defaultValues: {
-      id,
-      title: initialTitle,
-      content: initialContent,
-      labels: initialLabels,
-    },
-  });
-
-  // Use the label management hook
-  const {
-    labelSearch,
-    setLabelSearch,
-    isLabelPopoverOpen,
-    setIsLabelPopoverOpen,
-    filteredLabels,
-    showCreateOption,
-    handleLabelToggle,
-    handleRemoveLabel,
-    handleCreateLabel,
-  } = useLabelManagement({ form, contextLibraryStore });
-
-  const { control, handleSubmit } = form;
-
-  // Watch form values for auto-save and label display
-  const formValues = useWatch({ control });
-  const watchedLabels = formValues.labels || [];
-
-  // Auto-save with useDebouncedCallback
-  const debouncedSave = useDebouncedCallback((values: ContextFormData) => {
-    if (autoSave && onDataChange) {
-      onDataChange(values);
-    }
-  }, 500);
-
-  useEffect(() => {
-    if (autoSave) {
-      debouncedSave(formValues as ContextFormData);
-    } else {
-      debouncedSave.cancel();
-    }
-  }, [formValues, autoSave, debouncedSave]);
-
-  const onFormSubmit = useCallback(
-    (data: ContextFormData) => {
-      onSubmit(data);
-    },
-    [onSubmit],
-  );
 
   return (
     <DialogContent
@@ -154,7 +83,7 @@ const ContextForm: React.FC<ContextFormProps> = ({
 
         <form
           id="context-form"
-          onSubmit={handleSubmit(onFormSubmit)}
+          onSubmit={onSubmit}
           onKeyDown={(e) => {
             if (
               e.key === "Enter" &&
@@ -175,127 +104,16 @@ const ContextForm: React.FC<ContextFormProps> = ({
             >
               Title
             </label>
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="title"
-                  {...field}
-                  placeholder="Enter a title (optional, will be auto-generated if blank)"
-                  className="h-10"
-                />
-              )}
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => onTitleChange(e.target.value)}
+              placeholder="Enter a title (optional, will be auto-generated if blank)"
+              className="h-10"
             />
           </div>
 
-          <div className="space-y-4 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground">
-                Labels
-              </label>
-              <Popover
-                open={isLabelPopoverOpen}
-                onOpenChange={setIsLabelPopoverOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 gap-2"
-                  >
-                    <Tag className="h-4 w-4" />
-                    Add Label
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-0" align="end">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search or create label..."
-                      value={labelSearch}
-                      onValueChange={setLabelSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty>No labels found.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredLabels.map((label) => {
-                          const isSelected = (watchedLabels || []).some(
-                            (l) => l.id === label.id,
-                          );
-                          return (
-                            <CommandItem
-                              key={label.id}
-                              onSelect={() => {
-                                handleLabelToggle(label);
-                                setIsLabelPopoverOpen(false);
-                              }}
-                              className="flex items-center justify-between"
-                            >
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="h-2 w-2 rounded-full"
-                                  style={{ backgroundColor: label.color }}
-                                />
-                                <span>{label.name}</span>
-                              </div>
-                              {isSelected && <Check className="h-4 w-4" />}
-                            </CommandItem>
-                          );
-                        })}
-                        {showCreateOption && (
-                          <CommandItem
-                            onSelect={() =>
-                              handleCreateLabel(labelSearch.trim())
-                            }
-                            className="flex items-center gap-2 text-muted-foreground"
-                          >
-                            <PlusCircle className="h-4 w-4" />
-                            <span>Create "{labelSearch.trim()}"</span>
-                          </CommandItem>
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md border min-h-[44px]">
-              {(watchedLabels || []).length > 0 ? (
-                (watchedLabels || []).map((label) => (
-                  <Badge
-                    key={label.id}
-                    variant="secondary"
-                    className="flex items-center gap-1.5 pr-1 py-1 text-xs"
-                    style={{
-                      backgroundColor: `${label.color}15`,
-                      borderColor: `${label.color}40`,
-                      color: label.color,
-                    }}
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: label.color }}
-                    />
-                    <span>{label.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-4 w-4 p-0 hover:bg-transparent opacity-70 hover:opacity-100"
-                      onClick={() => handleRemoveLabel(label.id!)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-muted-foreground text-sm">
-                  No labels assigned
-                </span>
-              )}
-            </div>
-          </div>
+          {labelSelector}
 
           <div
             className={cn(
@@ -309,22 +127,16 @@ const ContextForm: React.FC<ContextFormProps> = ({
             >
               Content
             </label>
-            <Controller
-              name="content"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  id="content"
-                  {...field}
-                  className={cn(
-                    "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
-                    "border-2 focus:border-primary/50 transition-colors",
-                    isMaximized &&
-                      "flex-grow flex-shrink basis-0 h-full min-h-0",
-                  )}
-                  placeholder="Paste your context content here..."
-                />
+            <Textarea
+              id="content"
+              value={content}
+              onChange={(e) => onContentChange(e.target.value)}
+              className={cn(
+                "min-h-[300px] resize-none font-mono text-sm leading-relaxed",
+                "border-2 focus:border-primary/50 transition-colors",
+                isMaximized && "flex-grow flex-shrink basis-0 h-full min-h-0",
               )}
+              placeholder="Paste your context content here..."
             />
           </div>
         </form>

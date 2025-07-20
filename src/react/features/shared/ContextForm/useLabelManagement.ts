@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@livestore/react";
 import { Store } from "@livestore/livestore";
 import { toast as sonnerToast } from "sonner";
@@ -7,12 +6,13 @@ import { toast as sonnerToast } from "sonner";
 import { labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
-import { ContextFormData, Label } from "@/types";
+import { Label } from "@/types";
 import { LABEL_COLORS } from "@/constants/labelColors";
 import { generateLabelId } from "@/lib/utils";
 
 interface UseLabelManagementProps {
-  form: UseFormReturn<ContextFormData>;
+  selectedLabels: readonly Label[];
+  onLabelsChange: (labels: readonly Label[]) => void;
   contextLibraryStore: Store<typeof contextLibrarySchema>;
 }
 
@@ -35,11 +35,10 @@ interface UseLabelManagementReturn {
 }
 
 export const useLabelManagement = ({
-  form,
+  selectedLabels,
+  onLabelsChange,
   contextLibraryStore,
 }: UseLabelManagementProps): UseLabelManagementReturn => {
-  const { getValues, setValue } = form;
-
   const [labelSearch, setLabelSearch] = useState("");
   const [isLabelPopoverOpen, setIsLabelPopoverOpen] = useState(false);
 
@@ -65,31 +64,21 @@ export const useLabelManagement = ({
 
   const handleLabelToggle = useCallback(
     (label: Label) => {
-      const currentLabels = getValues("labels") || [];
-      const isSelected = currentLabels.some((l) => l.id === label.id);
+      const isSelected = selectedLabels.some((l: Label) => l.id === label.id);
       if (isSelected) {
-        setValue(
-          "labels",
-          currentLabels.filter((l) => l.id !== label.id),
-          { shouldDirty: true },
-        );
+        onLabelsChange(selectedLabels.filter((l: Label) => l.id !== label.id));
       } else {
-        setValue("labels", [...currentLabels, label], { shouldDirty: true });
+        onLabelsChange([...selectedLabels, label]);
       }
     },
-    [getValues, setValue],
+    [selectedLabels, onLabelsChange],
   );
 
   const handleRemoveLabel = useCallback(
     (labelId: string) => {
-      const currentLabels = getValues("labels") || [];
-      setValue(
-        "labels",
-        currentLabels.filter((l) => l.id !== labelId),
-        { shouldDirty: true },
-      );
+      onLabelsChange(selectedLabels.filter((l: Label) => l.id !== labelId));
     },
-    [getValues, setValue],
+    [selectedLabels, onLabelsChange],
   );
 
   const handleCreateLabel = useCallback(

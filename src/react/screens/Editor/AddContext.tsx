@@ -9,9 +9,10 @@ import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/lib/utils";
 import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
-import { Label } from "@/types";
+import { Label, ContextFormData } from "@/types";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
 import { v4 as uuid } from "uuid";
+import { useForm } from "react-hook-form";
 
 const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
@@ -21,10 +22,19 @@ const AddContext: React.FC = () => {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Form state
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [labels, setLabels] = useState<readonly Label[]>([]);
+  // Initialize form with React Hook Form
+  const form = useForm<ContextFormData>({
+    defaultValues: {
+      title: "",
+      content: "",
+      labels: [],
+    },
+  });
+
+  const { handleSubmit: formHandleSubmit, setValue, watch } = form;
+
+  // Watch form values
+  const formValues = watch();
 
   useEffect(() => {
     setIsOpen(true);
@@ -38,10 +48,8 @@ const AddContext: React.FC = () => {
   }, [navigate]);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      const finalContent = content.trim();
+    (data: ContextFormData) => {
+      const finalContent = data.content.trim();
       if (!finalContent) {
         sonnerToast.error("Content Required", {
           description: "The context content cannot be empty.",
@@ -49,7 +57,7 @@ const AddContext: React.FC = () => {
         return;
       }
 
-      const finalTitle = title.trim() || getRandomUntitledPlaceholder();
+      const finalTitle = data.title.trim() || getRandomUntitledPlaceholder();
       const contextId = generateId();
 
       // Get user ID (either authenticated user or anonymous user from session storage)
@@ -77,11 +85,11 @@ const AddContext: React.FC = () => {
         }),
       );
 
-      if (labels && labels.length > 0) {
+      if (data.labels && data.labels.length > 0) {
         contextLibraryStore.commit(
           contextLibraryEvents.contextLabelsUpdated({
             contextId,
-            labelIds: labels.map((label) => label.id),
+            labelIds: data.labels.map((label) => label.id),
           }),
         );
       }
@@ -92,13 +100,35 @@ const AddContext: React.FC = () => {
 
       handleClose();
     },
-    [content, title, labels, contextLibraryStore, handleClose, user],
+    [contextLibraryStore, handleClose, user],
+  );
+
+  // Handle form field changes
+  const handleTitleChange = useCallback(
+    (value: string) => {
+      setValue("title", value);
+    },
+    [setValue],
+  );
+
+  const handleContentChange = useCallback(
+    (value: string) => {
+      setValue("content", value);
+    },
+    [setValue],
+  );
+
+  const handleLabelsChange = useCallback(
+    (value: readonly Label[]) => {
+      setValue("labels", value);
+    },
+    [setValue],
   );
 
   const labelSelector = (
     <LabelSelector
-      selectedLabels={labels}
-      onLabelsChange={setLabels}
+      selectedLabels={(formValues?.labels as Label[]) || []}
+      onLabelsChange={handleLabelsChange}
       contextLibraryStore={contextLibraryStore}
     />
   );
@@ -106,12 +136,12 @@ const AddContext: React.FC = () => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <ContextFormUI
-        title={title}
-        content={content}
-        labels={labels}
-        onTitleChange={setTitle}
-        onContentChange={setContent}
-        onSubmit={handleSubmit}
+        title={formValues?.title || ""}
+        content={formValues?.content || ""}
+        labels={(formValues?.labels as Label[]) || []}
+        onTitleChange={handleTitleChange}
+        onContentChange={handleContentChange}
+        onSubmit={formHandleSubmit(handleSubmit)}
         onCancel={handleClose}
         dialogTitle="Add New Context"
         dialogDescription="Create a new context snippet to use in your prompts."

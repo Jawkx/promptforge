@@ -31,19 +31,6 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
   onLabelsChange,
   contextLibraryStore,
 }) => {
-  // Create a mock form object for the useLabelManagement hook
-  const mockForm = React.useMemo(
-    () => ({
-      getValues: () => ({ labels: selectedLabels }),
-      setValue: (field: string, value: readonly Label[]) => {
-        if (field === "labels") {
-          onLabelsChange(value);
-        }
-      },
-    }),
-    [selectedLabels, onLabelsChange],
-  );
-
   const {
     labelSearch,
     setLabelSearch,
@@ -55,7 +42,8 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
     handleRemoveLabel,
     handleCreateLabel,
   } = useLabelManagement({
-    form: mockForm as any,
+    selectedLabels,
+    onLabelsChange,
     contextLibraryStore,
   });
 
