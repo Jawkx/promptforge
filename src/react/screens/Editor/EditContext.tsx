@@ -127,9 +127,44 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     [contextId, type, contextLibraryStore, updateSelectedContext],
   );
 
+  // Immediate save function specifically for labels
+  const saveLabelsImmediately = useCallback(
+    (labels: readonly Label[]) => {
+      if (!contextId) return;
+
+      try {
+        if (type === "library") {
+          contextLibraryStore.commit(
+            contextLibraryEvents.contextLabelsUpdated({
+              contextId,
+              labelIds: labels.map((label) => label.id),
+            }),
+          );
+        } else if (type === "selected") {
+          const currentContext = useLocalStore
+            .getState()
+            .selectedContexts.find((c) => c.id === contextId);
+          if (currentContext) {
+            updateSelectedContext({
+              ...currentContext,
+              labels: labels,
+              updatedAt: Date.now(),
+              version: uuid(),
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Immediate label save failed:", error);
+      }
+    },
+    [contextId, type, contextLibraryStore, updateSelectedContext],
+  );
+
   // Auto-save with useDebouncedCallback (moved from ContextForm)
+  // Updated to exclude labels to prevent duplicate saves
   const debouncedSave = useDebouncedCallback((values: ContextFormData) => {
-    saveData(values, false);
+    const { labels: _labels, ...otherValues } = values;
+    saveData(otherValues, false);
   }, 500);
 
   // Auto-save effect using useWatch + useEffect pattern
@@ -190,8 +225,9 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const handleLabelsChange = useCallback(
     (value: readonly Label[]) => {
       setValue("labels", value, { shouldDirty: true });
+      saveLabelsImmediately(value);
     },
-    [setValue],
+    [setValue, saveLabelsImmediately],
   );
 
   useEffect(() => {
