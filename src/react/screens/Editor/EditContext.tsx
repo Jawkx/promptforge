@@ -58,10 +58,6 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   // Watch form values for auto-save
   const formValues = useWatch({ control });
 
-  // Track initial values for change detection
-  const [initialTitle] = useState(() => contextToEdit?.title || "");
-  const [initialContent] = useState(() => contextToEdit?.content || "");
-  const [initialLabels] = useState(() => contextToEdit?.labels || []);
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -183,13 +179,8 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   const handleClose = useCallback(() => {
     // Auto-save on close if there are changes
-    const currentValues = formValues as ContextFormData;
-    const hasChanges =
-      currentValues.title !== initialTitle ||
-      currentValues.content !== initialContent ||
-      JSON.stringify(currentValues.labels) !== JSON.stringify(initialLabels);
-
-    if (hasChanges) {
+    if (isDirty) {
+      const currentValues = formValues as ContextFormData;
       saveData(currentValues, false);
     }
 
@@ -197,14 +188,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     setTimeout(() => {
       navigate("/");
     }, 200);
-  }, [
-    formValues,
-    initialTitle,
-    initialContent,
-    initialLabels,
-    saveData,
-    navigate,
-  ]);
+  }, [formValues, isDirty, saveData, navigate]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
