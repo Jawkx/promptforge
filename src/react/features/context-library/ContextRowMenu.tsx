@@ -51,6 +51,7 @@ export const ContextRowMenu: React.FC<ContextRowMenuProps> = ({
   onResetRowSelection,
   onContextMenuCapture,
 }) => {
+  const isOpeningDialog = React.useRef(false);
   const handleAddSelectedFromContextMenu = useCallback(() => {
     const contextsToAdd = selectedRows.map((r) => r.original);
     if (contextsToAdd.length > 0) {
@@ -87,7 +88,17 @@ export const ContextRowMenu: React.FC<ContextRowMenuProps> = ({
       <ContextMenuTrigger asChild onContextMenuCapture={onContextMenuCapture}>
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent className="border-border">
+      <ContextMenuContent
+        className="border-border"
+        onCloseAutoFocus={(event) => {
+          // If the menu is closing because we are opening the dialog,
+          // prevent the default focus restoration.
+          if (isOpeningDialog.current) {
+            event.preventDefault();
+            isOpeningDialog.current = false;
+          }
+        }}
+      >
         {currentSelectedCount > 1 && isSelected ? (
           <>
             <ContextMenuLabel>
@@ -139,7 +150,10 @@ export const ContextRowMenu: React.FC<ContextRowMenuProps> = ({
               <LucideCopy className="mr-2 h-4 w-4" />
               Copy Content
             </ContextMenuItem>
-            <ContextMenuItem onClick={() => meta?.onEditContext(context)}>
+            <ContextMenuItem onClick={() => {
+              isOpeningDialog.current = true;
+              meta?.onEditContext(context)
+            }}>
               <LucideEdit3 className="mr-2 h-4 w-4" />
               Edit "{context.title}"
             </ContextMenuItem>
