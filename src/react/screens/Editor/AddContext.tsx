@@ -11,6 +11,7 @@ import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
 import { Label, ContextFormData } from "@/types";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLocalStore, FocusArea } from "@/store/localStore";
 import { v4 as uuid } from "uuid";
 import { useForm } from "react-hook-form";
 
@@ -18,6 +19,7 @@ const AddContext: React.FC = () => {
   const [, navigate] = useLocation();
   const { user } = useUser();
   const contextLibraryStore = useContextLibraryStore();
+  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -38,14 +40,16 @@ const AddContext: React.FC = () => {
 
   useEffect(() => {
     setIsOpen(true);
-  }, []);
+    setFocusedArea(FocusArea.ADD_CONTEXT_DIALOG);
+  }, [setFocusedArea]);
 
   const handleClose = useCallback(() => {
+    setFocusedArea(FocusArea.PROMPT_INPUT);
     setIsOpen(false);
     setTimeout(() => {
       navigate("/");
     }, 200);
-  }, [navigate]);
+  }, [navigate, setFocusedArea]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {

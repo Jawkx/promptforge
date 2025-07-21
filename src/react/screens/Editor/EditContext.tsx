@@ -5,7 +5,7 @@ import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useLocalStore } from "@/store/localStore";
+import { useLocalStore, FocusArea } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
@@ -28,6 +28,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
+  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
 
   const contextToEdit = React.useMemo(() => {
@@ -184,11 +185,12 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       saveData(currentValues, false);
     }
 
+    setFocusedArea(FocusArea.PROMPT_INPUT);
     setIsOpen(false);
     setTimeout(() => {
       navigate("/");
     }, 200);
-  }, [formValues, isDirty, saveData, navigate]);
+  }, [formValues, isDirty, saveData, navigate, setFocusedArea]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
@@ -223,7 +225,8 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
 
   useEffect(() => {
     setIsOpen(true);
-  }, []);
+    setFocusedArea(FocusArea.EDIT_CONTEXT_DIALOG);
+  }, [setFocusedArea]);
 
   // 2. Handle the "not found" case.
   useEffect(() => {
