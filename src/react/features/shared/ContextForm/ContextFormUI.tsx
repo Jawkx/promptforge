@@ -29,7 +29,7 @@ interface ContextFormUIProps {
   autoSave?: boolean;
   isMaximized?: boolean;
   onMaximizeToggle?: () => void;
-  labelSelector: React.ReactNode;
+  labelSelector?: React.ReactNode;
 }
 
 const ContextFormUI: React.FC<ContextFormUIProps> = ({

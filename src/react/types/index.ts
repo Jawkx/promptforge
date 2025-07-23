@@ -15,7 +15,7 @@ export type Context = {
   readonly labels: readonly Label[];
 };
 
-export type SelectedContext = Context & {
+export type SelectedContext = Omit<Context, "labels"> & {
   readonly originalContextId?: string;
   readonly originalVersion?: string;
 };

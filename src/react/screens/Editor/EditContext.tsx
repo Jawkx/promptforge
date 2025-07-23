@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { SelectedContext, Label, ContextFormData } from "@/types";
+import { SelectedContext, Label, ContextFormData, Context } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -45,7 +45,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       id: contextId,
       title: contextToEdit?.title || "",
       content: contextToEdit?.content || "",
-      labels: contextToEdit?.labels || [],
+      labels: type === "library" ? ((contextToEdit as Context)?.labels || []) : undefined,
     },
   });
 
@@ -112,7 +112,6 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
             ...contextToUpdate,
             title: trimmedTitle,
             content: trimmedContent,
-            labels: data.labels || contextToUpdate.labels,
             tokenCount: estimateTokens(trimmedContent),
             updatedAt: Date.now(),
             version: uuid(),
@@ -149,7 +148,6 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
           if (currentContext) {
             updateSelectedContext({
               ...currentContext,
-              labels: labels,
               updatedAt: Date.now(),
               version: uuid(),
             });
@@ -269,7 +267,7 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
         isMaximized={isMaximized}
         onMaximizeToggle={() => setIsMaximized((p) => !p)}
         autoSave={true}
-        labelSelector={labelSelector}
+        labelSelector={type === "library" ? labelSelector : undefined}
       />
     </Dialog>
   );

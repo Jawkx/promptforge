@@ -94,7 +94,6 @@ export const SelectedContexts: React.FC = () => {
               version: uuid(),
               createdAt: now,
               updatedAt: now,
-              labels: [],
             };
             addContextToPrompt(newContext);
             sonnerToast("Context Pasted", {
@@ -161,14 +160,6 @@ export const SelectedContexts: React.FC = () => {
         }),
       );
 
-      // Also sync labels
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextLabelsUpdated({
-          contextId: selectedContext.originalContextId,
-          labelIds: selectedContext.labels.map((l) => l.id),
-        }),
-      );
-
       updateSelectedContext({
         ...selectedContext,
         version: newVersion,
@@ -199,7 +190,6 @@ export const SelectedContexts: React.FC = () => {
           originalVersion: originalContext.version,
           createdAt: originalContext.createdAt,
           updatedAt: originalContext.updatedAt,
-          labels: originalContext.labels,
         });
         sonnerToast.success("Synced from Library", {
           description: `Selected context has been reverted to library version.`,
@@ -227,15 +217,6 @@ export const SelectedContexts: React.FC = () => {
           creatorId: "user",
         }),
       );
-
-      if (selectedContext.labels.length > 0) {
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextLabelsUpdated({
-            contextId: id,
-            labelIds: selectedContext.labels.map((l) => l.id),
-          }),
-        );
-      }
 
       updateSelectedContext({
         ...selectedContext,

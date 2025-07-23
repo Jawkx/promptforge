@@ -69,7 +69,6 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
           originalContextId: libraryContext.id,
           createdAt: libraryContext.createdAt,
           updatedAt: libraryContext.updatedAt,
-          labels: libraryContext.labels,
         };
         addContextToPrompt(newSelectedContextCopy);
         sonnerToast.success("Context Selected", {
