@@ -30,7 +30,6 @@ import {
   ContextsTableMeta,
 } from "./ContextsDataTableColumns";
 import { cn } from "@/lib/utils";
-import { useLocation } from "wouter";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { useDraggable } from "@dnd-kit/core";
 import { ContextRowMenu } from "./ContextRowMenu";
@@ -158,7 +157,9 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
   editingTitleId,
   setEditingTitleId,
 }) => {
-  const [, navigate] = useLocation();
+  const openEditContextModal = useLocalStore(
+    (state) => state.openEditContextModal,
+  );
 
   const isFocused = useLocalStore(
     (state) => state.focusedArea === FocusArea.CONTEXT_LIBRARY,
@@ -174,9 +175,9 @@ export const ContextsDataTable: React.FC<ContextsDataTableProps> = ({
 
   const handleEditContext = useCallback(
     (context: Context) => {
-      navigate(`/edit/library/${context.id}`);
+      openEditContextModal("library", context.id);
     },
-    [navigate],
+    [openEditContextModal],
   );
 
   const tableMeta: ContextsTableMeta = useMemo(

@@ -6,7 +6,6 @@ import { toast as sonnerToast } from "sonner";
 import { ThemeToggler } from "@/features/shared/ThemeToggler";
 import { ContextsDataTable } from "./ContextsDataTable";
 import { ContextsTableToolbar } from "./ContextsTableToolbar";
-import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -29,9 +28,11 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
 }) => {
   const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const focusedArea = useLocalStore((state) => state.focusedArea);
+  const openAddContextModal = useLocalStore(
+    (state) => state.openAddContextModal,
+  );
 
   const { userId } = useAuth();
-  const [, navigate] = useLocation();
   const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
   const labels = useQuery(labels$, { store: contextLibraryStore });
@@ -53,7 +54,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   };
 
   const handleAddContext = () => {
-    navigate("/add");
+    openAddContextModal();
   };
 
   const onAddSelectedToPrompt = useCallback(

@@ -10,7 +10,17 @@ export enum FocusArea {
   EDIT_CONTEXT_DIALOG = "EDIT_CONTEXT_DIALOG",
 }
 
-interface LocalStoreState {
+interface ModalState {
+  addContextModal: { isOpen: boolean };
+  editContextModal: {
+    isOpen: boolean;
+    type?: "library" | "selected";
+    contextId?: string;
+  };
+  labelsModal: { isOpen: boolean };
+}
+
+interface LocalStoreState extends ModalState {
   prompt: Content;
   setPrompt: (prompt: Content) => void;
 
@@ -22,6 +32,17 @@ interface LocalStoreState {
 
   focusedArea: FocusArea;
   setFocusedArea: (area: FocusArea) => void;
+
+  // Modal actions
+  openAddContextModal: () => void;
+  closeAddContextModal: () => void;
+  openEditContextModal: (
+    type: "library" | "selected",
+    contextId: string,
+  ) => void;
+  closeEditContextModal: () => void;
+  openLabelsModal: () => void;
+  closeLabelsModal: () => void;
 }
 
 export const useLocalStore = create<LocalStoreState>((set) => ({
@@ -66,4 +87,37 @@ export const useLocalStore = create<LocalStoreState>((set) => ({
 
   focusedArea: FocusArea.PROMPT_INPUT,
   setFocusedArea: (area) => set({ focusedArea: area }),
+
+  // Modal state
+  addContextModal: { isOpen: false },
+  editContextModal: { isOpen: false },
+  labelsModal: { isOpen: false },
+
+  // Modal actions
+  openAddContextModal: () =>
+    set({
+      addContextModal: { isOpen: true },
+      focusedArea: FocusArea.ADD_CONTEXT_DIALOG,
+    }),
+  closeAddContextModal: () =>
+    set({
+      addContextModal: { isOpen: false },
+      focusedArea: FocusArea.PROMPT_INPUT,
+    }),
+  openEditContextModal: (type, contextId) =>
+    set({
+      editContextModal: { isOpen: true, type, contextId },
+      focusedArea: FocusArea.EDIT_CONTEXT_DIALOG,
+    }),
+  closeEditContextModal: () =>
+    set({
+      editContextModal: {
+        isOpen: false,
+        type: undefined,
+        contextId: undefined,
+      },
+      focusedArea: FocusArea.PROMPT_INPUT,
+    }),
+  openLabelsModal: () => set({ labelsModal: { isOpen: true } }),
+  closeLabelsModal: () => set({ labelsModal: { isOpen: false } }),
 }));

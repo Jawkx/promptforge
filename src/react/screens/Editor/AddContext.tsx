@@ -1,5 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import React, { useCallback, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
@@ -11,18 +10,15 @@ import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
 import { Label, ContextFormData } from "@/types";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
-import { useLocalStore, FocusArea } from "@/store/localStore";
+import { useLocalStore } from "@/store/localStore";
 import { v4 as uuid } from "uuid";
 import { useForm } from "react-hook-form";
 
 const AddContext: React.FC = () => {
-  const [, navigate] = useLocation();
   const { user } = useUser();
   const contextLibraryStore = useContextLibraryStore();
-  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
+  const { addContextModal, closeAddContextModal } = useLocalStore();
   const [isMaximized, setIsMaximized] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
 
   // Initialize form with React Hook Form
   const form = useForm<ContextFormData>({
@@ -38,18 +34,10 @@ const AddContext: React.FC = () => {
   // Watch form values
   const formValues = watch();
 
-  useEffect(() => {
-    setIsOpen(true);
-    setFocusedArea(FocusArea.ADD_CONTEXT_DIALOG);
-  }, [setFocusedArea]);
-
   const handleClose = useCallback(() => {
-    setFocusedArea(FocusArea.PROMPT_INPUT);
-    setIsOpen(false);
-    setTimeout(() => {
-      navigate("/");
-    }, 200);
-  }, [navigate, setFocusedArea]);
+    form.reset();
+    closeAddContextModal();
+  }, [form, closeAddContextModal]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
@@ -138,7 +126,10 @@ const AddContext: React.FC = () => {
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog
+      open={addContextModal.isOpen}
+      onOpenChange={(open) => !open && handleClose()}
+    >
       <ContextFormUI
         title={formValues?.title || ""}
         content={formValues?.content || ""}

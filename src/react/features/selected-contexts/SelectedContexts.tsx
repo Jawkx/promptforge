@@ -7,7 +7,6 @@ import {
 } from "./SelectedContextsTableColumns";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { toast as sonnerToast } from "sonner";
-import { useLocation } from "wouter";
 import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
@@ -35,8 +34,9 @@ export const SelectedContexts: React.FC = () => {
 
   const contextLibraryStore = useContextLibraryStore();
   const libraryContexts = useQuery(contexts$, { store: contextLibraryStore });
-
-  const [, navigate] = useLocation();
+  const openEditContextModal = useLocalStore(
+    (state) => state.openEditContextModal,
+  );
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
@@ -129,9 +129,9 @@ export const SelectedContexts: React.FC = () => {
 
   const onEditSelectedContext = useCallback(
     (context: SelectedContext) => {
-      navigate(`/edit/selected/${context.id}`);
+      openEditContextModal("selected", context.id);
     },
-    [navigate],
+    [openEditContextModal],
   );
 
   const onDeleteMultipleFromPrompt = useCallback(

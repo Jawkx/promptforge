@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "wouter";
+import React, { useState, useCallback } from "react";
 import { useQuery } from "@livestore/react";
 import { toast as sonnerToast } from "sonner";
 import { LucideEdit, LucidePlus, LucideTrash2, LucideX } from "lucide-react";
 import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLocalStore } from "@/store/localStore";
 import { labels$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { Label as LabelType } from "@/types";
@@ -24,8 +24,8 @@ import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 import { Separator } from "@/components/ui/separator";
 
 export const ManageLabelsDialog: React.FC = () => {
-  const [, navigate] = useLocation();
   const contextLibraryStore = useContextLibraryStore();
+  const { labelsModal, closeLabelsModal } = useLocalStore();
   const labels = useQuery(labels$, { store: contextLibraryStore });
 
   // Edit state
@@ -41,13 +41,6 @@ export const ManageLabelsDialog: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [labelToDelete, setLabelToDelete] = useState<LabelType | null>(null);
 
-  // Dialog animation state
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    setIsOpen(true);
-  }, []);
-
   const handleClose = useCallback(() => {
     // Auto-save any pending changes before closing
     if (editingLabelId && editingName.trim()) {
@@ -59,11 +52,14 @@ export const ManageLabelsDialog: React.FC = () => {
         }),
       );
     }
-    setIsOpen(false);
-    setTimeout(() => {
-      navigate("/");
-    }, 200);
-  }, [navigate]);
+    closeLabelsModal();
+  }, [
+    editingLabelId,
+    editingName,
+    editingColor,
+    contextLibraryStore,
+    closeLabelsModal,
+  ]);
 
   const handleSelectLabelForEdit = (label: LabelType) => {
     setEditingLabelId(label.id);
@@ -146,7 +142,10 @@ export const ManageLabelsDialog: React.FC = () => {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog
+        open={labelsModal.isOpen}
+        onOpenChange={(open) => !open && handleClose()}
+      >
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader className="pb-4">
             <DialogTitle className="text-xl font-semibold">

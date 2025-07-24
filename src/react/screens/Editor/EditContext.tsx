@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "wouter";
 import { SelectedContext, Label, ContextFormData, Context } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useLocalStore, FocusArea } from "@/store/localStore";
+import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
@@ -15,21 +14,17 @@ import { v4 as uuid } from "uuid";
 import { useDebouncedCallback } from "use-debounce";
 import { useForm, useWatch } from "react-hook-form";
 
-interface EditContextProps {
-  type: "library" | "selected";
-  id: string;
-}
-
-const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
-  const [, navigate] = useLocation();
+const EditContext: React.FC = () => {
   const contextLibraryStore = useContextLibraryStore();
-
+  const { editContextModal, closeEditContextModal } = useLocalStore();
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
-  const setFocusedArea = useLocalStore((state) => state.setFocusedArea);
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
+
+  // Get type and contextId from store state
+  const { type, contextId } = editContextModal;
 
   const contextToEdit = React.useMemo(() => {
     if (type === "library") {
@@ -45,7 +40,10 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       id: contextId,
       title: contextToEdit?.title || "",
       content: contextToEdit?.content || "",
-      labels: type === "library" ? ((contextToEdit as Context)?.labels || []) : undefined,
+      labels:
+        type === "library"
+          ? (contextToEdit as Context)?.labels || []
+          : undefined,
     },
   });
 
@@ -60,8 +58,6 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   const formValues = useWatch({ control });
 
   const [isMaximized, setIsMaximized] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
 
   const saveData = useCallback(
     (data: ContextFormData, showToast = false) => {
@@ -183,12 +179,8 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
       saveData(currentValues, false);
     }
 
-    setFocusedArea(FocusArea.PROMPT_INPUT);
-    setIsOpen(false);
-    setTimeout(() => {
-      navigate("/");
-    }, 200);
-  }, [formValues, isDirty, saveData, navigate, setFocusedArea]);
+    closeEditContextModal();
+  }, [formValues, isDirty, saveData, closeEditContextModal]);
 
   const handleSubmit = useCallback(
     (data: ContextFormData) => {
@@ -221,25 +213,16 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
     [setValue, saveLabelsImmediately],
   );
 
+  // Handle the "not found" case.
   useEffect(() => {
-    setIsOpen(true);
-    setFocusedArea(FocusArea.EDIT_CONTEXT_DIALOG);
-  }, [setFocusedArea]);
-
-  // 2. Handle the "not found" case.
-  useEffect(() => {
-    if (!contextToEdit) {
+    if (!contextToEdit && editContextModal.isOpen) {
       sonnerToast.error("Context Not Found", {
         description:
           "The context you are trying to edit does not exist or could not be found.",
       });
-      navigate("/");
+      closeEditContextModal();
     }
-  }, [contextToEdit, navigate]);
-
-  if (!contextToEdit) {
-    return null; // Render nothing while we navigate away.
-  }
+  }, [contextToEdit, editContextModal.isOpen, closeEditContextModal]);
 
   const screenTitle =
     type === "library" ? "Edit Library Context" : "Edit Selected Context";
@@ -253,22 +236,27 @@ const EditContext: React.FC<EditContextProps> = ({ type, id: contextId }) => {
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <ContextFormUI
-        title={formValues?.title || ""}
-        content={formValues?.content || ""}
-        labels={(formValues?.labels as Label[]) || []}
-        onTitleChange={handleTitleChange}
-        onContentChange={handleContentChange}
-        onSubmit={formHandleSubmit(handleSubmit)}
-        onCancel={handleClose}
-        dialogTitle={screenTitle}
-        dialogDescription="Modify the title or content of your context snippet."
-        isMaximized={isMaximized}
-        onMaximizeToggle={() => setIsMaximized((p) => !p)}
-        autoSave={true}
-        labelSelector={type === "library" ? labelSelector : undefined}
-      />
+    <Dialog
+      open={editContextModal.isOpen}
+      onOpenChange={(open) => !open && handleClose()}
+    >
+      {contextToEdit ? (
+        <ContextFormUI
+          title={formValues?.title || ""}
+          content={formValues?.content || ""}
+          labels={(formValues?.labels as Label[]) || []}
+          onTitleChange={handleTitleChange}
+          onContentChange={handleContentChange}
+          onSubmit={formHandleSubmit(handleSubmit)}
+          onCancel={handleClose}
+          dialogTitle={screenTitle}
+          dialogDescription="Modify the title or content of your context snippet."
+          isMaximized={isMaximized}
+          onMaximizeToggle={() => setIsMaximized((p) => !p)}
+          autoSave={true}
+          labelSelector={type === "library" ? labelSelector : undefined}
+        />
+      ) : null}
     </Dialog>
   );
 };

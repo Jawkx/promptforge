@@ -9,7 +9,6 @@ import { useQuery } from "@livestore/react";
 import { contexts$ } from "@/livestore/context-library-store/queries";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
 import { toast as sonnerToast } from "sonner";
-import { useRoute } from "wouter";
 import AddContext from "./AddContext";
 import EditContext from "./EditContext";
 import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
@@ -35,12 +34,7 @@ const Editor: React.FC = () => {
   // Auto-create context library for new users
   useAutoCreateContextLibrary();
 
-  const [isAddModalOpen] = useRoute("/add");
-  const [isLabelsModalOpen] = useRoute("/labels");
-  const [isEditModalOpen, params] = useRoute<{
-    type: "library" | "selected";
-    id: string;
-  }>("/edit/:type/:id");
+  // Modal components are always mounted for proper animations
 
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [contextToDeleteId, setContextToDeleteId] = useState<string | null>(
@@ -237,13 +231,9 @@ const Editor: React.FC = () => {
           </div>
         ) : null}
       </DragOverlay>
-      {isAddModalOpen && <AddContext />}
-      {isLabelsModalOpen && <ManageLabelsDialog />}
-      {isEditModalOpen &&
-        params &&
-        (params.type === "library" || params.type === "selected") && (
-          <EditContext key={params.id} type={params.type} id={params.id} />
-        )}
+      <AddContext />
+      <ManageLabelsDialog />
+      <EditContext />
     </DndContext>
   );
 };

@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LucideSearch, LucideTag } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocalStore } from "@/store/localStore";
 
 interface ContextsTableToolbarProps {
   searchQuery: string;
@@ -13,7 +13,7 @@ export const ContextsTableToolbar: React.FC<ContextsTableToolbarProps> = ({
   searchQuery,
   setSearchQuery,
 }) => {
-  const [, navigate] = useLocation();
+  const openLabelsModal = useLocalStore((state) => state.openLabelsModal);
 
   return (
     <div className="flex items-center mb-3 gap-2">
@@ -26,7 +26,7 @@ export const ContextsTableToolbar: React.FC<ContextsTableToolbarProps> = ({
           className="h-9 w-full pl-10"
         />
       </div>
-      <Button variant="outline" onClick={() => navigate("/labels")}>
+      <Button variant="outline" onClick={openLabelsModal}>
         <LucideTag className="h-4 w-4" />
       </Button>
     </div>
