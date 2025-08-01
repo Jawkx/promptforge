@@ -4,6 +4,8 @@ import { Download, Upload } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 import { Context, Label } from "@/types";
 import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
+import { useQuery } from "@livestore/react";
 import { v4 as uuid } from "uuid";
 import { Store } from "@livestore/livestore";
 import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
@@ -16,17 +18,15 @@ interface ContextBackupData {
 }
 
 interface ContextBackupProps {
-  contexts: readonly Context[];
-  labels: readonly Label[];
   contextLibraryStore: Store<typeof contextLibrarySchema>;
 }
 
 export const ContextBackup: React.FC<ContextBackupProps> = ({
-  contexts,
-  labels,
   contextLibraryStore,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const labels = useQuery(labels$, { store: contextLibraryStore });
 
   const handleDownload = () => {
     try {
@@ -201,8 +201,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
     try {
       const backupData = await readAndParseFile(file);
 
-      const existingLabels = new Set(labels.map((l) => l.id));
-      const existingContexts = new Set(contexts.map((c) => c.id));
+      const existingLabels = new Set(labels.map((l: Label) => l.id));
+      const existingContexts = new Set(contexts.map((c: Context) => c.id));
 
       const newLabelsCount = importLabels(backupData.labels, existingLabels);
       const { newContextsCount, updatedContextsCount } = importContexts(
