@@ -4,7 +4,7 @@ import type { FormatAction } from "../../types";
 import type { toggleVariants } from "@/components/ui/toggle";
 import type { VariantProps } from "class-variance-authority";
 import { CaretDownIcon, ListBulletIcon } from "@radix-ui/react-icons";
-import { ToolbarSection } from "../toolbar-section";
+import { ToolbarSection } from "../ToolbarSection";
 
 type ListItemAction = "orderedList" | "bulletList";
 interface ListItem extends FormatAction {

@@ -12,8 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ToolbarButton } from "../toolbar-button";
-import { ShortcutKey } from "../shortcut-key";
+import { ToolbarButton } from "../ToolbarButton";
+import { ShortcutKey } from "../ShortcutKey";
 
 interface TextStyle
   extends Omit<

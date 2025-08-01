@@ -12,7 +12,7 @@ import {
   TextNoneIcon,
   UnderlineIcon,
 } from "@radix-ui/react-icons";
-import { ToolbarSection } from "../toolbar-section";
+import { ToolbarSection } from "../ToolbarSection";
 
 type TextStyleAction =
   | "bold"

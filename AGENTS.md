@@ -24,6 +24,16 @@
 - **State**: Use Zustand for global state, LiveStore for real-time data
 - **Styling**: Tailwind CSS with className prop, use cn() utility for conditional classes
 
+## File Naming Conventions
+
+- **React Components**: PascalCase (e.g., `ShortcutKey.tsx`, `ToolbarButton.tsx`)
+- **Hooks**: camelCase with `use` prefix (e.g., `useContainerSize.ts`, `useMinimalTiptap.ts`)
+- **UI Components**: kebab-case for multi-word compound components (e.g., `alert-dialog.tsx`, `dropdown-menu.tsx`)
+- **Utility Files**: camelCase (e.g., `utils.ts`, `localStore.ts`)
+- **Variables/Functions**: camelCase
+- **Component Names**: PascalCase
+- **Types/Interfaces**: PascalCase
+
 ## Architecture Notes
 
 - React + TypeScript + Vite project with LiveStore for real-time data sync

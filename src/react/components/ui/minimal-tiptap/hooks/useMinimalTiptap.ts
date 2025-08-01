@@ -16,7 +16,7 @@ import {
 } from "../extensions";
 import { cn } from "@/lib/utils";
 import { getOutput } from "../utils";
-import { useThrottle } from "../hooks/use-throttle";
+import { useThrottle } from "../hooks/useThrottle";
 
 export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   value?: Content;

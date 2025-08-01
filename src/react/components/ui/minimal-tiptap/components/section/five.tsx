@@ -11,7 +11,7 @@ import {
   QuoteIcon,
 } from "@radix-ui/react-icons";
 import { LinkEditPopover } from "../link/link-edit-popover";
-import { ToolbarSection } from "../toolbar-section";
+import { ToolbarSection } from "../ToolbarSection";
 
 type InsertElementAction = "codeBlock" | "blockquote" | "horizontalRule";
 interface InsertElement extends FormatAction {

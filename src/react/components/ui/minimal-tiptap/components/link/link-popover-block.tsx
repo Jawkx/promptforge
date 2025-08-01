@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Separator } from "@/components/ui/separator";
-import { ToolbarButton } from "../toolbar-button";
+import { ToolbarButton } from "../ToolbarButton";
 import {
   CopyIcon,
   ExternalLinkIcon,
