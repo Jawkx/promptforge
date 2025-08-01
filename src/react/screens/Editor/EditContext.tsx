@@ -54,6 +54,19 @@ const EditContext: React.FC = () => {
     formState: { isDirty },
   } = form;
 
+  // Synchronize form with contextToEdit when data becomes available
+  useEffect(() => {
+    if (contextToEdit && editContextModal.isOpen) {
+      form.reset({
+        id: contextId,
+        title: contextToEdit.title,
+        content: contextToEdit.content,
+        labels:
+          type === "library" ? (contextToEdit as Context).labels : undefined,
+      });
+    }
+  }, [contextToEdit, editContextModal.isOpen, contextId, type, form]);
+
   // Watch form values for auto-save
   const formValues = useWatch({ control });
 
