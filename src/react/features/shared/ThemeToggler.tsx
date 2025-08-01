@@ -6,12 +6,12 @@ import { preference$ } from "@/livestore/user-store/queries";
 import { userEvents } from "@/livestore/user-store/events";
 import { useUserStore } from "@/store/UserLiveStoreProvider";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { Auth } from "./Auth";
+import { useLocation } from "wouter";
 
 export const ThemeToggler = () => {
   const userStore = useUserStore();
   const preference = useQuery(preference$, { store: userStore });
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const theme = preference?.theme ?? "dark";
 
@@ -39,7 +39,7 @@ export const ThemeToggler = () => {
   return (
     <div className="flex items-center gap-2">
       <SignedOut>
-        <Button variant="outline" onClick={() => setIsAuthOpen(true)}>
+        <Button variant="outline" onClick={() => setLocation("/sign-in")}>
           Sign In
         </Button>
       </SignedOut>
@@ -70,8 +70,6 @@ export const ThemeToggler = () => {
           />
         </div>
       </Button>
-
-      <Auth isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </div>
   );
 };

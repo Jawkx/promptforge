@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import PromptInput from "@/features/prompt-editor/PromptInput";
 import { SelectedContexts } from "@/features/selected-contexts/SelectedContexts";
 import { CopyAllButton } from "@/features/shared/CopyAllButton";
-import { LucideAnvil } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 
 export const LeftPanel: React.FC = () => {
   const { setNodeRef, isOver } = useDroppable({
@@ -22,9 +22,8 @@ export const LeftPanel: React.FC = () => {
       minSize={30}
       className={cn("flex flex-col p-4 transition-colors")}
     >
-      <div className="flex flex-row mb-4">
-        <LucideAnvil className="h-9 w-9 mr-3" />
-        <h1 className="font-semibold text-3xl">Prompt Forge</h1>
+      <div className="flex flex-row">
+        <AppLogo />
       </div>
       <div
         ref={setNodeRef}
