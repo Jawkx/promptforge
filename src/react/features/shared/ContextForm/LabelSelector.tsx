@@ -16,14 +16,14 @@ import {
 } from "@/components/ui/command";
 import { Check, PlusCircle, X, Tag } from "lucide-react";
 import { Store } from "@livestore/livestore";
-import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
+import { liveSchema } from "@/livestore/live-store/schema";
 import { Label } from "@/types";
 import { useLabelManagement } from "./useLabelManagement";
 
 interface LabelSelectorProps {
   selectedLabels: readonly Label[];
   onLabelsChange: (labels: readonly Label[]) => void;
-  liveStore: Store<typeof contextLibrarySchema>;
+  liveStore: Store<typeof liveSchema>;
 }
 
 const LabelSelector: React.FC<LabelSelectorProps> = ({

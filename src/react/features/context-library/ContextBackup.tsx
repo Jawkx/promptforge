@@ -8,7 +8,7 @@ import { contexts$, labels$ } from "@/livestore/live-store/queries";
 import { useQuery } from "@livestore/react";
 import { v4 as uuid } from "uuid";
 import { Store } from "@livestore/livestore";
-import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
+import { liveSchema } from "@/livestore/live-store/schema";
 
 interface ContextBackupData {
   contexts: readonly Context[];
@@ -18,12 +18,10 @@ interface ContextBackupData {
 }
 
 interface ContextBackupProps {
-  liveStore: Store<typeof contextLibrarySchema>;
+  liveStore: Store<typeof liveSchema>;
 }
 
-export const ContextBackup: React.FC<ContextBackupProps> = ({
-  liveStore,
-}) => {
+export const ContextBackup: React.FC<ContextBackupProps> = ({ liveStore }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contexts = useQuery(contexts$, { store: liveStore });
   const labels = useQuery(labels$, { store: liveStore });
