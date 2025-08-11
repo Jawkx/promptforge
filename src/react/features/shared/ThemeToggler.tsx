@@ -2,18 +2,18 @@ import { Button } from "@/components/ui/button";
 import { LucideMoon, LucideSun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@livestore/react";
-import { preference$ } from "@/livestore/user-store/queries";
-import { userEvents } from "@/livestore/user-store/events";
-import { useUserStore } from "@/store/UserLiveStoreProvider";
+import { preferences$ } from "@/livestore/live-store/queries";
+import { events } from "@/livestore/live-store/events";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { useLocation } from "wouter";
 
 export const ThemeToggler = () => {
-  const userStore = useUserStore();
-  const preference = useQuery(preference$, { store: userStore });
+  const liveStore = useLiveStore();
+  const preferences = useQuery(preferences$, { store: liveStore });
   const [, setLocation] = useLocation();
 
-  const theme = preference?.theme ?? "dark";
+  const theme = preferences?.[0]?.theme ?? "dark";
 
   const [currentIcon, setCurrentIcon] = useState(
     theme === "dark" ? "moon" : "sun",
@@ -29,8 +29,8 @@ export const ThemeToggler = () => {
   }, [theme]);
 
   const handleToggleTheme = () => {
-    userStore.commit(
-      userEvents.preferenceUpdated({
+    liveStore.commit(
+      events.userPreferenceUpdated({
         theme: theme === "dark" ? "light" : "dark",
       }),
     );

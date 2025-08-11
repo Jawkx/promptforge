@@ -8,13 +8,13 @@ import {
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
-import { contexts$ } from "@/livestore/context-library-store/queries";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { contexts$ } from "@/livestore/live-store/queries";
+import { events } from "@/livestore/live-store/events";
 import { useSyncContexts } from "@/hooks/useSyncContexts";
 import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { generateId, estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 
 export const SelectedContexts: React.FC = () => {
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
@@ -32,8 +32,8 @@ export const SelectedContexts: React.FC = () => {
   const focusedArea = useLocalStore((state) => state.focusedArea);
   const isFocused = focusedArea === FocusArea.SELECTED_CONTEXTS;
 
-  const contextLibraryStore = useContextLibraryStore();
-  const libraryContexts = useQuery(contexts$, { store: contextLibraryStore });
+  const liveStore = useLiveStore();
+  const libraryContexts = useQuery(contexts$, { store: liveStore });
   const openEditContextModal = useLocalStore(
     (state) => state.openEditContextModal,
   );
@@ -150,8 +150,8 @@ export const SelectedContexts: React.FC = () => {
 
       const now = Date.now();
       const newVersion = uuid();
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextUpdated({
+      liveStore.commit(
+        events.contextUpdated({
           id: selectedContext.originalContextId,
           title: selectedContext.title,
           content: selectedContext.content,
@@ -171,7 +171,7 @@ export const SelectedContexts: React.FC = () => {
         description: `Context in library has been updated.`,
       });
     },
-    [contextLibraryStore, updateSelectedContext],
+    [liveStore, updateSelectedContext],
   );
 
   const onSyncFromLibrary = useCallback(
@@ -207,8 +207,8 @@ export const SelectedContexts: React.FC = () => {
     (selectedContext: SelectedContext) => {
       const id = generateId();
       const newVersion = uuid();
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextCreated({
+      liveStore.commit(
+        events.contextCreated({
           id,
           title: selectedContext.title,
           content: selectedContext.content,
@@ -229,7 +229,7 @@ export const SelectedContexts: React.FC = () => {
         description: `Context "${selectedContext.title}" has been created in the library.`,
       });
     },
-    [contextLibraryStore, updateSelectedContext],
+    [liveStore, updateSelectedContext],
   );
 
   const selectedContextsTableMeta: SelectedContextsTableMeta = useMemo(

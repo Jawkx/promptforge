@@ -2,26 +2,26 @@ import React, { useState, useEffect, useCallback } from "react";
 import { SelectedContext, Label, ContextFormData, Context } from "@/types";
 import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@livestore/react";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { contexts$ } from "@/livestore/context-library-store/queries";
+import { events } from "@/livestore/live-store/events";
+import { contexts$ } from "@/livestore/live-store/queries";
 import { useLocalStore } from "@/store/localStore";
 import { Dialog } from "@/components/ui/dialog";
 import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { estimateTokens } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 import { useDebouncedCallback } from "use-debounce";
 import { useForm, useWatch } from "react-hook-form";
 
 const EditContext: React.FC = () => {
-  const contextLibraryStore = useContextLibraryStore();
+  const liveStore = useLiveStore();
   const { editContextModal, closeEditContextModal } = useLocalStore();
   const selectedContexts = useLocalStore((state) => state.selectedContexts);
   const updateSelectedContext = useLocalStore(
     (state) => state.updateSelectedContext,
   );
-  const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const contexts = useQuery(contexts$, { store: liveStore });
 
   // Get type and contextId from store state
   const { type, contextId } = editContextModal;
@@ -84,8 +84,8 @@ const EditContext: React.FC = () => {
       }
 
       if (type === "library") {
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextUpdated({
+        liveStore.commit(
+          events.contextUpdated({
             id: contextId,
             title: trimmedTitle,
             content: trimmedContent,
@@ -96,8 +96,8 @@ const EditContext: React.FC = () => {
 
         // Update labels if they were changed
         if (data.labels !== undefined) {
-          contextLibraryStore.commit(
-            contextLibraryEvents.contextLabelsUpdated({
+          liveStore.commit(
+            events.contextLabelsUpdated({
               contextId,
               labelIds: data.labels.map((label) => label.id),
             }),
@@ -134,7 +134,7 @@ const EditContext: React.FC = () => {
         }
       }
     },
-    [contextId, type, contextLibraryStore, updateSelectedContext],
+    [contextId, type, liveStore, updateSelectedContext],
   );
 
   // Immediate save function specifically for labels
@@ -144,8 +144,8 @@ const EditContext: React.FC = () => {
 
       try {
         if (type === "library") {
-          contextLibraryStore.commit(
-            contextLibraryEvents.contextLabelsUpdated({
+          liveStore.commit(
+            events.contextLabelsUpdated({
               contextId,
               labelIds: labels.map((label) => label.id),
             }),
@@ -166,7 +166,7 @@ const EditContext: React.FC = () => {
         console.error("Immediate label save failed:", error);
       }
     },
-    [contextId, type, contextLibraryStore, updateSelectedContext],
+    [contextId, type, liveStore, updateSelectedContext],
   );
 
   // Auto-save with useDebouncedCallback (moved from ContextForm)
@@ -244,7 +244,7 @@ const EditContext: React.FC = () => {
     <LabelSelector
       selectedLabels={(formValues?.labels as Label[]) || []}
       onLabelsChange={handleLabelsChange}
-      contextLibraryStore={contextLibraryStore}
+      liveStore={liveStore}
     />
   );
 

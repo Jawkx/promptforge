@@ -2,21 +2,21 @@ import React, { useCallback, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { LucideSave } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { events } from "@/livestore/live-store/events";
 import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
 import { Dialog } from "@/components/ui/dialog";
 import { generateId } from "@/lib/utils";
 import ContextFormUI from "@/features/shared/ContextForm/ContextFormUI";
 import LabelSelector from "@/features/shared/ContextForm/LabelSelector";
 import { Label, ContextFormData } from "@/types";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { useLocalStore } from "@/store/localStore";
 import { v4 as uuid } from "uuid";
 import { useForm } from "react-hook-form";
 
 const AddContext: React.FC = () => {
   const { user } = useUser();
-  const contextLibraryStore = useContextLibraryStore();
+  const liveStore = useLiveStore();
   const { addContextModal, closeAddContextModal } = useLocalStore();
   const [isMaximized, setIsMaximized] = useState(false);
 
@@ -66,8 +66,8 @@ const AddContext: React.FC = () => {
         }
       }
 
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextCreated({
+      liveStore.commit(
+        events.contextCreated({
           id: contextId,
           title: finalTitle,
           content: finalContent,
@@ -78,8 +78,8 @@ const AddContext: React.FC = () => {
       );
 
       if (data.labels && data.labels.length > 0) {
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextLabelsUpdated({
+        liveStore.commit(
+          events.contextLabelsUpdated({
             contextId,
             labelIds: data.labels.map((label) => label.id),
           }),
@@ -92,7 +92,7 @@ const AddContext: React.FC = () => {
 
       handleClose();
     },
-    [contextLibraryStore, handleClose, user],
+    [liveStore, handleClose, user],
   );
 
   // Handle form field changes
@@ -121,7 +121,7 @@ const AddContext: React.FC = () => {
     <LabelSelector
       selectedLabels={(formValues?.labels as Label[]) || []}
       onLabelsChange={handleLabelsChange}
-      contextLibraryStore={contextLibraryStore}
+      liveStore={liveStore}
     />
   );
 

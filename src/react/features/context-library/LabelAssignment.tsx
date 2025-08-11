@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/command";
 import { Check, PlusCircle } from "lucide-react";
 import { useQuery } from "@livestore/react";
-import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { contexts$, labels$ } from "@/livestore/live-store/queries";
+import { events } from "@/livestore/live-store/events";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { Label } from "@/types";
 import { LABEL_COLORS } from "@/constants/labelColors";
 import { generateLabelId } from "@/lib/utils";
@@ -24,9 +24,9 @@ interface LabelAssignmentProps {
 export const LabelAssignment: React.FC<LabelAssignmentProps> = ({
   contextIds,
 }) => {
-  const contextLibraryStore = useContextLibraryStore();
-  const allLabels = useQuery(labels$, { store: contextLibraryStore });
-  const allContexts = useQuery(contexts$, { store: contextLibraryStore });
+  const liveStore = useLiveStore();
+  const allLabels = useQuery(labels$, { store: liveStore });
+  const allContexts = useQuery(contexts$, { store: liveStore });
   const [search, setSearch] = useState("");
 
   const selectedContexts = useMemo(
@@ -64,15 +64,15 @@ export const LabelAssignment: React.FC<LabelAssignmentProps> = ({
 
       const labelIdArray = Array.from(newLabelIds);
       contextIds.forEach((contextId) => {
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextLabelsUpdated({
+        liveStore.commit(
+          events.contextLabelsUpdated({
             contextId,
             labelIds: labelIdArray,
           }),
         );
       });
     },
-    [assignedLabelIds, contextIds, contextLibraryStore],
+    [assignedLabelIds, contextIds, liveStore],
   );
 
   const handleCreateLabel = useCallback(
@@ -86,14 +86,14 @@ export const LabelAssignment: React.FC<LabelAssignmentProps> = ({
         color: newColor,
       };
 
-      contextLibraryStore.commit(contextLibraryEvents.labelCreated(newLabel));
+      liveStore.commit(events.labelCreated(newLabel));
       sonnerToast.success("Label Created", {
         description: `Label "${labelName}" has been created.`,
       });
       handleLabelToggle(newLabel);
       setSearch("");
     },
-    [allLabels.length, handleLabelToggle, contextLibraryStore],
+    [allLabels.length, handleLabelToggle, liveStore],
   );
 
   const filteredLabels = useMemo(

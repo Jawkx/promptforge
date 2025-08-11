@@ -3,9 +3,9 @@ import { useQuery } from "@livestore/react";
 import { Store } from "@livestore/livestore";
 import { toast as sonnerToast } from "sonner";
 
-import { labels$ } from "@/livestore/context-library-store/queries";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { contextLibrarySchema } from "@/livestore/context-library-store/schema";
+import { labels$ } from "@/livestore/live-store/queries";
+import { events } from "@/livestore/live-store/events";
+import { liveSchema } from "@/livestore/live-store/schema";
 import { Label } from "@/types";
 import { LABEL_COLORS } from "@/constants/labelColors";
 import { generateLabelId } from "@/lib/utils";
@@ -13,7 +13,7 @@ import { generateLabelId } from "@/lib/utils";
 interface UseLabelManagementProps {
   selectedLabels: readonly Label[];
   onLabelsChange: (labels: readonly Label[]) => void;
-  contextLibraryStore: Store<typeof contextLibrarySchema>;
+  liveStore: Store<typeof liveSchema>;
 }
 
 interface UseLabelManagementReturn {
@@ -37,12 +37,12 @@ interface UseLabelManagementReturn {
 export const useLabelManagement = ({
   selectedLabels,
   onLabelsChange,
-  contextLibraryStore,
+  liveStore,
 }: UseLabelManagementProps): UseLabelManagementReturn => {
   const [labelSearch, setLabelSearch] = useState("");
   const [isLabelPopoverOpen, setIsLabelPopoverOpen] = useState(false);
 
-  const allLabels = useQuery(labels$, { store: contextLibraryStore });
+  const allLabels = useQuery(labels$, { store: liveStore });
 
   const filteredLabels = useMemo(
     () =>
@@ -92,7 +92,7 @@ export const useLabelManagement = ({
         color: newColor,
       };
 
-      contextLibraryStore.commit(contextLibraryEvents.labelCreated(newLabel));
+      liveStore.commit(events.labelCreated(newLabel));
       sonnerToast.success("Label Created", {
         description: `Label "${labelName}" has been created.`,
       });
@@ -100,7 +100,7 @@ export const useLabelManagement = ({
       setLabelSearch("");
       setIsLabelPopoverOpen(false);
     },
-    [allLabels.length, handleLabelToggle, contextLibraryStore],
+    [allLabels.length, handleLabelToggle, liveStore],
   );
 
   return {

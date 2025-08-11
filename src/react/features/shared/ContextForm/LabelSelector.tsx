@@ -23,13 +23,13 @@ import { useLabelManagement } from "./useLabelManagement";
 interface LabelSelectorProps {
   selectedLabels: readonly Label[];
   onLabelsChange: (labels: readonly Label[]) => void;
-  contextLibraryStore: Store<typeof contextLibrarySchema>;
+  liveStore: Store<typeof contextLibrarySchema>;
 }
 
 const LabelSelector: React.FC<LabelSelectorProps> = ({
   selectedLabels,
   onLabelsChange,
-  contextLibraryStore,
+  liveStore,
 }) => {
   const {
     labelSearch,
@@ -44,7 +44,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
   } = useLabelManagement({
     selectedLabels,
     onLabelsChange,
-    contextLibraryStore,
+    liveStore,
   });
 
   return (

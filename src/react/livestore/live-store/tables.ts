@@ -10,7 +10,17 @@ const contextLivewireColumns = {
   updatedAt: State.SQLite.integer({ nullable: false, default: 0 }),
 };
 
-export const contextLibraryTables = {
+export const tables = {
+  // User tables
+  preferences: State.SQLite.table({
+    name: "preferences",
+    columns: {
+      id: State.SQLite.text({ primaryKey: true }),
+      theme: State.SQLite.text({ default: "dark" }),
+    },
+  }),
+
+  // Context library tables
   library: State.SQLite.table({
     name: "library",
     columns: {

@@ -5,8 +5,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import { scan } from "react-scan";
-import { UserLiveStoreProvider } from "./store/UserLiveStoreProvider.tsx";
-import { ContextLibraryLiveStoreProvider } from "./store/ContextLibraryLiveStoreProvider.tsx";
+import { LiveStoreProvider } from "./store/LiveStoreProvider.tsx";
 
 scan({ enabled: import.meta.env.VITE_REACT_SCAN === "true" });
 
@@ -19,13 +18,11 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <UserLiveStoreProvider>
-        <ContextLibraryLiveStoreProvider>
-          <TooltipProvider>
-            <App />
-          </TooltipProvider>
-        </ContextLibraryLiveStoreProvider>
-      </UserLiveStoreProvider>
+      <LiveStoreProvider>
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
+      </LiveStoreProvider>
     </ClerkProvider>
   </StrictMode>,
 );

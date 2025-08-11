@@ -2,10 +2,10 @@ import React, { useState, useCallback } from "react";
 import { useQuery } from "@livestore/react";
 import { toast as sonnerToast } from "sonner";
 import { LucideEdit, LucidePlus, LucideTrash2, LucideX } from "lucide-react";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { useLocalStore } from "@/store/localStore";
-import { labels$ } from "@/livestore/context-library-store/queries";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { labels$ } from "@/livestore/live-store/queries";
+import { events } from "@/livestore/live-store/events";
 import { Label as LabelType } from "@/types";
 import { generateLabelId, cn } from "@/lib/utils";
 import { LABEL_COLORS } from "@/constants/labelColors";
@@ -24,9 +24,9 @@ import { ConfirmationDialog } from "@/features/shared/ConfirmationDialog";
 import { Separator } from "@/components/ui/separator";
 
 export const ManageLabelsDialog: React.FC = () => {
-  const contextLibraryStore = useContextLibraryStore();
+  const liveStore = useLiveStore();
   const { labelsModal, closeLabelsModal } = useLocalStore();
-  const labels = useQuery(labels$, { store: contextLibraryStore });
+  const labels = useQuery(labels$, { store: liveStore });
 
   // Edit state
   const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
@@ -44,8 +44,8 @@ export const ManageLabelsDialog: React.FC = () => {
   const handleClose = useCallback(() => {
     // Auto-save any pending changes before closing
     if (editingLabelId && editingName.trim()) {
-      contextLibraryStore.commit(
-        contextLibraryEvents.labelUpdated({
+      liveStore.commit(
+        events.labelUpdated({
           id: editingLabelId,
           name: editingName.trim(),
           color: editingColor,
@@ -57,7 +57,7 @@ export const ManageLabelsDialog: React.FC = () => {
     editingLabelId,
     editingName,
     editingColor,
-    contextLibraryStore,
+    liveStore,
     closeLabelsModal,
   ]);
 
@@ -76,8 +76,8 @@ export const ManageLabelsDialog: React.FC = () => {
     }
 
     if (editingLabelId) {
-      contextLibraryStore.commit(
-        contextLibraryEvents.labelUpdated({
+      liveStore.commit(
+        events.labelUpdated({
           id: editingLabelId,
           name: trimmedName,
           color: editingColor,
@@ -106,8 +106,8 @@ export const ManageLabelsDialog: React.FC = () => {
       return;
     }
 
-    contextLibraryStore.commit(
-      contextLibraryEvents.labelCreated({
+    liveStore.commit(
+      events.labelCreated({
         id: generateLabelId(),
         name: trimmedName,
         color: newLabelColor,
@@ -128,8 +128,8 @@ export const ManageLabelsDialog: React.FC = () => {
 
   const confirmDelete = () => {
     if (labelToDelete) {
-      contextLibraryStore.commit(
-        contextLibraryEvents.labelDeleted({ id: labelToDelete.id }),
+      liveStore.commit(
+        events.labelDeleted({ id: labelToDelete.id }),
       );
       sonnerToast.error(`Label "${labelToDelete.name}" deleted.`);
       if (editingLabelId === labelToDelete.id) {

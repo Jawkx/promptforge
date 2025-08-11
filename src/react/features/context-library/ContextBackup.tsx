@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 import { Context, Label } from "@/types";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
-import { contexts$, labels$ } from "@/livestore/context-library-store/queries";
+import { events } from "@/livestore/live-store/events";
+import { contexts$, labels$ } from "@/livestore/live-store/queries";
 import { useQuery } from "@livestore/react";
 import { v4 as uuid } from "uuid";
 import { Store } from "@livestore/livestore";
@@ -18,15 +18,15 @@ interface ContextBackupData {
 }
 
 interface ContextBackupProps {
-  contextLibraryStore: Store<typeof contextLibrarySchema>;
+  liveStore: Store<typeof contextLibrarySchema>;
 }
 
 export const ContextBackup: React.FC<ContextBackupProps> = ({
-  contextLibraryStore,
+  liveStore,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const contexts = useQuery(contexts$, { store: contextLibraryStore });
-  const labels = useQuery(labels$, { store: contextLibraryStore });
+  const contexts = useQuery(contexts$, { store: liveStore });
+  const labels = useQuery(labels$, { store: liveStore });
 
   const handleDownload = () => {
     try {
@@ -121,8 +121,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
 
     for (const label of labelsToImport) {
       if (!existingLabels.has(label.id)) {
-        contextLibraryStore.commit(
-          contextLibraryEvents.labelCreated({
+        liveStore.commit(
+          events.labelCreated({
             id: label.id,
             name: label.name,
             color: label.color,
@@ -145,8 +145,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
     for (const context of contextsToImport) {
       if (existingContexts.has(context.id)) {
         // Update existing context
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextUpdated({
+        liveStore.commit(
+          events.contextUpdated({
             id: context.id,
             title: context.title,
             content: context.content,
@@ -156,8 +156,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
         );
 
         // Update labels for this context
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextLabelsUpdated({
+        liveStore.commit(
+          events.contextLabelsUpdated({
             contextId: context.id,
             labelIds: context.labels.map((l) => l.id),
           }),
@@ -166,8 +166,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
         updatedContextsCount++;
       } else {
         // Create new context
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextCreated({
+        liveStore.commit(
+          events.contextCreated({
             id: context.id,
             title: context.title,
             content: context.content,
@@ -179,8 +179,8 @@ export const ContextBackup: React.FC<ContextBackupProps> = ({
 
         // Add labels for this context
         if (context.labels.length > 0) {
-          contextLibraryStore.commit(
-            contextLibraryEvents.contextLabelsUpdated({
+          liveStore.commit(
+            events.contextLabelsUpdated({
               contextId: context.id,
               labelIds: context.labels.map((l) => l.id),
             }),

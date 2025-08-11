@@ -8,12 +8,12 @@ import { ContextsDataTable } from "./ContextsDataTable";
 import { ContextsTableToolbar } from "./ContextsTableToolbar";
 import { useQuery } from "@livestore/react";
 import { getRandomUntitledPlaceholder } from "@/constants/randomNames";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { events } from "@/livestore/live-store/events";
 import { FocusArea, useLocalStore } from "@/store/localStore";
 import { generateId } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
-import { contexts$ } from "@/livestore/context-library-store/queries";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { contexts$ } from "@/livestore/live-store/queries";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { ContextBackup } from "./ContextBackup";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -33,8 +33,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
   );
 
   const { userId } = useAuth();
-  const contextLibraryStore = useContextLibraryStore();
-  const contexts = useQuery(contexts$, { store: contextLibraryStore });
+  const liveStore = useLiveStore();
+  const contexts = useQuery(contexts$, { store: liveStore });
   const addContextToPrompt = useLocalStore((state) => state.addContextToPrompt);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -105,8 +105,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       // Main logic: Update existing context if one is active
       if (activeId) {
         const contextToUpdate = contexts.find((c) => c.id === activeId);
-        contextLibraryStore.commit(
-          contextLibraryEvents.contextUpdated({
+        liveStore.commit(
+          events.contextUpdated({
             id: activeId,
             title: contextToUpdate?.title || getRandomUntitledPlaceholder(),
             content: pastedText,
@@ -124,8 +124,8 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       // Main logic: Create a new context
       const placeholderTitle = getRandomUntitledPlaceholder();
       const newId = generateId();
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextCreated({
+      liveStore.commit(
+        events.contextCreated({
           id: newId,
           title: placeholderTitle,
           content: pastedText,
@@ -139,7 +139,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
       });
       setEditingTitleId(newId);
     },
-    [isFocused, contextLibraryStore, activeId, contexts, userId],
+    [isFocused, liveStore, activeId, contexts, userId],
   );
 
   return (
@@ -175,7 +175,7 @@ const ContextsLibrary: React.FC<ContextsLibraryProps> = ({
         </Button>
 
         <div className="flex justify-end">
-          <ContextBackup contextLibraryStore={contextLibraryStore} />
+          <ContextBackup liveStore={liveStore} />
         </div>
       </div>{" "}
     </div>

@@ -18,12 +18,12 @@ import {
   LucideCopy,
   LucideTag,
 } from "lucide-react";
-import { contextLibraryEvents } from "@/livestore/context-library-store/events";
+import { events } from "@/livestore/live-store/events";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
 import { formatTokenCount } from "@/lib/utils";
-import { useContextLibraryStore } from "@/store/ContextLibraryLiveStoreProvider";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { v4 as uuid } from "uuid";
 import {
   DropdownMenuSub,
@@ -45,7 +45,7 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
   row,
   table,
 }) => {
-  const contextLibraryStore = useContextLibraryStore();
+  const liveStore = useLiveStore();
   const context = row.original;
   const meta = table.options.meta as ContextsTableMeta | undefined;
   const { editingTitleId, setEditingTitleId } = meta || {};
@@ -74,8 +74,8 @@ const TitleCell: React.FC<{ row: Row<Context>; table: Table<Context> }> = ({
   const handleSave = () => {
     const trimmedTitle = title.trim();
     if (trimmedTitle && trimmedTitle !== context.title) {
-      contextLibraryStore.commit(
-        contextLibraryEvents.contextUpdated({
+      liveStore.commit(
+        events.contextUpdated({
           id: context.id,
           title: trimmedTitle,
           content: context.content,

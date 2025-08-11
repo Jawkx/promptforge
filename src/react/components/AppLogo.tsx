@@ -1,18 +1,22 @@
-import { preference$ } from "@/livestore/user-store/queries";
-import { useUserStore } from "@/store/UserLiveStoreProvider";
+import { preferences$ } from "@/livestore/live-store/queries";
+import { useLiveStore } from "@/store/LiveStoreProvider";
 import { useQuery } from "@livestore/react";
 
 export const AppLogo = () => {
-  const userStore = useUserStore();
+  const liveStore = useLiveStore();
 
-  const preference = useQuery(preference$, { store: userStore });
+  const preferences = useQuery(preferences$, { store: liveStore });
 
-  const theme = preference?.theme ?? "dark";
+  const theme = preferences?.[0]?.theme ?? "dark";
 
   return (
     <div className="flex items-center justify-center">
       <img
-        src={theme === "dark" ? "/android-chrome-512x512.png" : "/android-chrome-512x512-light.png"}
+        src={
+          theme === "dark"
+            ? "/android-chrome-512x512.png"
+            : "/android-chrome-512x512-light.png"
+        }
         alt="Prompt Forge"
         className="h-12 w-12 mr-2"
       />
