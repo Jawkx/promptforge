@@ -43,10 +43,4 @@ export const contextLibraryTables = {
     // For performance, indices could be added if necessary.
     // e.g. using `indices: (t) => [t.contextId(), t.labelId()]` if API supported it.
   }),
-  members: State.SQLite.table({
-    name: "members",
-    columns: {
-      userId: State.SQLite.text({ primaryKey: true }),
-    },
-  }),
 };

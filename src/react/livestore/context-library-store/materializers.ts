@@ -7,7 +7,7 @@ export const contextLibraryMaterializers = State.SQLite.materializers(
   contextLibraryEvents,
   {
     "v1.LibraryCreated": ({ libraryId, name, creatorId }) => {
-      // Perform an "upsert" for the library metadata and the initial member.
+      // Perform an "upsert" for the library metadata.
       const deleteLibraryOp = contextLibraryTables.library
         .delete()
         .where({ id: libraryId });
@@ -17,23 +17,9 @@ export const contextLibraryMaterializers = State.SQLite.materializers(
         creatorId,
       });
 
-      const deleteMemberOp = contextLibraryTables.members
-        .delete()
-        .where({ userId: creatorId });
-      const insertMemberOp = contextLibraryTables.members.insert({
-        userId: creatorId,
-      });
-
-      return [deleteLibraryOp, insertLibraryOp, deleteMemberOp, insertMemberOp];
+      return [deleteLibraryOp, insertLibraryOp];
     },
-    "v1.ContextCreated": ({
-      id,
-      title,
-      content,
-      createdAt,
-      version,
-      creatorId,
-    }) => {
+    "v1.ContextCreated": ({ id, title, content, createdAt, version }) => {
       const tokenCount = estimateTokens(content);
       return [
         contextLibraryTables.contexts.insert({
@@ -45,9 +31,6 @@ export const contextLibraryMaterializers = State.SQLite.materializers(
           createdAt,
           updatedAt: createdAt,
         }),
-        // Make member insertion idempotent
-        contextLibraryTables.members.delete().where({ userId: creatorId }),
-        contextLibraryTables.members.insert({ userId: creatorId }),
       ];
     },
     "v1.ContextUpdated": ({ id, title, content, updatedAt, version }) => {
@@ -92,12 +75,6 @@ export const contextLibraryMaterializers = State.SQLite.materializers(
       );
 
       return [deleteOp, ...insertOps];
-    },
-    "v1.UserJoined": ({ userId }) => {
-      // Make this idempotent to prevent UNIQUE constraint errors
-      const deleteOp = contextLibraryTables.members.delete().where({ userId });
-      const insertOp = contextLibraryTables.members.insert({ userId });
-      return [deleteOp, insertOp];
     },
   },
 );

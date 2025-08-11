@@ -65,11 +65,4 @@ export const contextLibraryEvents = {
       labelIds: Schema.Array(Schema.String),
     }),
   }),
-  // User Events
-  userJoined: Events.synced({
-    name: "v1.UserJoined",
-    schema: Schema.Struct({
-      userId: Schema.String,
-    }),
-  }),
 };

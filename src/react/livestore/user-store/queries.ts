@@ -8,11 +8,3 @@ export const preference$ = queryDb(
     label: "preferences",
   },
 );
-
-export const userContextLibraries$ = queryDb(
-  userTables.user_context_libraries.select(),
-  {
-    map: (results) => results,
-    label: "userContextLibraries",
-  },
-);
