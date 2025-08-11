@@ -1,11 +1,7 @@
 name: Build and Deploy to Cloudflare Workers
 
 on:
-  push:
-    branches: [dev]
-  pull_request:
-    branches: [dev]
-
+  workflow_dispatch:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
