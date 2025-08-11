@@ -20,7 +20,7 @@ new_sqlite_classes = ["WebSocketServer"]
 [[d1_databases]]
 binding = "DB"
 database_name = "promptforge-store"
-database_id = "636160e6-3995-4385-81a7-1cf2e79908ed"
+database_id = "73479358-db0f-40d5-af2d-b9878d739080"
 
 [observability.logs]
 enabled = false
