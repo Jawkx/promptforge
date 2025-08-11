@@ -12,7 +12,7 @@ import { useUser } from "@clerk/clerk-react";
 import { v4 as uuidv4 } from "uuid";
 import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import LiveStoreWorker from "@/livestore/live.worker.ts?worker";
-import LiveStoreSharedWorker from "@livestore/adapter-web/shared-worker?sharedworker&name=liveSharedWorker";
+import LiveStoreSharedWorker from '@livestore/adapter-web/shared-worker?sharedworker'
 import { LoadingScreen } from "@/components/LoadingScreen";
 
 type LiveStore = Store<typeof liveSchema>;
