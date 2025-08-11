@@ -25,14 +25,10 @@ import {
 import { useDragAndDrop } from "./useDragAndDrop";
 import { ManageLabelsDialog } from "@/features/context-library/ManageLabelsDialog";
 import { useLocalStore } from "@/store/localStore";
-import { useAutoCreateContextLibrary } from "@/hooks/useAutoCreateContextLibrary";
 
 const Editor: React.FC = () => {
   const contextLibraryStore = useContextLibraryStore();
   const contexts = useQuery(contexts$, { store: contextLibraryStore });
-
-  // Auto-create context library for new users
-  useAutoCreateContextLibrary();
 
   // Modal components are always mounted for proper animations
 
