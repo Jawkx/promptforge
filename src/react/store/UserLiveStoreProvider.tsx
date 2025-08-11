@@ -39,20 +39,21 @@ export const UserLiveStoreProvider = ({
     const initializeUserStore = async () => {
       if (!isLoaded) return;
 
-      let userId: string;
+      let storeId: string;
 
       if (user) {
-        userId = user.id;
+        storeId = `user-${user.id}`;
       } else {
         const existingAnonymousId = sessionStorage.getItem("anonymousUserId");
         if (existingAnonymousId) {
-          userId = existingAnonymousId;
+          storeId = existingAnonymousId;
         } else {
-          userId = uuidv4();
-          sessionStorage.setItem("anonymousUserId", userId);
+          storeId = uuidv4();
+          sessionStorage.setItem("anonymousUserId", storeId);
         }
       }
 
+      console.log({ userStoreId: storeId })
       const adapter = makePersistedAdapter({
         storage: { type: "opfs" },
         worker: UserLiveStoreWorker,
@@ -63,7 +64,7 @@ export const UserLiveStoreProvider = ({
         const store = await createStorePromise({
           schema: userSchema,
           adapter,
-          storeId: userId,
+          storeId: storeId,
           batchUpdates,
         });
 

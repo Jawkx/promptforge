@@ -61,6 +61,8 @@ export const ContextLibraryLiveStoreProvider = ({
         }
       }
 
+      console.log({ contextStoreId: storeId })
+
       const adapter = makePersistedAdapter({
         storage: { type: "opfs" },
         worker: ContextLibraryLiveStoreWorker,
