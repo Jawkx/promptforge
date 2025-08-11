@@ -14,7 +14,6 @@ import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import ContextLibraryLiveStoreWorker from "@/livestore/context-library.worker.ts?worker";
 import ContextLibraryLiveStoreSharedWorker from "@livestore/adapter-web/shared-worker?sharedworker&name=contextLibrarySharedWorker";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { migrateContextLibraryData } from "@/lib/migrateContextLibraryData";
 
 type ContextLibraryStore = Store<typeof contextLibrarySchema>;
 
@@ -40,18 +39,15 @@ export const ContextLibraryLiveStoreProvider = ({
   const { user, isLoaded } = useUser();
   const [contextLibraryStore, setContextLibraryStore] =
     useState<ContextLibraryStore | null>(null);
-  const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
     const initializeContextLibraryStore = async () => {
       if (!isLoaded) return;
 
       let storeId: string;
-      let anonymousId: string | null = null;
 
       if (user) {
         storeId = `context-${user.id}`;
-        anonymousId = sessionStorage.getItem("anonymousContextLibraryId");
       } else {
         const existingAnonymousId = sessionStorage.getItem(
           "anonymousContextLibraryId",
@@ -79,30 +75,7 @@ export const ContextLibraryLiveStoreProvider = ({
           batchUpdates,
         });
 
-        if (anonymousId && anonymousId !== user?.id) {
-          console.log(
-            "Context library migration needed from",
-            anonymousId,
-            "to",
-            user?.id,
-          );
-          setIsMigrating(true);
-          try {
-            await migrateContextLibraryData(anonymousId, store, user!.id);
-            sessionStorage.removeItem("anonymousContextLibraryId");
-            setIsMigrating(false);
-            setContextLibraryStore(store);
-          } catch (error) {
-            console.error(
-              "Context library migration failed, continuing without migration:",
-              error,
-            );
-            setIsMigrating(false);
-            setContextLibraryStore(store);
-          }
-        } else {
-          setContextLibraryStore(store);
-        }
+        setContextLibraryStore(store);
       } catch (error) {
         console.error("Error initializing context library store:", error);
       }
@@ -111,7 +84,7 @@ export const ContextLibraryLiveStoreProvider = ({
     initializeContextLibraryStore();
   }, [user, isLoaded]);
 
-  if (!contextLibraryStore || isMigrating) {
+  if (!contextLibraryStore) {
     return <LoadingScreen />;
   }
 

@@ -14,7 +14,6 @@ import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import UserLiveStoreWorker from "@/livestore/user.worker.ts?worker";
 import UserLiveStoreSharedWorker from "@livestore/adapter-web/shared-worker?sharedworker&name=userSharedWorker";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { migrateUserData } from "@/lib/migrateUserData";
 
 type UserStore = Store<typeof userSchema>;
 
@@ -35,18 +34,15 @@ export const UserLiveStoreProvider = ({
 }) => {
   const { user, isLoaded } = useUser();
   const [userStore, setUserStore] = useState<UserStore | null>(null);
-  const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
-    const initializeUserStore = () => {
+    const initializeUserStore = async () => {
       if (!isLoaded) return;
 
       let userId: string;
-      let anonymousId: string | null = null;
 
       if (user) {
         userId = user.id;
-        anonymousId = sessionStorage.getItem("anonymousUserId");
       } else {
         const existingAnonymousId = sessionStorage.getItem("anonymousUserId");
         if (existingAnonymousId) {
@@ -63,49 +59,24 @@ export const UserLiveStoreProvider = ({
         sharedWorker: UserLiveStoreSharedWorker,
       });
 
-      createStorePromise({
-        schema: userSchema,
-        adapter,
-        storeId: userId,
-        batchUpdates,
-      })
-        .then((store) => {
-          if (anonymousId && anonymousId !== userId) {
-            console.log(
-              "Data migration needed from",
-              anonymousId,
-              "to",
-              userId,
-            );
-            setIsMigrating(true);
-            return migrateUserData(anonymousId, store)
-              .then(() => {
-                sessionStorage.removeItem("anonymousUserId");
-                setIsMigrating(false);
-                setUserStore(store);
-              })
-              .catch((error) => {
-                console.error(
-                  "Migration failed, continuing without migration:",
-                  error,
-                );
-                setIsMigrating(false);
-                setUserStore(store);
-              });
-          } else {
-            setUserStore(store);
-            return Promise.resolve();
-          }
-        })
-        .catch((error) => {
-          console.error("Error initializing user store:", error);
+      try {
+        const store = await createStorePromise({
+          schema: userSchema,
+          adapter,
+          storeId: userId,
+          batchUpdates,
         });
+
+        setUserStore(store);
+      } catch (error) {
+        console.error("Error initializing user store:", error);
+      }
     };
 
     initializeUserStore();
   }, [user, isLoaded]);
 
-  if (!userStore || isMigrating) {
+  if (!userStore) {
     return <LoadingScreen />;
   }
   return (
